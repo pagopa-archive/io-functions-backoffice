@@ -47,12 +47,10 @@ export const toApiBPDCitizen = (
     domainObj.reduce((acc: BPDCitizen | undefined, citizen) => {
       if (acc === undefined) {
         return {
-          citizen_enabled: fromNullable(citizen.citizen_enabled).toUndefined(),
+          citizen_enabled: citizen.citizen_enabled,
           fiscal_code: citizen.fiscal_code,
           onboarding_date: citizen.onboarding_date?.toISOString(),
-          onboarding_issuer_id: fromNullable(
-            citizen.onboarding_issuer_id
-          ).toUndefined(),
+          onboarding_issuer_id: citizen.onboarding_issuer_id,
           payment_methods:
             citizen.payment_instrument_hpan && citizen.payment_instrument_status
               ? [
@@ -64,9 +62,9 @@ export const toApiBPDCitizen = (
               : [],
           timestamp_tc: citizen.timestamp_tc.toISOString(),
           update_date: citizen.update_date?.toISOString(),
-          update_user: fromNullable(citizen.update_user).toUndefined(),
+          update_user: citizen.update_user,
 
-          pay_off_instr: fromNullable(citizen.pay_off_instr).toUndefined()
+          pay_off_instr: citizen.pay_off_instr
         };
       }
       if (
