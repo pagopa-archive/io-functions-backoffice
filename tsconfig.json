@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false,  /* Enable strict checking of property initialization in classes. */
     "target": "es6",
     "rootDir": ".",
     "module": "commonjs",

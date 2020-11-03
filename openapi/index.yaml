@@ -1,49 +1,116 @@
 swagger: "2.0"
 info:
   version: 1.1.0
-  title: IO Function API
+  title: IO Function Backoffice
   contact:
     name: IO team
     url: https://forum.italia.it/c/progetto-io
   x-logo:
     url: https://io.italia.it/assets/img/io-logo-blue.svg
   description: >
-    Documentation of the IO Function API here.
-host: api.cd.italia.it
-basePath: "/template"
+    Documentation of the io-function-backoffice
+host: backoffice-api.io.italia.it
+basePath: "/api/v1"
 schemes:
   - https
 paths:
-  "/echo/{input}":
+  "/bpd/citizen":
     parameters:
-      - name: input
-        in: path
-        type: string
-        required: true
-        description: test input.
+      - $ref: "#/parameters/FiscalCode"
     get:
-      operationId: echo
-      summary: Echo API
-      description: Some API description here.
+      operationId: GetBPDCitizen
+      summary: Get BPD Citizen info
+      description: Get the Citizen BPD info
       responses:
         "200":
           description: Found.
           schema:
-            "$ref": "#/definitions/Input"
+            "$ref": "#/definitions/BPDCitizen"
           examples:
             application/json:
-              id: "10000AAAA"
-              output: "hello world !"
+              fiscal_code: "AAABBB01C02D345A"
+              timestamp_tc: "2011-10-05T14:48:00.000Z"
+              payment_methods:
+                - hpan: "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+                  status: "ACTIVE"
+              onboarding_date: "2011-10-05T14:48:00.000Z"
+              onboarding_issuer_id: "Bank"
+              update_date: "2011-10-05T14:48:00.000Z"
+              update_user: "Bank"
+        "400":
+          description: Invalid request.
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "401":
           description: Unauthorized
         "404":
           description: Not found.
-      parameters: []
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "500":
+          description: Internal server Error
+          schema:
+            $ref: "#/definitions/ProblemJson"
+consumes:
+  - application/json
+produces:
+  - application/json
 definitions:
-  Input:
+  FiscalCode:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.7.0/openapi/definitions.yaml#/FiscalCode"
+  ProblemJson:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.7.0/openapi/definitions.yaml#/ProblemJson"
+  Iban:
+    type: string
+    pattern: '[a-zA-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}'
+  BPDCitizen:
     type: object
     properties:
-      id:
+      fiscal_code:
+        $ref: "#/definitions/FiscalCode"
+      onboarding_date:
         type: string
-      output:
+        format: dateTime
+      onboarding_issuer_id:
         type: string
+      citizen_enabled:
+        type: boolean
+      timestamp_tc:
+        type: string
+        format: dateTime
+      payment_methods:
+        type: array
+        items:
+          $ref: "#/definitions/PaymentMethod"
+      update_date:
+        type: string
+        format: dateTime
+      update_user:
+        type: string
+      pay_off_instr:
+        $ref: "#/definitions/Iban"
+    required:
+      - fiscal_code
+      - timestamp_tc
+      - payment_methods
+  PaymentMethod:
+    type: object
+    properties:
+      hpan:
+        type: string
+      status:
+        type: string
+    required:
+      - hpan
+      - status
+parameters:
+  FiscalCode:
+    name: x-citizen-fiscal-code
+    in: header
+    type: string
+    maxLength: 16
+    minLength: 16
+    required: false
+    description: The fiscal code of the user, all upper case.
+    pattern: "[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]"
+    x-example: SPNDNL80R13C555X

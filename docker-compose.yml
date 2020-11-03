@@ -8,7 +8,7 @@ services:
       context: ./
       dockerfile: docker/functions/Dockerfile
     env_file: 
-      - .env
+      - env.example
     environment:
       - languageWorkers__node__arguments=--inspect=0.0.0.0:5858
     working_dir: /usr/src/app
@@ -19,6 +19,7 @@ services:
       - io-fn
     depends_on:
       - fnstorage
+      - fixtures
     volumes:
       - .:/usr/src/app
     labels:
@@ -61,18 +62,6 @@ services:
     networks:
       - io-fn
 
-  cosmosdb:
-    image: cosmosdb
-    env_file:
-      - .env
-    build:
-      context: ./
-      dockerfile: docker/cosmosdb/Dockerfile
-    ports:
-      - ${COSMOSDB_PORT}:3000
-    networks:
-      - io-fn
-
   fixtures:
     image: fixtures
     env_file:
@@ -81,9 +70,26 @@ services:
       context: ./
       dockerfile: docker/fixtures/Dockerfile
     depends_on:
-      - cosmosdb
+      - postgres
     networks:
       - io-fn
+
+  postgres:
+    image: postgres
+    build:
+      context: ./
+      dockerfile: docker/postgres/Dockerfile
+    restart: always
+    command: -c ssl=on -c ssl_cert_file=/var/lib/postgresql/server.crt -c ssl_key_file=/var/lib/postgresql/server.key
+    ports:
+      - "5532:5432"
+    environment:
+      POSTGRES_USER: testuser
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: test
+    volumes:
+      - ./docker/postgres/server.crt:/var/lib/postgresql/server.crt:delegated
+      - ./docker/postgres/server.key:/var/lib/postgresql/server.key:delegated
 
   traefik:
     image: traefik:v2.0

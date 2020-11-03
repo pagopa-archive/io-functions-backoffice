@@ -7,14 +7,21 @@
   },
   "extensions": {
     "http": {
-      "routePrefix": ""
+      "routePrefix": "api/v1"
     },
     "durableTask": {
-      "hubName": "FunctionsTemplateHub"
+      "hubName": "%SLOT_TASK_HUBNAME%",
+      "storageProvider": {
+        "connectionStringName": "DASHBOARD_STORAGE_CONNECTION_STRING"
+      },
+      "tracing": {
+        "traceInputsAndOutputs": false,
+        "traceReplayEvents": false
+      }
     }
   },
   "extensionBundle": {
     "id": "Microsoft.Azure.Functions.ExtensionBundle",
-    "version": "[1.*, 2.0.0)"
+    "version": "[2.*, 3.0.0)"
   }
 }

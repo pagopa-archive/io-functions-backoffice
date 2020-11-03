@@ -5,7 +5,7 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "route": "some/path/{someParam}",
+      "route": "bpd/citizen",
       "methods": [
         "get"
       ]
