@@ -16,5 +16,5 @@
       "name": "res"
     }
   ],
-  "scriptFile": "./index.js"
+  "scriptFile": "../dist/GetBPDCitizen/index.js"
 }
