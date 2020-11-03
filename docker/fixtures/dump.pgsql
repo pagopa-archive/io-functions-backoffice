@@ -21,9 +21,14 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Reset database drop table and views if exists
+--
+DROP VIEW IF EXISTS public.citizen_profile;
+DROP TABLE IF EXISTS public.bpd_citizen, public.bpd_payment_instrument;
+
+--
 -- Name: bpd_citizen; Type: TABLE; Schema: public; Owner: testuser
 --
-DROP TABLE IF EXISTS public.bpd_citizen;
 
 CREATE TABLE public.bpd_citizen (
     fiscal_code_s character varying(16) NOT NULL,
@@ -43,7 +48,6 @@ ALTER TABLE public.bpd_citizen OWNER TO testuser;
 --
 -- Name: bpd_payment_instrument; Type: TABLE; Schema: public; Owner: testuser
 --
-DROP TABLE IF EXISTS public.bpd_payment_instrument;
 
 CREATE TABLE public.bpd_payment_instrument (
     hpan_s character varying(64) NOT NULL,
@@ -64,7 +68,6 @@ ALTER TABLE public.bpd_payment_instrument OWNER TO testuser;
 --
 -- Name: citizen_profile; Type: VIEW; Schema: public; Owner: testuser
 --
-DROP VIEW IF EXISTS public.citizen_profile;
 
 CREATE VIEW public.citizen_profile AS
  SELECT a.fiscal_code_s AS fiscal_code,
@@ -105,8 +108,8 @@ INSERT INTO public.bpd_citizen (fiscal_code_s, payoff_instr_s, payoff_instr_type
 -- Data for Name: bpd_payment_instrument; Type: TABLE DATA; Schema: public; Owner: testuser
 --
 
-INSERT INTO public.bpd_payment_instrument (hpan_s, fiscal_code_s, cancellation_t, status_c, enrollment_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b) VALUES ('807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966', 'AAABBB01C02D345A', NULL, 'STATUS', '2020-10-30 11:02:08.749861+01', '2020-10-30 11:02:08.749861+01', NULL, NULL, NULL, true);
-INSERT INTO public.bpd_payment_instrument (hpan_s, fiscal_code_s, cancellation_t, status_c, enrollment_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b) VALUES ('7726b99f6eff4f80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a29', 'AAABBB01C02D345A', NULL, 'STATUS', '2020-10-30 11:02:31.11989+01', '2020-10-30 11:02:31.11989+01', NULL, NULL, NULL, false);
+INSERT INTO public.bpd_payment_instrument (hpan_s, fiscal_code_s, cancellation_t, status_c, enrollment_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b) VALUES ('807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966', 'AAABBB01C02D345A', NULL, 'ACTIVE', '2020-10-30 11:02:08.749861+01', '2020-10-30 11:02:08.749861+01', NULL, NULL, NULL, true);
+INSERT INTO public.bpd_payment_instrument (hpan_s, fiscal_code_s, cancellation_t, status_c, enrollment_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b) VALUES ('7726b99f6eff4f80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a29', 'AAABBB01C02D345A', NULL, 'INACTIVE', '2020-10-30 11:02:31.11989+01', '2020-10-30 11:02:31.11989+01', NULL, NULL, NULL, false);
 
 
 --

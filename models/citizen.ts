@@ -1,7 +1,18 @@
 // tslint:disable: member-access variable-name
+import * as t from "io-ts";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { enumType } from "italia-ts-commons/lib/types";
 import { AfterLoad, ViewColumn, ViewEntity } from "typeorm";
 import { Iban } from "../generated/definitions/Iban";
+
+export enum StatusEnum {
+  "ACTIVE" = "ACTIVE",
+
+  "INACTIVE" = "INACTIVE"
+}
+
+export const Status = enumType<StatusEnum>(StatusEnum, "status");
+export type Status = t.TypeOf<typeof Status>;
 
 @ViewEntity("citizen_profile")
 export class Citizen {
@@ -36,7 +47,7 @@ export class Citizen {
   timestamp_tc: Date;
 
   @ViewColumn()
-  payment_instrument_status?: string;
+  payment_instrument_status?: Status;
 
   @AfterLoad()
   // Convert all null values to undefined

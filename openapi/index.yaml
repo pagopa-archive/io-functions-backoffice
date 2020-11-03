@@ -100,6 +100,7 @@ definitions:
         type: string
       status:
         type: string
+        enum: [ACTIVE, INACTIVE]
     required:
       - hpan
       - status
