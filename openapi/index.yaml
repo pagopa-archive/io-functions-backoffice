@@ -31,8 +31,8 @@ paths:
               fiscal_code: "AAABBB01C02D345A"
               timestamp_tc: "2011-10-05T14:48:00.000Z"
               payment_methods:
-                - hpan: "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
-                  status: "ACTIVE"
+                - payment_instrument_hpan: "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+                  payment_instrument_status: "ACTIVE"
               onboarding_date: "2011-10-05T14:48:00.000Z"
               onboarding_issuer_id: "Bank"
               update_date: "2011-10-05T14:48:00.000Z"
@@ -96,14 +96,14 @@ definitions:
   PaymentMethod:
     type: object
     properties:
-      hpan:
+      payment_instrument_hpan:
         type: string
-      status:
+      payment_instrument_status:
         type: string
         enum: [ACTIVE, INACTIVE]
     required:
-      - hpan
-      - status
+      - payment_instrument_hpan
+      - payment_instrument_status
 parameters:
   FiscalCode:
     name: x-citizen-fiscal-code

@@ -25,6 +25,7 @@ import {
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { Repository } from "typeorm";
 import { BPDCitizen } from "../generated/definitions/BPDCitizen";
+import { PaymentMethod } from "../generated/definitions/PaymentMethod";
 import { Citizen } from "../models/citizen";
 import { OptionalHeaderMiddleware } from "../utils/middleware/optional_header";
 
@@ -51,15 +52,7 @@ export const toApiBPDCitizen = (
           fiscal_code: citizen.fiscal_code,
           onboarding_date: citizen.onboarding_date?.toISOString(),
           onboarding_issuer_id: citizen.onboarding_issuer_id,
-          payment_methods:
-            citizen.payment_instrument_hpan && citizen.payment_instrument_status
-              ? [
-                  {
-                    hpan: citizen.payment_instrument_hpan,
-                    status: citizen.payment_instrument_status
-                  }
-                ]
-              : [],
+          payment_methods: PaymentMethod.is(citizen) ? [citizen] : [],
           timestamp_tc: citizen.timestamp_tc.toISOString(),
           update_date: citizen.update_date?.toISOString(),
           update_user: citizen.update_user,
@@ -67,19 +60,10 @@ export const toApiBPDCitizen = (
           pay_off_instr: citizen.pay_off_instr
         };
       }
-      if (
-        citizen.payment_instrument_hpan &&
-        citizen.payment_instrument_status
-      ) {
+      if (PaymentMethod.is(citizen)) {
         return {
           ...acc,
-          payment_methods: [
-            ...acc.payment_methods,
-            {
-              hpan: citizen.payment_instrument_hpan,
-              status: citizen.payment_instrument_status
-            }
-          ]
+          payment_methods: [...acc.payment_methods, citizen]
         };
       }
       return acc;
