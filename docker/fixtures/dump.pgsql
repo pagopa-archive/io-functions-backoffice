@@ -23,8 +23,8 @@ SET default_table_access_method = heap;
 --
 -- Reset database drop table and views if exists
 --
-DROP VIEW IF EXISTS public.citizen_profile;
-DROP TABLE IF EXISTS public.bpd_citizen, public.bpd_payment_instrument;
+DROP VIEW IF EXISTS public.citizen_profile, public.transaction;
+DROP TABLE IF EXISTS public.bpd_citizen, public.bpd_payment_instrument, public.bpd_winning_transaction;
 
 --
 -- Name: bpd_citizen; Type: TABLE; Schema: public; Owner: testuser
@@ -66,6 +66,38 @@ CREATE TABLE public.bpd_payment_instrument (
 ALTER TABLE public.bpd_payment_instrument OWNER TO testuser;
 
 --
+-- Name: bpd_winning_transaction; Type: TABLE; Schema: public; Owner: testuser
+--
+
+CREATE TABLE public.bpd_winning_transaction (
+    acquirer_c character varying(20) NOT NULL,
+    amount_currency_c character varying(3),
+    amount_i numeric,
+    award_period_id_n int8range,
+    circuit_type_c character varying(5),
+    hpan_s character varying(64),
+    id_trx_acquirer_s character varying NOT NULL,
+    mcc_c character varying(5),
+    mcc_descr_s character varying(40),
+    operation_type_c character varying(5),
+    score_n numeric,
+    trx_timestamp_t timestamp(6) with time zone NOT NULL,
+    insert_date_t timestamp(6) with time zone,
+    insert_user_s character varying(20),
+    update_date_t timestamp(6) with time zone,
+    update_user_s character varying(20),
+    enabled_b boolean,
+    merchant_id_s character varying,
+    correlation_id_s character varying,
+    acquirer_id_s character varying,
+    id_trx_issuer_s character varying,
+    bin_s character varying,
+    terminal_id_s character varying
+);
+
+ALTER TABLE public.bpd_winning_transaction OWNER TO testuser;
+
+--
 -- Name: citizen_profile; Type: VIEW; Schema: public; Owner: testuser
 --
 
@@ -93,6 +125,46 @@ CREATE VIEW public.citizen_profile AS
 ALTER TABLE public.citizen_profile OWNER TO testuser;
 
 --
+-- Name: transaction; Type: VIEW; Schema: public; Owner: testuser
+--
+
+CREATE VIEW public.transaction AS
+ SELECT bpd_payment_instrument.fiscal_code_s AS fiscal_code,
+    bpd_winning_transaction.hpan_s AS hpan,
+    bpd_winning_transaction.trx_timestamp_t AS trx_timestamp,
+    bpd_winning_transaction.acquirer_id_s AS acquirer_id,
+    bpd_winning_transaction.acquirer_c AS acquirer_descr,
+    bpd_winning_transaction.id_trx_acquirer_s AS id_trx_acquirer,
+    bpd_winning_transaction.id_trx_issuer_s AS id_trx_issuer,
+    bpd_winning_transaction.operation_type_c AS operation_type_id,
+    bpd_winning_transaction.operation_type_c AS operation_type_descr,
+    bpd_winning_transaction.circuit_type_c AS circuit_type_id,
+    bpd_winning_transaction.circuit_type_c AS circuit_type_descr,
+    bpd_winning_transaction.amount_i AS amount,
+    bpd_winning_transaction.amount_currency_c AS amount_currency,
+    bpd_winning_transaction.mcc_c AS mcc,
+    bpd_winning_transaction.mcc_descr_s AS mcc_descr,
+    bpd_winning_transaction.score_n AS score,
+    bpd_winning_transaction.award_period_id_n AS award_period_id,
+    bpd_winning_transaction.insert_date_t AS insert_date,
+    bpd_winning_transaction.insert_user_s AS insert_user,
+    bpd_winning_transaction.update_date_t AS update_date,
+    bpd_winning_transaction.update_user_s AS update_user,
+    bpd_winning_transaction.merchant_id_s AS merchant_id,
+    bpd_winning_transaction.merchant_id_s AS merchant_descr,
+    bpd_winning_transaction.correlation_id_s AS correlation_id,
+    bpd_winning_transaction.correlation_id_s AS correlation_desr,
+    bpd_winning_transaction.bin_s AS bin,
+    bpd_winning_transaction.terminal_id_s AS terminal_id,
+    bpd_winning_transaction.terminal_id_s AS terminal_descr,
+    bpd_winning_transaction.enabled_b AS enabled
+   FROM (public.bpd_winning_transaction
+     LEFT JOIN public.bpd_payment_instrument ON (((bpd_winning_transaction.hpan_s)::text = (bpd_payment_instrument.hpan_s)::text)));
+
+
+ALTER TABLE public.transaction OWNER TO testuser;
+
+--
 -- Data for Name: bpd_citizen; Type: TABLE DATA; Schema: public; Owner: testuser
 --
 
@@ -111,6 +183,12 @@ INSERT INTO public.bpd_citizen (fiscal_code_s, payoff_instr_s, payoff_instr_type
 INSERT INTO public.bpd_payment_instrument (hpan_s, fiscal_code_s, cancellation_t, status_c, enrollment_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b) VALUES ('807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966', 'AAABBB01C02D345A', NULL, 'ACTIVE', '2020-10-30 11:02:08.749861+01', '2020-10-30 11:02:08.749861+01', NULL, NULL, NULL, true);
 INSERT INTO public.bpd_payment_instrument (hpan_s, fiscal_code_s, cancellation_t, status_c, enrollment_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b) VALUES ('7726b99f6eff4f80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a29', 'AAABBB01C02D345A', NULL, 'INACTIVE', '2020-10-30 11:02:31.11989+01', '2020-10-30 11:02:31.11989+01', NULL, NULL, NULL, false);
 
+--
+-- Data for Name: bpd_winning_transaction; Type: TABLE DATA; Schema: public; Owner: testuser
+--
+
+INSERT INTO public.bpd_winning_transaction VALUES ('Acquirer1', 'EUR', 10, NULL, NULL, '807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966', '1234567890123', NULL, NULL, NULL, 2, '2020-10-31 10:02:31.11989+00', '2020-10-31 10:02:31.11989+00', NULL, NULL, NULL, true, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO public.bpd_winning_transaction VALUES ('Acquirer2', 'EUR', 31, NULL, NULL, '807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966', '2345678901555', NULL, NULL, NULL, 7, '2020-10-31 10:02:31.11989+00', '2020-10-31 10:02:31.11989+00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 --
 -- Name: bpd_citizen bpd_citizen_pkey; Type: CONSTRAINT; Schema: public; Owner: testuser
@@ -133,6 +211,12 @@ ALTER TABLE ONLY public.bpd_payment_instrument
 --
 
 GRANT ALL ON TABLE public.citizen_profile TO testuser;
+
+--
+-- Name: TABLE transaction; Type: ACL; Schema: public; Owner: testuser
+--
+
+GRANT ALL ON TABLE public.transaction TO testuser;
 
 
 --

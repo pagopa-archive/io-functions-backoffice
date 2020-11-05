@@ -1,11 +1,10 @@
 FROM node:10.14.2-alpine
 
-WORKDIR /opt/cosmosdb
+WORKDIR /opt/fixtures
 
 RUN npm install -g ts-node typescript && \
     npm install typeorm pg @types/node
 
-COPY docker/fixtures/index.ts /opt/cosmosdb
-COPY docker/fixtures/dump.pgsql /opt/cosmosdb
+COPY docker/fixtures/index.ts /opt/fixtures
 
 CMD ["sh", "-c", "ts-node index"]
