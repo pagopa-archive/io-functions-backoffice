@@ -7,6 +7,7 @@ import {
   Repository
 } from "typeorm";
 import { Citizen } from "../models/citizen";
+import { Transaction } from "../models/transaction";
 
 export interface IPostgresConnectionParams {
   host: string;
@@ -22,14 +23,20 @@ export function getConnection(
 ): TaskEither<Error, Connection> {
   // Use an existing connection inside the connection manager.
   const maybeActiveConnection = getConnectionManager().connections[0];
-  if (maybeActiveConnection) {
+  if (maybeActiveConnection && maybeActiveConnection.isConnected) {
     return taskEither.of(maybeActiveConnection);
+  }
+  if (maybeActiveConnection) {
+    return tryCatch(
+      () => maybeActiveConnection.connect(),
+      err => new Error(`Error during postgres re-connection [err:${err}]`)
+    );
   }
   return tryCatch(
     () =>
       createConnection({
         database: params.database,
-        entities: [Citizen],
+        entities: [Citizen, Transaction],
         host: params.host,
         password: params.password,
         port: params.port,
