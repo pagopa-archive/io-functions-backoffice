@@ -27,6 +27,8 @@ export function getConnection(
     return taskEither.of(maybeActiveConnection);
   }
   if (maybeActiveConnection) {
+    // If the existing connection is disconnected
+    // we perorm a reconnection and return it
     return tryCatch(
       () => maybeActiveConnection.connect(),
       err => new Error(`Error during postgres re-connection [err:${err}]`)
