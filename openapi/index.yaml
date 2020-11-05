@@ -133,6 +133,8 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/BPDTransaction"
+    required:
+      - transactions
   BPDTransaction:
     type: object
     properties:
