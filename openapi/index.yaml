@@ -127,9 +127,12 @@ definitions:
       - payment_instrument_hpan
       - payment_instrument_status
   BPDTransactionList:
-    type: array
-    items:
-      $ref: "#/definitions/BPDTransaction"
+    type: object
+    properties:
+      transactions:
+        type: array
+        items:
+          $ref: "#/definitions/BPDTransaction"
   BPDTransaction:
     type: object
     properties:

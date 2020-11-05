@@ -42,8 +42,8 @@ type IHttpHandler = (
 export const toApiBPDTransactionList = (
   domainObj: ReadonlyArray<Transaction>
 ): Either<t.Errors, BPDTransactionList> => {
-  return BPDTransactionList.decode(
-    domainObj.map(transaction => {
+  return BPDTransactionList.decode({
+    transactions: domainObj.map(transaction => {
       return {
         ...transaction,
         insert_date: transaction.insert_date?.toISOString(),
@@ -51,7 +51,7 @@ export const toApiBPDTransactionList = (
         update_date: transaction.update_date?.toISOString()
       } as BPDTransaction;
     })
-  );
+  });
 };
 
 export function GetBPDTransactionsHandler(
