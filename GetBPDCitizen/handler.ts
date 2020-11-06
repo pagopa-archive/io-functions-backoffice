@@ -34,9 +34,12 @@ import { BPDCitizen } from "../generated/definitions/BPDCitizen";
 import { PaymentMethod } from "../generated/definitions/PaymentMethod";
 import { Citizen } from "../models/citizen";
 import { OptionalHeaderMiddleware } from "../utils/middleware/optional_header";
+import { RequiredExpressUserMiddleware } from "../utils/middleware/required_express_user";
+import { AdUser } from "../utils/strategy/bearer_strategy";
 
 type IHttpHandler = (
   context: Context,
+  user: AdUser,
   requestFiscalCode: Option<FiscalCode>
 ) => Promise<
   // tslint:disable-next-line: max-union-size
@@ -80,7 +83,7 @@ export const toApiBPDCitizen = (
 export function GetBPDCitizenHandler(
   citizenRepository: TaskEither<Error, Repository<Citizen>>
 ): IHttpHandler {
-  return async (context, requestFiscalCode) => {
+  return async (context, _, requestFiscalCode) => {
     return fromEither<
       | IResponseErrorInternal
       | IResponseErrorValidation
@@ -142,6 +145,7 @@ export function GetBPDCitizen(
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
+    RequiredExpressUserMiddleware(AdUser),
     OptionalHeaderMiddleware("x-citizen-fiscal-code", FiscalCode)
   );
 

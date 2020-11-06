@@ -27,9 +27,12 @@ import { BPDTransaction } from "../generated/definitions/BPDTransaction";
 import { BPDTransactionList } from "../generated/definitions/BPDTransactionList";
 import { Transaction } from "../models/transaction";
 import { OptionalHeaderMiddleware } from "../utils/middleware/optional_header";
+import { RequiredExpressUserMiddleware } from "../utils/middleware/required_express_user";
+import { AdUser } from "../utils/strategy/bearer_strategy";
 
 type IHttpHandler = (
   context: Context,
+  user: AdUser,
   requestFiscalCode: Option<FiscalCode>
 ) => Promise<
   // tslint:disable-next-line: max-union-size
@@ -58,7 +61,7 @@ export const toApiBPDTransactionList = (
 export function GetBPDTransactionsHandler(
   transactionRepository: TaskEither<Error, Repository<Transaction>>
 ): IHttpHandler {
-  return async (context, requestFiscalCode) => {
+  return async (context, _, requestFiscalCode) => {
     return fromEither<
       IResponseErrorInternal | IResponseErrorValidation,
       FiscalCode
@@ -108,6 +111,7 @@ export function GetBPDTransactions(
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
+    RequiredExpressUserMiddleware(AdUser),
     OptionalHeaderMiddleware("x-citizen-fiscal-code", FiscalCode)
   );
 

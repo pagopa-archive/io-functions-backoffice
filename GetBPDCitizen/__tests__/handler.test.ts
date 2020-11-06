@@ -3,11 +3,16 @@
 import { none, some } from "fp-ts/lib/Option";
 import { taskEither } from "fp-ts/lib/TaskEither";
 import { IResponseSuccessJson } from "italia-ts-commons/lib/responses";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import {
+  EmailString,
+  FiscalCode,
+  NonEmptyString
+} from "italia-ts-commons/lib/strings";
 import { Repository } from "typeorm";
 import { context } from "../../__mocks__/durable-functions";
 import { BPDCitizen } from "../../generated/definitions/BPDCitizen";
 import { Citizen } from "../../models/citizen";
+import { AdUser } from "../../utils/strategy/bearer_strategy";
 import { GetBPDCitizenHandler } from "../handler";
 
 const mockFind = jest.fn();
@@ -17,6 +22,13 @@ const mockCitizenRepository = taskEither.of<Error, Repository<Citizen>>(({
 
 const aFiscalCode = "AAABBB01C02D345D" as FiscalCode;
 const aTimestamp = new Date();
+
+const anAuthenticatedUser: AdUser = {
+  emails: ["email@example.com" as EmailString],
+  family_name: "Surname",
+  given_name: "Name",
+  oid: "anUserOID" as NonEmptyString
+};
 
 describe("GetBPDCitizenHandler", () => {
   it("should return a success response if the user was found on db", async () => {
@@ -40,7 +52,11 @@ describe("GetBPDCitizenHandler", () => {
       ] as Citizen[];
     });
     const handler = GetBPDCitizenHandler(mockCitizenRepository);
-    const response = await handler(context, some(aFiscalCode));
+    const response = await handler(
+      context,
+      anAuthenticatedUser,
+      some(aFiscalCode)
+    );
 
     expect(response.kind).toBe("IResponseSuccessJson");
     const responseValue = (response as IResponseSuccessJson<BPDCitizen>).value;
@@ -57,7 +73,11 @@ describe("GetBPDCitizenHandler", () => {
       return [];
     });
     const handler = GetBPDCitizenHandler(mockCitizenRepository);
-    const response = await handler(context, some(aFiscalCode));
+    const response = await handler(
+      context,
+      anAuthenticatedUser,
+      some(aFiscalCode)
+    );
 
     expect(response.kind).toBe("IResponseErrorNotFound");
   });
@@ -68,7 +88,11 @@ describe("GetBPDCitizenHandler", () => {
       return Promise.reject(expectedError);
     });
     const handler = GetBPDCitizenHandler(mockCitizenRepository);
-    const response = await handler(context, some(aFiscalCode));
+    const response = await handler(
+      context,
+      anAuthenticatedUser,
+      some(aFiscalCode)
+    );
 
     expect(context.log.error).toBeCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorInternal");
@@ -76,7 +100,7 @@ describe("GetBPDCitizenHandler", () => {
 
   it("should return a validation error if the fiscal code is missing", async () => {
     const handler = GetBPDCitizenHandler(mockCitizenRepository);
-    const response = await handler(context, none);
+    const response = await handler(context, anAuthenticatedUser, none);
 
     expect(response.kind).toBe("IResponseErrorValidation");
   });
@@ -91,7 +115,11 @@ describe("GetBPDCitizenHandler", () => {
       ];
     });
     const handler = GetBPDCitizenHandler(mockCitizenRepository);
-    const response = await handler(context, some(aFiscalCode));
+    const response = await handler(
+      context,
+      anAuthenticatedUser,
+      some(aFiscalCode)
+    );
 
     expect(response.kind).toBe("IResponseErrorValidation");
   });
