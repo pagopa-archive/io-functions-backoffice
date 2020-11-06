@@ -3,11 +3,16 @@
 import { none, some } from "fp-ts/lib/Option";
 import { taskEither } from "fp-ts/lib/TaskEither";
 import { IResponseSuccessJson } from "italia-ts-commons/lib/responses";
-import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
+import {
+  EmailString,
+  FiscalCode,
+  NonEmptyString
+} from "italia-ts-commons/lib/strings";
 import { Repository } from "typeorm";
 import { context } from "../../__mocks__/durable-functions";
 import { BPDTransactionList } from "../../generated/definitions/BPDTransactionList";
 import { Transaction } from "../../models/transaction";
+import { AdUser } from "../../utils/strategy/bearer_strategy";
 import { GetBPDTransactionsHandler } from "../handler";
 
 const mockFind = jest.fn();
@@ -26,6 +31,13 @@ FmprTzaax++spskX3QIDAQAB
 -----END PUBLIC KEY-----` as NonEmptyString;
 const anAcquirer = "Acquirer1";
 const aTimestamp = new Date();
+
+const anAuthenticatedUser: AdUser = {
+  emails: ["email@example.com" as EmailString],
+  family_name: "Surname",
+  given_name: "Name",
+  oid: "anUserOID" as NonEmptyString
+};
 
 describe("GetBPDTransactionsHandler", () => {
   it("should return a success response if query success", async () => {
@@ -54,7 +66,7 @@ describe("GetBPDTransactionsHandler", () => {
       mockTransactionRepository,
       aPublicRsaCert
     );
-    const response = await handler(context, aFiscalCode);
+    const response = await handler(context, anAuthenticatedUser, aFiscalCode);
 
     expect(response.kind).toBe("IResponseSuccessJson");
     const responseValue = (response as IResponseSuccessJson<BPDTransactionList>)
@@ -73,7 +85,7 @@ describe("GetBPDTransactionsHandler", () => {
       mockTransactionRepository,
       aPublicRsaCert
     );
-    const response = await handler(context, aFiscalCode);
+    const response = await handler(context, anAuthenticatedUser, aFiscalCode);
 
     expect(response.kind).toBe("IResponseSuccessJson");
     const responseValue = (response as IResponseSuccessJson<BPDTransactionList>)
@@ -93,7 +105,7 @@ describe("GetBPDTransactionsHandler", () => {
       mockTransactionRepository,
       aPublicRsaCert
     );
-    const response = await handler(context, aFiscalCode);
+    const response = await handler(context, anAuthenticatedUser, aFiscalCode);
 
     expect(context.log.error).toBeCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorInternal");
@@ -114,7 +126,7 @@ describe("GetBPDTransactionsHandler", () => {
       mockTransactionRepository,
       aPublicRsaCert
     );
-    const response = await handler(context, aFiscalCode);
+    const response = await handler(context, anAuthenticatedUser, aFiscalCode);
 
     expect(response.kind).toBe("IResponseErrorValidation");
   });
