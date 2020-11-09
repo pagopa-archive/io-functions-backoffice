@@ -65,9 +65,9 @@ parameters:
     type: string
     default: deployToProductionSlot
     values:
-      - deployToStagingSlot  
+      # - deployToStagingSlot  
       - deployToProductionSlot
-      - deployToStagingSlotAndSwap
+      # - deployToStagingSlotAndSwap
 
 # This pipeline can be manually run or is automatically triggered whenever one 
 # of the following conditions is true:
