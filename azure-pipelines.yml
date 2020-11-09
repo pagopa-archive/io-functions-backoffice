@@ -38,7 +38,7 @@
 # 
 
 variables:
-  NODE_VERSION: '12.14.1'
+  NODE_VERSION: '12.19.0'
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
 
 parameters:
