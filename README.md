@@ -1,4 +1,4 @@
-# IO Functions template
+# IO Functions Backoffice
 
 Template per l'utilizzo di Azure Functions (e Durable Functions) all'interno del
 progetto IO.
