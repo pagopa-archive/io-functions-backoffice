@@ -18,8 +18,8 @@
     "lint-api": "oval validate -p openapi/index.yaml",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
     "dist:zip": "zip -r dist.zip . --exclude @.funcignore --exclude .funcignore",
-    "predeploy": "npm-run-all generate build dist:*",
-    "generate:definitions": "shx rm -rf ./generated/definitions && mkdir -p ./generated/definitions && gen-api-models --api-spec ./openapi/index.yaml --out-dir ./generated/definitions",
+    "predeploy": "npm-run-all generate build dist:modules",
+    "generate:definitions": "shx rm -rf ./generated/definitions && gen-api-models --api-spec ./openapi/index.yaml --out-dir ./generated/definitions",
     "generate": "npm-run-all generate:*"
   },
   "devDependencies": {
@@ -31,7 +31,7 @@
     "danger": "^8.0.0",
     "danger-plugin-digitalcitizenship": "*",
     "italia-tslint-rules": "*",
-    "italia-utils": "^4.1.0",
+    "italia-utils": "^6.1.0",
     "jest": "^24.8.0",
     "jest-mock-express": "^0.1.1",
     "modclean": "^3.0.0-beta.1",
