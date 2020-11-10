@@ -28,11 +28,12 @@ import {
   ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 import { Repository } from "typeorm";
 import { BPDCitizen } from "../generated/definitions/BPDCitizen";
 import { PaymentMethod } from "../generated/definitions/PaymentMethod";
 import { Citizen } from "../models/citizen";
+import { AuditLogTableRow, InsertOrReplaceEntity } from "../utils/audit_logs";
 import { OptionalHeaderMiddleware } from "../utils/middleware/optional_header";
 import { RequiredExpressUserMiddleware } from "../utils/middleware/required_express_user";
 import { AdUser } from "../utils/strategy/bearer_strategy";
@@ -81,7 +82,8 @@ export const toApiBPDCitizen = (
 };
 
 export function GetBPDCitizenHandler(
-  citizenRepository: TaskEither<Error, Repository<Citizen>>
+  citizenRepository: TaskEither<Error, Repository<Citizen>>,
+  insertOrReplaceEntity: InsertOrReplaceEntity
 ): IHttpHandler {
   return async (context, _, requestFiscalCode) => {
     return fromEither<
@@ -95,7 +97,13 @@ export function GetBPDCitizenHandler(
       )(requestFiscalCode)
     )
       .chain(fiscalCode =>
-        citizenRepository
+        insertOrReplaceEntity({
+          Citizen: requestFiscalCode.toUndefined(),
+          OperationName: "GetBPDCitizen",
+          PartitionKey: _.oid, // Can we use email?
+          RowKey: context.executionContext.invocationId as NonEmptyString
+        })
+          .chain(_1 => citizenRepository)
           .chain(citizen =>
             tryCatch(
               () => citizen.find({ fiscal_code: fiscalCode }),
@@ -139,9 +147,13 @@ export function GetBPDCitizenHandler(
 }
 
 export function GetBPDCitizen(
-  citizenRepository: TaskEither<Error, Repository<Citizen>>
+  citizenRepository: TaskEither<Error, Repository<Citizen>>,
+  insertOrReplaceEntity: InsertOrReplaceEntity
 ): express.RequestHandler {
-  const handler = GetBPDCitizenHandler(citizenRepository);
+  const handler = GetBPDCitizenHandler(
+    citizenRepository,
+    insertOrReplaceEntity
+  );
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
