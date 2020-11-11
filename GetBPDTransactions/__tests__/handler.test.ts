@@ -12,6 +12,10 @@ import { Repository } from "typeorm";
 import { context } from "../../__mocks__/durable-functions";
 import { BPDTransactionList } from "../../generated/definitions/BPDTransactionList";
 import { Transaction } from "../../models/transaction";
+import {
+  AuditLogTableRow,
+  InsertOrReplaceEntity
+} from "../../utils/audit_logs";
 import { AdUser } from "../../utils/strategy/bearer_strategy";
 import { GetBPDTransactionsHandler } from "../handler";
 
@@ -33,7 +37,24 @@ const anAuthenticatedUser: AdUser = {
   oid: "anUserOID" as NonEmptyString
 };
 
+const expectedAdminAuditLog: AuditLogTableRow = {
+  AuthLevel: "Admin",
+  Citizen: aFiscalCode,
+  OperationName: "GetBPDTransactions",
+  PartitionKey: anAuthenticatedUser.oid,
+  RowKey: expect.any(String)
+};
+
+const mockInsertOrReplaceEntity = (jest
+  .fn()
+  .mockImplementation(_ =>
+    taskEither.of(true)
+  ) as unknown) as InsertOrReplaceEntity;
+
 describe("GetBPDTransactionsHandler", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it("should return a success response if query success", async () => {
     mockFind.mockImplementationOnce(async () => {
       return [
@@ -56,7 +77,10 @@ describe("GetBPDTransactionsHandler", () => {
         // tslint:disable-next-line: readonly-array
       ] as Transaction[];
     });
-    const handler = GetBPDTransactionsHandler(mockTransactionRepository);
+    const handler = GetBPDTransactionsHandler(
+      mockTransactionRepository,
+      mockInsertOrReplaceEntity
+    );
     const response = await handler(
       context,
       anAuthenticatedUser,
@@ -69,6 +93,8 @@ describe("GetBPDTransactionsHandler", () => {
     expect(responseValue).toEqual({
       transactions: expect.any(Array)
     } as BPDTransactionList);
+    expect(mockInsertOrReplaceEntity).toBeCalledTimes(1);
+    expect(mockInsertOrReplaceEntity).toBeCalledWith(expectedAdminAuditLog);
     expect(responseValue.transactions).toHaveLength(2);
   });
 
@@ -76,7 +102,10 @@ describe("GetBPDTransactionsHandler", () => {
     mockFind.mockImplementationOnce(async () => {
       return [];
     });
-    const handler = GetBPDTransactionsHandler(mockTransactionRepository);
+    const handler = GetBPDTransactionsHandler(
+      mockTransactionRepository,
+      mockInsertOrReplaceEntity
+    );
     const response = await handler(
       context,
       anAuthenticatedUser,
@@ -89,6 +118,8 @@ describe("GetBPDTransactionsHandler", () => {
     expect(responseValue).toEqual({
       transactions: expect.any(Array)
     } as BPDTransactionList);
+    expect(mockInsertOrReplaceEntity).toBeCalledTimes(1);
+    expect(mockInsertOrReplaceEntity).toBeCalledWith(expectedAdminAuditLog);
     expect(responseValue.transactions).toHaveLength(0);
   });
 
@@ -97,20 +128,29 @@ describe("GetBPDTransactionsHandler", () => {
     mockFind.mockImplementationOnce(() => {
       return Promise.reject(expectedError);
     });
-    const handler = GetBPDTransactionsHandler(mockTransactionRepository);
+    const handler = GetBPDTransactionsHandler(
+      mockTransactionRepository,
+      mockInsertOrReplaceEntity
+    );
     const response = await handler(
       context,
       anAuthenticatedUser,
       some(aFiscalCode)
     );
+    expect(mockInsertOrReplaceEntity).toBeCalledTimes(1);
+    expect(mockInsertOrReplaceEntity).toBeCalledWith(expectedAdminAuditLog);
 
     expect(context.log.error).toBeCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorInternal");
   });
 
   it("should return a validation error if the fiscal code is missing in header", async () => {
-    const handler = GetBPDTransactionsHandler(mockTransactionRepository);
+    const handler = GetBPDTransactionsHandler(
+      mockTransactionRepository,
+      mockInsertOrReplaceEntity
+    );
     const response = await handler(context, anAuthenticatedUser, none);
+    expect(mockInsertOrReplaceEntity).toBeCalledTimes(0);
 
     expect(response.kind).toBe("IResponseErrorValidation");
   });
@@ -126,12 +166,17 @@ describe("GetBPDTransactionsHandler", () => {
         }
       ];
     });
-    const handler = GetBPDTransactionsHandler(mockTransactionRepository);
+    const handler = GetBPDTransactionsHandler(
+      mockTransactionRepository,
+      mockInsertOrReplaceEntity
+    );
     const response = await handler(
       context,
       anAuthenticatedUser,
       some(aFiscalCode)
     );
+    expect(mockInsertOrReplaceEntity).toBeCalledTimes(1);
+    expect(mockInsertOrReplaceEntity).toBeCalledWith(expectedAdminAuditLog);
 
     expect(response.kind).toBe("IResponseErrorValidation");
   });

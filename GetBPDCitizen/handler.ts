@@ -98,6 +98,7 @@ export function GetBPDCitizenHandler(
     )
       .chain(fiscalCode =>
         insertOrReplaceEntity({
+          AuthLevel: "Admin",
           Citizen: requestFiscalCode.toUndefined(),
           OperationName: "GetBPDCitizen",
           PartitionKey: _.oid, // Can we use email?

@@ -21,11 +21,12 @@ import {
   ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 import { Repository } from "typeorm";
 import { BPDTransaction } from "../generated/definitions/BPDTransaction";
 import { BPDTransactionList } from "../generated/definitions/BPDTransactionList";
 import { Transaction } from "../models/transaction";
+import { AuditLogTableRow, InsertOrReplaceEntity } from "../utils/audit_logs";
 import { OptionalHeaderMiddleware } from "../utils/middleware/optional_header";
 import { RequiredExpressUserMiddleware } from "../utils/middleware/required_express_user";
 import { AdUser } from "../utils/strategy/bearer_strategy";
@@ -59,7 +60,8 @@ export const toApiBPDTransactionList = (
 };
 
 export function GetBPDTransactionsHandler(
-  transactionRepository: TaskEither<Error, Repository<Transaction>>
+  transactionRepository: TaskEither<Error, Repository<Transaction>>,
+  insertOrReplaceEntity: InsertOrReplaceEntity
 ): IHttpHandler {
   return async (context, _, requestFiscalCode) => {
     return fromEither<
@@ -71,7 +73,14 @@ export function GetBPDTransactionsHandler(
       )(requestFiscalCode)
     )
       .chain(fiscalCode =>
-        transactionRepository
+        insertOrReplaceEntity({
+          AuthLevel: "Admin",
+          Citizen: requestFiscalCode.toUndefined(),
+          OperationName: "GetBPDTransactions",
+          PartitionKey: _.oid, // Can we use email?
+          RowKey: `${context.executionContext.invocationId}` as NonEmptyString
+        })
+          .chain(_1 => transactionRepository)
           .chain(transactions =>
             tryCatch(
               () => transactions.find({ fiscal_code: fiscalCode }),
@@ -105,9 +114,13 @@ export function GetBPDTransactionsHandler(
 }
 
 export function GetBPDTransactions(
-  citizenRepository: TaskEither<Error, Repository<Transaction>>
+  citizenRepository: TaskEither<Error, Repository<Transaction>>,
+  insertOrReplaceEntity: InsertOrReplaceEntity
 ): express.RequestHandler {
-  const handler = GetBPDTransactionsHandler(citizenRepository);
+  const handler = GetBPDTransactionsHandler(
+    citizenRepository,
+    insertOrReplaceEntity
+  );
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
