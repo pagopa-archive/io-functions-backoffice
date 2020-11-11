@@ -21,12 +21,13 @@ import {
   ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 import { Repository } from "typeorm";
 import { BPDTransaction } from "../generated/definitions/BPDTransaction";
 import { BPDTransactionList } from "../generated/definitions/BPDTransactionList";
 import { CitizenID } from "../generated/definitions/CitizenID";
 import { Transaction } from "../models/transaction";
+import { InsertOrReplaceEntity } from "../utils/audit_logs";
 import { withCitizenIdCheck } from "../utils/citizen_id";
 import { RequiredExpressUserMiddleware } from "../utils/middleware/required_express_user";
 import { RequiredHeaderMiddleware } from "../utils/middleware/required_header";
@@ -62,11 +63,19 @@ export const toApiBPDTransactionList = (
 
 export function GetBPDTransactionsHandler(
   transactionRepository: TaskEither<Error, Repository<Transaction>>,
+  insertOrReplaceEntity: InsertOrReplaceEntity,
   publicRsaCertificate: NonEmptyString
 ): IHttpHandler {
   return async (context, _, citizenId) => {
     return withCitizenIdCheck(citizenId, publicRsaCertificate, fiscalCode =>
-      transactionRepository
+      insertOrReplaceEntity({
+        AuthLevel: "Admin",
+        Citizen: fiscalCode,
+        OperationName: "GetBPDTransactions",
+        PartitionKey: _.oid, // Can we use email?
+        RowKey: `${context.executionContext.invocationId}` as NonEmptyString
+      })
+        .chain(_1 => transactionRepository)
         .chain(transactions =>
           tryCatch(
             () => transactions.find({ fiscal_code: fiscalCode }),
@@ -100,10 +109,12 @@ export function GetBPDTransactionsHandler(
 
 export function GetBPDTransactions(
   citizenRepository: TaskEither<Error, Repository<Transaction>>,
+  insertOrReplaceEntity: InsertOrReplaceEntity,
   publicRsaCertificate: NonEmptyString
 ): express.RequestHandler {
   const handler = GetBPDTransactionsHandler(
     citizenRepository,
+    insertOrReplaceEntity,
     publicRsaCertificate
   );
 

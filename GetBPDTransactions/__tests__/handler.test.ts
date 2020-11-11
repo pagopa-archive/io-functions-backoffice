@@ -12,6 +12,10 @@ import { Repository } from "typeorm";
 import { context } from "../../__mocks__/durable-functions";
 import { BPDTransactionList } from "../../generated/definitions/BPDTransactionList";
 import { Transaction } from "../../models/transaction";
+import {
+  AuditLogTableRow,
+  InsertOrReplaceEntity
+} from "../../utils/audit_logs";
 import { AdUser } from "../../utils/strategy/bearer_strategy";
 import { GetBPDTransactionsHandler } from "../handler";
 
@@ -39,7 +43,24 @@ const anAuthenticatedUser: AdUser = {
   oid: "anUserOID" as NonEmptyString
 };
 
+const expectedAdminAuditLog: AuditLogTableRow = {
+  AuthLevel: "Admin",
+  Citizen: aFiscalCode,
+  OperationName: "GetBPDTransactions",
+  PartitionKey: anAuthenticatedUser.oid,
+  RowKey: expect.any(String)
+};
+
+const mockInsertOrReplaceEntity = (jest
+  .fn()
+  .mockImplementation(_ =>
+    taskEither.of(true)
+  ) as unknown) as InsertOrReplaceEntity;
+
 describe("GetBPDTransactionsHandler", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it("should return a success response if query success", async () => {
     mockFind.mockImplementationOnce(async () => {
       return [
@@ -64,6 +85,7 @@ describe("GetBPDTransactionsHandler", () => {
     });
     const handler = GetBPDTransactionsHandler(
       mockTransactionRepository,
+      mockInsertOrReplaceEntity,
       aPublicRsaCert
     );
     const response = await handler(context, anAuthenticatedUser, aFiscalCode);
@@ -74,6 +96,8 @@ describe("GetBPDTransactionsHandler", () => {
     expect(responseValue).toEqual({
       transactions: expect.any(Array)
     } as BPDTransactionList);
+    expect(mockInsertOrReplaceEntity).toBeCalledTimes(1);
+    expect(mockInsertOrReplaceEntity).toBeCalledWith(expectedAdminAuditLog);
     expect(responseValue.transactions).toHaveLength(2);
   });
 
@@ -83,6 +107,7 @@ describe("GetBPDTransactionsHandler", () => {
     });
     const handler = GetBPDTransactionsHandler(
       mockTransactionRepository,
+      mockInsertOrReplaceEntity,
       aPublicRsaCert
     );
     const response = await handler(context, anAuthenticatedUser, aFiscalCode);
@@ -93,6 +118,8 @@ describe("GetBPDTransactionsHandler", () => {
     expect(responseValue).toEqual({
       transactions: expect.any(Array)
     } as BPDTransactionList);
+    expect(mockInsertOrReplaceEntity).toBeCalledTimes(1);
+    expect(mockInsertOrReplaceEntity).toBeCalledWith(expectedAdminAuditLog);
     expect(responseValue.transactions).toHaveLength(0);
   });
 
@@ -103,6 +130,7 @@ describe("GetBPDTransactionsHandler", () => {
     });
     const handler = GetBPDTransactionsHandler(
       mockTransactionRepository,
+      mockInsertOrReplaceEntity,
       aPublicRsaCert
     );
     const response = await handler(context, anAuthenticatedUser, aFiscalCode);
@@ -124,6 +152,7 @@ describe("GetBPDTransactionsHandler", () => {
     });
     const handler = GetBPDTransactionsHandler(
       mockTransactionRepository,
+      mockInsertOrReplaceEntity,
       aPublicRsaCert
     );
     const response = await handler(context, anAuthenticatedUser, aFiscalCode);

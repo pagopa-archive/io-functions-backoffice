@@ -4,7 +4,6 @@ import * as winston from "winston";
 
 import { Context } from "@azure/functions";
 import { TableService } from "azure-storage";
-import { tryCatch } from "fp-ts/lib/TaskEither";
 import { secureExpressApp } from "io-functions-commons/dist/src/utils/express";
 import { AzureContextTransport } from "io-functions-commons/dist/src/utils/logging";
 import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
@@ -14,7 +13,7 @@ import { Citizen } from "../models/citizen";
 import { getRepository, IPostgresConnectionParams } from "../utils/database";
 import { GetBPDCitizen } from "./handler";
 
-import { AuditLogTableRow, InsertOrReplaceEntity } from "../utils/audit_logs";
+import { GetInsertOrReplaceEntity } from "../utils/audit_logs";
 import { getConfigOrThrow } from "../utils/config";
 import { GetOAuthVerifier } from "../utils/middleware/oauth_adb2c";
 import { setupBearerStrategy } from "../utils/strategy/bearer_strategy";
@@ -24,26 +23,6 @@ const config = getConfigOrThrow();
 const tableService = new TableService(
   config.DASHBOARD_STORAGE_CONNECTION_STRING
 );
-
-const insertOrReplaceEntity: InsertOrReplaceEntity = (
-  entity: AuditLogTableRow
-) =>
-  tryCatch<Error, unknown>(
-    () =>
-      new Promise((resolve, reject) =>
-        tableService.insertOrReplaceEntity(
-          config.DASHBOARD_LOGS_TABLE_NAME,
-          entity,
-          (err, result) => {
-            if (err) {
-              return reject(err);
-            }
-            return resolve(result);
-          }
-        )
-      ),
-    err => err as Error
-  );
 
 const postgresConfig: IPostgresConnectionParams = {
   database: config.POSTGRES_DB_NAME,
@@ -87,7 +66,7 @@ app.get(
   GetOAuthVerifier(passportAuthenticator, config.ADB2C_POLICY_NAME),
   GetBPDCitizen(
     getRepository(postgresConfig, Citizen),
-    insertOrReplaceEntity,
+    GetInsertOrReplaceEntity(tableService, config.DASHBOARD_LOGS_TABLE_NAME),
     config.JWT_SUPPORT_TOKEN_PUBLIC_RSA_CERTIFICATE
   )
 );

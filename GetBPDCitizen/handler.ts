@@ -93,7 +93,7 @@ export function GetBPDCitizenHandler(
       publicRsaCertificate,
       requestFiscalCode =>
         insertOrReplaceEntity({
-          AuthLevel: "Admin" as "Admin",
+          AuthLevel: "Admin",
           Citizen: requestFiscalCode,
           OperationName: "GetBPDCitizen",
           PartitionKey: _.oid, // Can we use email?

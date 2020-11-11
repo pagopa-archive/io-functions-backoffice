@@ -21,5 +21,9 @@ export const context = ({
     verbose: jest.fn().mockImplementation(console.log),
     // tslint:disable-next-line: no-console
     warn: jest.fn().mockImplementation(console.log)
+  },
+  // tslint:disable-next-line: object-literal-sort-keys
+  executionContext: {
+    invocationId: "123456"
   }
 } as unknown) as Context;
