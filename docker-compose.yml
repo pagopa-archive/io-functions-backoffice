@@ -2,7 +2,7 @@ version: "3.2"
 
 services:
 
-  functions:
+  functions-backoffice:
     image: functions-template:v2.0.0
     build:
       context: ./
@@ -13,7 +13,7 @@ services:
       - languageWorkers__node__arguments=--inspect=0.0.0.0:5858
     working_dir: /usr/src/app
     ports:
-      - "7071:7071"
+      - "80:7071"
       - "5858:5858"
     networks:
       - io-fn
@@ -22,21 +22,6 @@ services:
       - fixtures
     volumes:
       - .:/usr/src/app
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.functions.rule=Host(`localhost`)"
-      - "traefik.http.routers.functions.entrypoints=web"
-      - "traefik.http.services.functions.loadbalancer.server.port=7071"
-
-      # - "traefik.http.middlewares.testHeader.headers.customrequestheaders.x-user-id=unused"
-      # - "traefik.http.middlewares.testHeader.headers.customrequestheaders.x-user-groups=${REQ_USER_GROUPS}"
-      # - "traefik.http.middlewares.testHeader.headers.customrequestheaders.x-subscription-id=${REQ_SERVICE_ID}"
-      # - "traefik.http.middlewares.testHeader.headers.customrequestheaders.x-user-email=${SERVICE_EMAIL}"
-      # - "traefik.http.middlewares.testHeader.headers.customrequestheaders.x-user-note=unused"
-      # - "traefik.http.middlewares.testHeader.headers.customrequestheaders.x-functions-key=unused"
-
-      # apply middleware to route
-      - "traefik.http.routers.functions.middlewares=testHeader"
 
   fnstorage:
     image: azurite
@@ -90,22 +75,6 @@ services:
     volumes:
       - ./docker/postgres/server.crt:/var/lib/postgresql/server.crt:delegated
       - ./docker/postgres/server.key:/var/lib/postgresql/server.key:delegated
-
-  traefik:
-    image: traefik:v2.0
-    command: |-
-      --entrypoints.web.address=:80
-      --providers.docker=true
-      --providers.docker.network=io-fn
-      --log.level=ERROR
-    env_file:
-      - .env
-    ports:
-      - ${API_GATEWAY_PORT}:${API_GATEWAY_PORT}
-    networks:
-      - io-fn
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
 
 networks:
   io-fn:
