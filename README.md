@@ -1,24 +1,11 @@
 # IO Functions Backoffice
 
-Template per l'utilizzo di Azure Functions (e Durable Functions) all'interno del
-progetto IO.
+[![codecov](https://codecov.io/gh/pagopa/io-functions-backoffice/branch/master/graph/badge.svg)](https://codecov.io/gh/pagopa/io-functions-backoffice)
+[![Build Status](https://dev.azure.com/pagopa-io/io-functions-backoffice/_apis/build/status/pagopa.io-functions-backoffice?branchName=master)](https://dev.azure.com/pagopa-io/io-functions-backoffice/_build/latest?definitionId=37&branchName=master)
 
-Una volta clonato il repo assicurarsi di:
+This repository contains the code for the backend used by the Backoffice.
 
-- editare i metadati del repository nel file `package.json`
-
-- specificare un nome per il
-  [TaskHub](https://docs.microsoft.com/it-it/azure/azure-functions/durable/durable-functions-task-hubs)
-  in host.json in modo da evitare di condividere lo stesso per function diverse
-  che usano lo stesso storage
-
-- effettuare il [tuning dei parametri per le durable
-  function](https://docs.microsoft.com/it-it/azure/azure-functions/durable/durable-functions-bindings#host-json)
-
-- impostare a `false` il parametro `FUNCTIONS_V2_COMPATIBILITY_MODE` nel file
-  `local.settings.json` nel caso di upgrade a `azure-functions@3.x`
-
-## Sviluppo in locale
+## Local development
 
 ```shell
 cp env.example .env
@@ -31,30 +18,21 @@ open http://localhost/some/path/test
 
 ## Deploy
 
-Il deploy avviene tramite una [pipeline](./.circleci/config.yml)
-(workflow) configurata su [CircleCI](https://circleci.com/).
+Deploy appens with this [pipeline](./azure-pipelines.yml)
+(workflow) configured on [Azure DevOps](https://dev.azure.com).
 
-A ogni push su master il workflow effettua il deploy sulle 
-risorse di staging. Quando invece un branch è taggato con `latest`
-il deploy avviene sulle functions in produzione.
+## Environment variables
 
-Per il deploy è necessario che il job su CircleCI possa autenticarsi
-tramite il client azure. Vanno quindi impostate le seguenti 
-variabili di ambiente nei settings del progetto CircleCI:
+Those are all Environment variables needed by the application:
 
-```shell
-AZURE_SP_TENANT="<tenantid>"
-AZURE_SP="<service principal id>"
-AZURE_SP_PASSWORD="<service principal password>"
-AZURE_SUBSCRIPTION_ID="<subscription id>"
-PRODUCTION_RESOURCE_GROUP_NAME="<production resource group>"
-STAGING_RESOURCE_GROUP_NAME="<staging resource group>"
-FUNCTION_APP_NAME="<function app name>"
-```
+| Variable name                          | Description                                                                       | type   |
+|----------------------------------------|-----------------------------------------------------------------------------------|--------|
+| DASHBOARD_STORAGE_CONNECTION_STRING    | Storage connection string                                                         | string |
+| SLOT_TASK_HUBNAME                      | The unique slot task hubname                                                      | string |
+| POSTGRES_HOSTNAME                      | Host for the postgres database                                                    | string |
+| POSTGRES_PORT                          | Port for the postgres database                                                    | number |
+| POSTGRES_USERNAME                      | Username for the postgres database                                                | string |
+| POSTGRES_PASSWORD                      | Password for the postgres database                                                | string |
+| POSTGRES_DB_NAME                       | Postgres database name                                                            | string |
+| POSTGRES_SCHEMA                        | Postgres schema name                                                              | string |
 
-## Esempi di function
-
-Sono presenti alcune function di esempio che permettono di testare la corretta
-esecuzione del runtime delle durable functions. Le funzioni attivate 
-da [trigger HTTP](./HttpTriggerFunction) utilizzano il pacchetto
-[io-functions-express](https://github.com/teamdigitale/io-functions-express).
