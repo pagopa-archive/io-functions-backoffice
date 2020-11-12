@@ -2,9 +2,15 @@ import * as express from "express";
 
 import { Context } from "@azure/functions";
 import { isEmpty } from "fp-ts/lib/Array";
-import { Either, isLeft } from "fp-ts/lib/Either";
+import { Either } from "fp-ts/lib/Either";
+import { identity } from "fp-ts/lib/function";
 import { isNone, Option } from "fp-ts/lib/Option";
-import { TaskEither, tryCatch } from "fp-ts/lib/TaskEither";
+import {
+  fromEither,
+  fromPredicate,
+  TaskEither,
+  tryCatch
+} from "fp-ts/lib/TaskEither";
 import { ContextMiddleware } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import {
   withRequestMiddlewares,
@@ -81,7 +87,7 @@ export function GetBPDCitizenHandler(
         "Missing fiscal code header"
       );
     }
-    const errorOrCitizenData = await citizenRepository
+    return citizenRepository
       .chain(citizen =>
         tryCatch(
           () => citizen.find({ fiscal_code: requestFiscalCode.value }),
@@ -93,23 +99,33 @@ export function GetBPDCitizenHandler(
           }
         )
       )
+      .mapLeft<
+        | IResponseErrorInternal
+        | IResponseErrorNotFound
+        | IResponseErrorValidation
+      >(err => ResponseErrorInternal(err.message))
+      .chain(
+        fromPredicate(
+          citizenData => !isEmpty(citizenData),
+          () => ResponseErrorNotFound("Not found", "Citizen not found")
+        )
+      )
+      .chain(citizenData =>
+        fromEither(toApiBPDCitizen(citizenData)).mapLeft(err =>
+          ResponseErrorValidation(
+            "Invalid BPDCitizen object",
+            readableReport(err)
+          )
+        )
+      )
+      .fold<
+        // tslint:disable-next-line: max-union-size
+        | IResponseErrorInternal
+        | IResponseErrorNotFound
+        | IResponseErrorValidation
+        | IResponseSuccessJson<BPDCitizen>
+      >(identity, ResponseSuccessJson)
       .run();
-    if (isLeft(errorOrCitizenData)) {
-      return ResponseErrorInternal(errorOrCitizenData.value.message);
-    }
-    if (isEmpty(errorOrCitizenData.value)) {
-      return ResponseErrorNotFound("Not found", "Citizen not found");
-    }
-    return toApiBPDCitizen(errorOrCitizenData.value).fold<
-      IResponseErrorValidation | IResponseSuccessJson<BPDCitizen>
-    >(
-      err =>
-        ResponseErrorValidation(
-          "Invalid BPDCitizen object",
-          readableReport(err)
-        ),
-      bpdCitizen => ResponseSuccessJson(bpdCitizen)
-    );
   };
 }
 
