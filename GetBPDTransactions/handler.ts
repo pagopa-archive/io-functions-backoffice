@@ -1,7 +1,7 @@
 import * as express from "express";
 
 import { Context } from "@azure/functions";
-import { Either } from "fp-ts/lib/Either";
+import { Either, fromOption } from "fp-ts/lib/Either";
 import { identity } from "fp-ts/lib/function";
 import { isNone, Option } from "fp-ts/lib/Option";
 import { fromEither, TaskEither, tryCatch } from "fp-ts/lib/TaskEither";
@@ -59,26 +59,30 @@ export function GetBPDTransactionsHandler(
   transactionRepository: TaskEither<Error, Repository<Transaction>>
 ): IHttpHandler {
   return async (context, requestFiscalCode) => {
-    if (isNone(requestFiscalCode)) {
-      return ResponseErrorValidation(
-        "Bad request",
-        "Missing fiscal code header"
-      );
-    }
-    return transactionRepository
-      .chain(transactions =>
-        tryCatch(
-          () => transactions.find({ fiscal_code: requestFiscalCode.value }),
-          err => {
-            context.log.error(
-              `GetBPDTransactionsHandler|ERROR|Find citizen transactions query error [${err}]`
-            );
-            return new Error("Transactions find query error");
-          }
-        )
-      )
-      .mapLeft<IResponseErrorInternal | IResponseErrorValidation>(err =>
-        ResponseErrorInternal(err.message)
+    return fromEither<
+      IResponseErrorInternal | IResponseErrorValidation,
+      FiscalCode
+    >(
+      fromOption(
+        ResponseErrorValidation("Bad request", "Missing fiscal code header")
+      )(requestFiscalCode)
+    )
+      .chain(fiscalCode =>
+        transactionRepository
+          .chain(transactions =>
+            tryCatch(
+              () => transactions.find({ fiscal_code: fiscalCode }),
+              err => {
+                context.log.error(
+                  `GetBPDTransactionsHandler|ERROR|Find citizen transactions query error [${err}]`
+                );
+                return new Error("Transactions find query error");
+              }
+            )
+          )
+          .mapLeft<IResponseErrorInternal | IResponseErrorValidation>(err =>
+            ResponseErrorInternal(err.message)
+          )
       )
       .chain(transactionsData =>
         fromEither(toApiBPDTransactionList(transactionsData)).mapLeft(err =>
@@ -89,7 +93,6 @@ export function GetBPDTransactionsHandler(
         )
       )
       .fold<
-        // tslint:disable-next-line: max-union-size
         | IResponseErrorInternal
         | IResponseErrorValidation
         | IResponseSuccessJson<BPDTransactionList>
