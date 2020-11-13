@@ -194,8 +194,7 @@ definitions:
       enabled:
         type: boolean
     required:
-      - fiscal_code
-      - aquirer_descr
+      - acquirer_descr
       - id_trx_acquirer
       - trx_timestamp
       - hpan
