@@ -110,9 +110,10 @@ definitions:
     description: A JWT token used by Support Team
   CitizenID:
     description: Fiscal Code or Support Token for Citizen Identification
-    oneOf:
-      - $ref: '#/definitions/SupportToken'
-      - $ref: '#/definitions/FiscalCode'
+    x-one-of: true
+    allOf:
+      - $ref: "#/definitions/FiscalCode"    
+      - $ref: "#/definitions/SupportToken"
 
 parameters:
   FiscalCode:
@@ -128,5 +129,6 @@ parameters:
   CitizenID:
     name: x-citizen-id
     in: header
-    type:
-      - $ref : '#/definitions/CitizenID'
+    description: The fiscal code of the user or the JWT' s support token
+    type: string
+    required: true

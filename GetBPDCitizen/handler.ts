@@ -1,16 +1,16 @@
 import * as express from "express";
 
 import { Context } from "@azure/functions";
-import { isEmpty } from "fp-ts/lib/Array";
 import { Either } from "fp-ts/lib/Either";
 import { identity } from "fp-ts/lib/function";
-import { isNone, Option } from "fp-ts/lib/Option";
 import {
   fromEither,
+  fromLeft,
   fromPredicate,
   TaskEither,
   tryCatch
 } from "fp-ts/lib/TaskEither";
+import { taskEither } from "fp-ts/lib/TaskEither";
 import { ContextMiddleware } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import {
   withRequestMiddlewares,
@@ -19,6 +19,7 @@ import {
 import * as t from "io-ts";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import {
+  IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
@@ -28,22 +29,28 @@ import {
   ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 import { Repository } from "typeorm";
 import { BPDCitizen } from "../generated/definitions/BPDCitizen";
+import { CitizenID } from "../generated/definitions/CitizenID";
 import { PaymentMethod } from "../generated/definitions/PaymentMethod";
+import { SupportToken } from "../generated/definitions/SupportToken";
 import { Citizen } from "../models/citizen";
-import { OptionalHeaderMiddleware } from "../utils/middleware/optional_header";
+import { RequiredHeaderMiddleware } from "../utils/middleware/required_header";
+import { verifySupportToken } from "../utils/token";
+
+type ResponseErrorTypes =
+  | IResponseErrorForbiddenNotAuthorized
+  | IResponseErrorNotFound
+  | IResponseErrorInternal
+  | IResponseErrorValidation;
 
 type IHttpHandler = (
   context: Context,
-  requestFiscalCode: Option<FiscalCode>
+  citizenId: CitizenID
 ) => Promise<
   // tslint:disable-next-line: max-union-size
-  | IResponseSuccessJson<BPDCitizen>
-  | IResponseErrorNotFound
-  | IResponseErrorInternal
-  | IResponseErrorValidation
+  IResponseSuccessJson<BPDCitizen> | ResponseErrorTypes
 >;
 
 // Convert model object to API object
@@ -77,36 +84,48 @@ export const toApiBPDCitizen = (
   );
 };
 
-export function GetBPDCitizenHandler(
-  citizenRepository: TaskEither<Error, Repository<Citizen>>
-): IHttpHandler {
-  return async (context, requestFiscalCode) => {
-    if (isNone(requestFiscalCode)) {
-      return ResponseErrorValidation(
-        "Bad request",
-        "Missing fiscal code header"
+const verifyCitizenId = (
+  citizenId: CitizenID,
+  publicRsaCertificate: NonEmptyString
+) =>
+  // TODO insert group check in case of a FiscalCode used by non admin users
+  SupportToken.is(citizenId)
+    ? verifySupportToken(publicRsaCertificate, citizenId)
+    : taskEither.of<IResponseErrorForbiddenNotAuthorized, FiscalCode>(
+        citizenId
       );
-    }
-    return citizenRepository
-      .chain(citizen =>
-        tryCatch(
-          () => citizen.find({ fiscal_code: requestFiscalCode.value }),
-          err => {
-            context.log.error(
-              `GetUserHandler|ERROR|Find citizen query error [${err}]`
-            );
-            return new Error("Citizen find query error");
-          }
-        )
-      )
-      .mapLeft<
-        | IResponseErrorInternal
-        | IResponseErrorNotFound
+
+export function GetBPDCitizenHandler(
+  citizenRepository: TaskEither<Error, Repository<Citizen>>,
+  publicRsaCertificate: NonEmptyString
+): IHttpHandler {
+  return async (context, citizenId) => {
+    return verifyCitizenId(citizenId, publicRsaCertificate)
+      .foldTaskEither<
+        // tslint:disable-next-line: max-union-size
+        | IResponseErrorForbiddenNotAuthorized
         | IResponseErrorValidation
-      >(err => ResponseErrorInternal(err.message))
+        | IResponseErrorInternal
+        | IResponseErrorNotFound,
+        readonly Citizen[]
+      >(fromLeft, requestFiscalCode =>
+        citizenRepository
+          .chain(citizen =>
+            tryCatch(
+              () => citizen.find({ fiscal_code: requestFiscalCode }),
+              err => {
+                context.log.error(
+                  `GetUserHandler|ERROR|Find citizen query error [${err}]`
+                );
+                return new Error("Citizen find query error");
+              }
+            )
+          )
+          .mapLeft(err => ResponseErrorInternal(err.message))
+      )
       .chain(
         fromPredicate(
-          citizenData => !isEmpty(citizenData),
+          citizenData => citizenData.length > 0,
           () => ResponseErrorNotFound("Not found", "Citizen not found")
         )
       )
@@ -118,25 +137,23 @@ export function GetBPDCitizenHandler(
           )
         )
       )
-      .fold<
-        // tslint:disable-next-line: max-union-size
-        | IResponseErrorInternal
-        | IResponseErrorNotFound
-        | IResponseErrorValidation
-        | IResponseSuccessJson<BPDCitizen>
-      >(identity, ResponseSuccessJson)
+      .fold<ResponseErrorTypes | IResponseSuccessJson<BPDCitizen>>(
+        identity,
+        ResponseSuccessJson
+      )
       .run();
   };
 }
 
 export function GetBPDCitizen(
-  citizenRepository: TaskEither<Error, Repository<Citizen>>
+  citizenRepository: TaskEither<Error, Repository<Citizen>>,
+  publicRsaCertificate: NonEmptyString
 ): express.RequestHandler {
-  const handler = GetBPDCitizenHandler(citizenRepository);
+  const handler = GetBPDCitizenHandler(citizenRepository, publicRsaCertificate);
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
-    OptionalHeaderMiddleware("x-citizen-fiscal-code", FiscalCode)
+    RequiredHeaderMiddleware("x-citizen-id", CitizenID)
   );
 
   return wrapRequestHandler(middlewaresWrap(handler));
