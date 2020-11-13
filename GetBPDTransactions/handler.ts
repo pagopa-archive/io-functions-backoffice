@@ -1,9 +1,10 @@
 import * as express from "express";
 
 import { Context } from "@azure/functions";
-import { Either, isLeft } from "fp-ts/lib/Either";
+import { Either } from "fp-ts/lib/Either";
+import { identity } from "fp-ts/lib/function";
 import { isNone, Option } from "fp-ts/lib/Option";
-import { TaskEither, tryCatch } from "fp-ts/lib/TaskEither";
+import { fromEither, TaskEither, tryCatch } from "fp-ts/lib/TaskEither";
 import { ContextMiddleware } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import {
   withRequestMiddlewares,
@@ -64,7 +65,7 @@ export function GetBPDTransactionsHandler(
         "Missing fiscal code header"
       );
     }
-    const errorOrTransactionsData = await transactionRepository
+    return transactionRepository
       .chain(transactions =>
         tryCatch(
           () => transactions.find({ fiscal_code: requestFiscalCode.value }),
@@ -76,20 +77,24 @@ export function GetBPDTransactionsHandler(
           }
         )
       )
+      .mapLeft<IResponseErrorInternal | IResponseErrorValidation>(err =>
+        ResponseErrorInternal(err.message)
+      )
+      .chain(transactionsData =>
+        fromEither(toApiBPDTransactionList(transactionsData)).mapLeft(err =>
+          ResponseErrorValidation(
+            "Invalid BPDTransactionList object",
+            readableReport(err)
+          )
+        )
+      )
+      .fold<
+        // tslint:disable-next-line: max-union-size
+        | IResponseErrorInternal
+        | IResponseErrorValidation
+        | IResponseSuccessJson<BPDTransactionList>
+      >(identity, ResponseSuccessJson)
       .run();
-    if (isLeft(errorOrTransactionsData)) {
-      return ResponseErrorInternal(errorOrTransactionsData.value.message);
-    }
-    return toApiBPDTransactionList(errorOrTransactionsData.value).fold<
-      IResponseErrorValidation | IResponseSuccessJson<BPDTransactionList>
-    >(
-      err =>
-        ResponseErrorValidation(
-          "Invalid BPDCitizen object",
-          readableReport(err)
-        ),
-      bpdTransactionList => ResponseSuccessJson(bpdTransactionList)
-    );
   };
 }
 
