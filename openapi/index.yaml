@@ -16,7 +16,7 @@ schemes:
 paths:
   "/bpd/citizen":
     parameters:
-      - $ref: "#/parameters/FiscalCode"
+      - $ref: "#/parameters/CitizenID"
     get:
       operationId: GetBPDCitizen
       summary: Get BPD Citizen info
@@ -104,6 +104,16 @@ definitions:
     required:
       - payment_instrument_hpan
       - payment_instrument_status
+  SupportToken:
+    type: string
+    pattern: "^\\w{1,}\\.\\w{1,}\\.\\w{1,}$"
+    description: A JWT token used by Support Team
+  CitizenID:
+    description: Fiscal Code or Support Token for Citizen Identification
+    oneOf:
+      - $ref: '#/definitions/SupportToken'
+      - $ref: '#/definitions/FiscalCode'
+
 parameters:
   FiscalCode:
     name: x-citizen-fiscal-code
@@ -115,3 +125,8 @@ parameters:
     description: The fiscal code of the user, all upper case.
     pattern: "[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]"
     x-example: SPNDNL80R13C555X
+  CitizenID:
+    name: x-citizen-id
+    in: header
+    type:
+      - $ref : '#/definitions/CitizenID'
