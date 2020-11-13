@@ -1,4 +1,11 @@
-import { taskEither, TaskEither, tryCatch } from "fp-ts/lib/TaskEither";
+import { fromNullable } from "fp-ts/lib/Either";
+import {
+  fromEither,
+  fromPredicate,
+  taskEither,
+  TaskEither,
+  tryCatch
+} from "fp-ts/lib/TaskEither";
 import {
   Connection,
   createConnection,
@@ -21,34 +28,52 @@ export interface IPostgresConnectionParams {
 export function getConnection(
   params: IPostgresConnectionParams
 ): TaskEither<Error, Connection> {
-  // Use an existing connection inside the connection manager.
-  const maybeActiveConnection = getConnectionManager().connections[0];
-  if (maybeActiveConnection && maybeActiveConnection.isConnected) {
-    return taskEither.of(maybeActiveConnection);
-  }
-  if (maybeActiveConnection) {
-    // If the existing connection is disconnected
-    // we perform a reconnection and return it
-    return tryCatch(
-      () => maybeActiveConnection.connect(),
-      err => new Error(`Error during postgres re-connection [err:${err}]`)
-    );
-  }
   return tryCatch(
-    () =>
-      createConnection({
-        database: params.database,
-        entities: [Citizen, Transaction],
-        host: params.host,
-        password: params.password,
-        port: params.port,
-        schema: params.schema,
-        ssl: true,
-        type: "postgres",
-        username: params.username
-      }),
-    err => new Error(`Error during postgres connection [err:${err}]`)
-  );
+    async () => getConnectionManager(),
+    () => Error("Error loading connection manager")
+  )
+    .chain(_ =>
+      fromEither(
+        fromNullable(new Error("Connection pool empty"))(
+          _.connections[0] as Connection | undefined
+        )
+      )
+    )
+    .foldTaskEither(
+      _ =>
+        // The connection pool is empty a new connection will be created.
+        tryCatch(
+          () =>
+            createConnection({
+              database: params.database,
+              entities: [Citizen, Transaction],
+              host: params.host,
+              password: params.password,
+              port: params.port,
+              schema: params.schema,
+              ssl: true,
+              type: "postgres",
+              username: params.username
+            }),
+          err => new Error(`Error during postgres connection [err:${err}]`)
+        ),
+      _ => taskEither.of(_)
+    )
+    .chain(_ =>
+      // forward the connection from the connection pool if is connected.
+      fromPredicate<Error, Connection>(
+        connection => connection.isConnected,
+        () => new Error("Connection is disconnected")
+      )(_).foldTaskEither(
+        () =>
+          // if the connection from the connection pool is disconneted try to reconnect
+          tryCatch(
+            () => _.connect(),
+            err => new Error(`Error during postgres re-connection [err:${err}]`)
+          ),
+        connection => taskEither.of(connection)
+      )
+    );
 }
 
 export function getRepository<T>(
