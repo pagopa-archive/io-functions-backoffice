@@ -1,3 +1,5 @@
+import { Context } from "@azure/functions";
+
 export const mockStartNew = jest.fn();
 
 export const getClient = jest.fn(() => ({
@@ -7,3 +9,17 @@ export const getClient = jest.fn(() => ({
 export const orchestrator = jest.fn();
 
 export const RetryOptions = jest.fn(() => ({}));
+
+export const context = ({
+  bindings: {},
+  log: {
+    // tslint:disable-next-line: no-console
+    error: jest.fn().mockImplementation(console.log),
+    // tslint:disable-next-line: no-console
+    info: jest.fn().mockImplementation(console.log),
+    // tslint:disable-next-line: no-console
+    verbose: jest.fn().mockImplementation(console.log),
+    // tslint:disable-next-line: no-console
+    warn: jest.fn().mockImplementation(console.log)
+  }
+} as unknown) as Context;

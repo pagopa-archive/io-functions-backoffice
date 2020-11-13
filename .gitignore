@@ -53,5 +53,7 @@ generated
 !jest.config.js
 !.release-it.js
 
+.DS_Store
+
 
 azure-functions-core-tools

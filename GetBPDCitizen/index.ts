@@ -7,35 +7,22 @@ import { AzureContextTransport } from "io-functions-commons/dist/src/utils/loggi
 import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
-import { DocumentClient as DocumentDBClient } from "documentdb";
-import {
-  SERVICE_COLLECTION_NAME,
-  ServiceModel
-} from "io-functions-commons/dist/src/models/service";
-import * as documentDbUtils from "io-functions-commons/dist/src/utils/documentdb";
-import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
+import { Citizen } from "../models/citizen";
+import { getRepository, IPostgresConnectionParams } from "../utils/database";
+import { GetBPDCitizen } from "./handler";
 
-import { HttpCtrl } from "./handler";
+import { getConfigOrThrow } from "../utils/config";
 
-//
-//  CosmosDB initialization
-//
+const config = getConfigOrThrow();
 
-const cosmosDbUri = getRequiredStringEnv("CUSTOMCONNSTR_COSMOSDB_URI");
-const cosmosDbKey = getRequiredStringEnv("CUSTOMCONNSTR_COSMOSDB_KEY");
-const cosmosDbName = getRequiredStringEnv("COSMOSDB_NAME");
-
-const documentDbDatabaseUrl = documentDbUtils.getDatabaseUri(cosmosDbName);
-const servicesCollectionUrl = documentDbUtils.getCollectionUri(
-  documentDbDatabaseUrl,
-  SERVICE_COLLECTION_NAME
-);
-
-const documentClient = new DocumentDBClient(cosmosDbUri, {
-  masterKey: cosmosDbKey
-});
-
-const serviceModel = new ServiceModel(documentClient, servicesCollectionUrl);
+const postgresConfig: IPostgresConnectionParams = {
+  database: config.POSTGRES_DB_NAME,
+  host: config.POSTGRES_HOSTNAME,
+  password: config.POSTGRES_PASSWORD,
+  port: config.POSTGRES_PORT,
+  schema: config.POSTGRES_SCHEMA,
+  username: config.POSTGRES_USERNAME
+};
 
 // tslint:disable-next-line: no-let
 let logger: Context["log"] | undefined;
@@ -49,7 +36,10 @@ const app = express();
 secureExpressApp(app);
 
 // Add express route
-app.get("/some/path/:someParam", HttpCtrl(serviceModel));
+app.get(
+  "/api/v1/bpd/citizen",
+  GetBPDCitizen(getRepository(postgresConfig, Citizen))
+);
 
 const azureFunctionHandler = createAzureFunctionHandler(app);
 
