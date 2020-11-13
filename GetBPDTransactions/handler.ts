@@ -3,7 +3,7 @@ import * as express from "express";
 import { Context } from "@azure/functions";
 import { Either, fromOption } from "fp-ts/lib/Either";
 import { identity } from "fp-ts/lib/function";
-import { isNone, Option } from "fp-ts/lib/Option";
+import { Option } from "fp-ts/lib/Option";
 import { fromEither, TaskEither, tryCatch } from "fp-ts/lib/TaskEither";
 import { ContextMiddleware } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import {
