@@ -25,8 +25,9 @@ TuJDDBC1kbs6SGpqbMjnHk4hUXeSlxbvuksmnwEzmT7u9jYlCj5Zjmr+pBLKBoTk
 FmprTzaax++spskX3QIDAQAB
 -----END PUBLIC KEY-----` as NonEmptyString;
 
-const aSupportToken = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJmaXNjYWxDb2RlIjoiQUFBQkJCMDFDMDJEMzQ1RCIsImlhdCI6MTYwNTM2ODYwMywiZXhwIjoxNjA1OTczNDAzLCJpc3MiOiJpby1iYWNrZW5kIiwianRpIjoiMDFFUTNQU1MxUVZXTTdRQjNERldNM0YxRkIifQ.BNr5rQRXiC9U0ZLM_RfGX7ad9467OQ5bzMC8DFp-vb5O4seVzJMu1ejRl2kHoqw8Wa2sepMZj30wpDwW4g3QDDj7pqqsjxNt1ikrNET6avWsaOy2n7b-w__gl37IE_519k9FPDTJQW3I3wPo8AhW4iibDMAU-iBzGNo7sFRBHeg` as SupportToken;
-const anInvalidSupportToken = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJmaXNjYWxDb2RlIjoiQUFBQkJCMDFDMDJEMzQ1RCIsImlhdCI6MTYwNTM2ODYwMywiZXhwIjoxNjA1OTczNDAzLCJpc3MiOiJpby1iYWNrZW5kIiwianRpIjoiMDFFUTNQU1MxUVZXTTdRQjNERldNM0YxRkIifQ.BNr5rQRXiC9U0ZLM_RfGX7ad9467OQ5bzMC8DFp-vb5O4seVzJMu1ejRl2kHoqw8Wa2sepMZj30wpDwW4g3QDDj7pqqsjxNt1ikrNET6avWsaOy2n7b-w__gl37IE_529k9FPATJQW3I3wPo8AhW4iibDMAU-iBzGNo7sFRBHeg` as SupportToken;
+const aSupportToken = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJmaXNjYWxDb2RlIjoiQUFBQkJCMDFDMDJEMzQ1RCIsImlhdCI6MTYwNTU0NzU3NywiZXhwIjo4NTE3NTQ3NTc3LCJpc3MiOiJpby1iYWNrZW5kIiwianRpIjoiMDFFUTkxRk1NMTg4WUJNQks3WEZCRzdZQUoifQ.jvj2JEtxHhyFZJbzdeFfymyEEOhD4FPBm2wjNwStWMFqbD8B8CuKEAN_fl6tBrASdI0ZW2XfQujP_TejMFiAjvf696FZKUIyIJo58iOb0nfyRwTCCWUYuyFgkvVMnuMSo47rzp7LUSYx8VUaqz5pJLK3p8w9C6Q-yxrvxGJOZ6M` as SupportToken;
+const anInvalidSupportToken = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJmaXNjYWxDb2RlIjoiQUFBQkJCMDFDMDJEMzQ1RCIsImlhdCI6MTYwNTU0NzYzOCwiZXhwIjoxNjA1NTQ3NjM5LCJpc3MiOiJpby1iYWNrZW5kIiwianRpIjoiMDFFUTkxSEZaTUdGWkdFODUzTlg0TjIwTjYifQ.ENAJhnQB19jUKDYXyvf9LIps9tsRMGUIhsYKyBx8KQbhytKBzRBYaCskuvkHQbEE-CdK2kD66RoQIeg3-ulgA6uFe1aPrsAVS9sbxHKaz_xgHbB6MmyPiRYF9vuv-HsiVHLcL-XNOtczDmGdAsBz-uugeMkk2BjXqR2hf7hgP5Y` as SupportToken;
+const anotherInvalidSupportToken = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJmaXNjYWxDb2RlIjoiQUFBQkJCMDFDIiwiaWF0IjoxNjA1NTQ3NDYwLCJleHAiOjg1MTc1NDc0NjAsImlzcyI6ImlvLWJhY2tlbmQiLCJqdGkiOiIwMUVROTFDMVZGUUZSSlIwSzJBMEI4Q1o2UyJ9.j0OD1IDJFOqj3Hhh0t6m97RIS5Jgg7gMEWI35JIgxaUcPYwg77lp08njjdyDe88xkTpaMyXRN08EVvVdgcQTgGUrP2EV4SpSkFKWxQbNzdZqNEpRghTCjgxgQARml8CyU6pMn-c_baXKJsiEyWq5TpCGUAbhUQZVkV3liywTSr8` as SupportToken;
 
 const aSuccessCase = (citizenId: CitizenID) =>
   jest.fn(async () => {
@@ -120,5 +121,15 @@ describe("GetBPDCitizenHandler", () => {
     const response = await handler(context, anInvalidSupportToken);
 
     expect(response.kind).toBe("IResponseErrorForbiddenNotAuthorized");
+  });
+
+  it("should return a validation error if the support token contains an invalid FiscalCode", async () => {
+    mockFind.mockImplementationOnce(async () => {
+      return [];
+    });
+    const handler = GetBPDCitizenHandler(mockCitizenRepository, aPublicRsaCert);
+    const response = await handler(context, anotherInvalidSupportToken);
+
+    expect(response.kind).toBe("IResponseErrorValidation");
   });
 });
