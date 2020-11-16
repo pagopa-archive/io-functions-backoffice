@@ -45,10 +45,7 @@ type ResponseErrorTypes =
 type IHttpHandler = (
   context: Context,
   citizenId: CitizenID
-) => Promise<
-  // tslint:disable-next-line: max-union-size
-  IResponseSuccessJson<BPDCitizen> | ResponseErrorTypes
->;
+) => Promise<IResponseSuccessJson<BPDCitizen> | ResponseErrorTypes>;
 
 // Convert model object to API object
 export const toApiBPDCitizen = (
