@@ -3,7 +3,7 @@
 import { none, some } from "fp-ts/lib/Option";
 import { taskEither } from "fp-ts/lib/TaskEither";
 import { IResponseSuccessJson } from "italia-ts-commons/lib/responses";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 import { Repository } from "typeorm";
 import { context } from "../../__mocks__/durable-functions";
 import { BPDTransactionList } from "../../generated/definitions/BPDTransactionList";
@@ -18,6 +18,12 @@ const mockTransactionRepository = taskEither.of<Error, Repository<Transaction>>(
 );
 
 const aFiscalCode = "AAABBB01C02D345D" as FiscalCode;
+const aPublicRsaCert = `-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCc3FR1mjQDrhvaDF8UpdtQQknh
+MAyxT1o6eCwWIiF+ZHsnnnn8XI++V11+uqSlRlh9gamt4XKqc8/4vKTKzxBYJPV/
+TuJDDBC1kbs6SGpqbMjnHk4hUXeSlxbvuksmnwEzmT7u9jYlCj5Zjmr+pBLKBoTk
+FmprTzaax++spskX3QIDAQAB
+-----END PUBLIC KEY-----` as NonEmptyString;
 const anAcquirer = "Acquirer1";
 const aTimestamp = new Date();
 
@@ -44,8 +50,11 @@ describe("GetBPDTransactionsHandler", () => {
         // tslint:disable-next-line: readonly-array
       ] as Transaction[];
     });
-    const handler = GetBPDTransactionsHandler(mockTransactionRepository);
-    const response = await handler(context, some(aFiscalCode));
+    const handler = GetBPDTransactionsHandler(
+      mockTransactionRepository,
+      aPublicRsaCert
+    );
+    const response = await handler(context, aFiscalCode);
 
     expect(response.kind).toBe("IResponseSuccessJson");
     const responseValue = (response as IResponseSuccessJson<BPDTransactionList>)
@@ -60,8 +69,11 @@ describe("GetBPDTransactionsHandler", () => {
     mockFind.mockImplementationOnce(async () => {
       return [];
     });
-    const handler = GetBPDTransactionsHandler(mockTransactionRepository);
-    const response = await handler(context, some(aFiscalCode));
+    const handler = GetBPDTransactionsHandler(
+      mockTransactionRepository,
+      aPublicRsaCert
+    );
+    const response = await handler(context, aFiscalCode);
 
     expect(response.kind).toBe("IResponseSuccessJson");
     const responseValue = (response as IResponseSuccessJson<BPDTransactionList>)
@@ -77,18 +89,14 @@ describe("GetBPDTransactionsHandler", () => {
     mockFind.mockImplementationOnce(() => {
       return Promise.reject(expectedError);
     });
-    const handler = GetBPDTransactionsHandler(mockTransactionRepository);
-    const response = await handler(context, some(aFiscalCode));
+    const handler = GetBPDTransactionsHandler(
+      mockTransactionRepository,
+      aPublicRsaCert
+    );
+    const response = await handler(context, aFiscalCode);
 
     expect(context.log.error).toBeCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorInternal");
-  });
-
-  it("should return a validation error if the fiscal code is missing in header", async () => {
-    const handler = GetBPDTransactionsHandler(mockTransactionRepository);
-    const response = await handler(context, none);
-
-    expect(response.kind).toBe("IResponseErrorValidation");
   });
 
   it("should return a validation error if the response decode fail", async () => {
@@ -102,8 +110,11 @@ describe("GetBPDTransactionsHandler", () => {
         }
       ];
     });
-    const handler = GetBPDTransactionsHandler(mockTransactionRepository);
-    const response = await handler(context, some(aFiscalCode));
+    const handler = GetBPDTransactionsHandler(
+      mockTransactionRepository,
+      aPublicRsaCert
+    );
+    const response = await handler(context, aFiscalCode);
 
     expect(response.kind).toBe("IResponseErrorValidation");
   });

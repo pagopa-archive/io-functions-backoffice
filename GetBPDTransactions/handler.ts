@@ -1,9 +1,8 @@
 import * as express from "express";
 
 import { Context } from "@azure/functions";
-import { Either, fromOption } from "fp-ts/lib/Either";
+import { Either } from "fp-ts/lib/Either";
 import { identity } from "fp-ts/lib/function";
-import { Option } from "fp-ts/lib/Option";
 import { fromEither, TaskEither, tryCatch } from "fp-ts/lib/TaskEither";
 import { ContextMiddleware } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import {
@@ -13,6 +12,7 @@ import {
 import * as t from "io-ts";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import {
+  IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorValidation,
@@ -21,23 +21,25 @@ import {
   ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { Repository } from "typeorm";
 import { BPDTransaction } from "../generated/definitions/BPDTransaction";
 import { BPDTransactionList } from "../generated/definitions/BPDTransactionList";
+import { CitizenID } from "../generated/definitions/CitizenID";
 import { Transaction } from "../models/transaction";
-import { OptionalHeaderMiddleware } from "../utils/middleware/optional_header";
+import { withCitizenIdCheck } from "../utils/citizen_id";
+import { RequiredHeaderMiddleware } from "../utils/middleware/required_header";
+
+type ErrorTypes =
+  | IResponseErrorForbiddenNotAuthorized
+  | IResponseErrorNotFound
+  | IResponseErrorInternal
+  | IResponseErrorValidation;
 
 type IHttpHandler = (
   context: Context,
-  requestFiscalCode: Option<FiscalCode>
-) => Promise<
-  // tslint:disable-next-line: max-union-size
-  | IResponseSuccessJson<BPDTransactionList>
-  | IResponseErrorNotFound
-  | IResponseErrorInternal
-  | IResponseErrorValidation
->;
+  citizenId: CitizenID
+) => Promise<IResponseSuccessJson<BPDTransactionList> | ErrorTypes>;
 
 // Convert model object to API object
 export const toApiBPDTransactionList = (
@@ -56,59 +58,55 @@ export const toApiBPDTransactionList = (
 };
 
 export function GetBPDTransactionsHandler(
-  transactionRepository: TaskEither<Error, Repository<Transaction>>
+  transactionRepository: TaskEither<Error, Repository<Transaction>>,
+  publicRsaCertificate: NonEmptyString
 ): IHttpHandler {
-  return async (context, requestFiscalCode) => {
-    return fromEither<
-      IResponseErrorInternal | IResponseErrorValidation,
-      FiscalCode
-    >(
-      fromOption(
-        ResponseErrorValidation("Bad request", "Missing fiscal code header")
-      )(requestFiscalCode)
-    )
-      .chain(fiscalCode =>
-        transactionRepository
-          .chain(transactions =>
-            tryCatch(
-              () => transactions.find({ fiscal_code: fiscalCode }),
-              err => {
-                context.log.error(
-                  `GetBPDTransactionsHandler|ERROR|Find citizen transactions query error [${err}]`
-                );
-                return new Error("Transactions find query error");
-              }
-            )
-          )
-          .mapLeft<IResponseErrorInternal | IResponseErrorValidation>(err =>
-            ResponseErrorInternal(err.message)
-          )
-      )
-      .chain(transactionsData =>
-        fromEither(toApiBPDTransactionList(transactionsData)).mapLeft(err =>
-          ResponseErrorValidation(
-            "Invalid BPDTransactionList object",
-            readableReport(err)
+  return async (context, citizenId) => {
+    return withCitizenIdCheck(citizenId, publicRsaCertificate, fiscalCode =>
+      transactionRepository
+        .chain(transactions =>
+          tryCatch(
+            () => transactions.find({ fiscal_code: fiscalCode }),
+            err => {
+              context.log.error(
+                `GetBPDTransactionsHandler|ERROR|Find citizen transactions query error [${err}]`
+              );
+              return new Error("Transactions find query error");
+            }
           )
         )
+        .mapLeft<IResponseErrorInternal | IResponseErrorValidation>(err =>
+          ResponseErrorInternal(err.message)
+        )
+        .chain(transactionsData =>
+          fromEither(toApiBPDTransactionList(transactionsData)).mapLeft(err =>
+            ResponseErrorValidation(
+              "Invalid BPDTransactionList object",
+              readableReport(err)
+            )
+          )
+        )
+    )
+      .fold<ErrorTypes | IResponseSuccessJson<BPDTransactionList>>(
+        identity,
+        ResponseSuccessJson
       )
-      .fold<
-        | IResponseErrorInternal
-        | IResponseErrorValidation
-        | IResponseSuccessJson<BPDTransactionList>
-      >(identity, ResponseSuccessJson)
       .run();
   };
 }
 
 export function GetBPDTransactions(
-  citizenRepository: TaskEither<Error, Repository<Transaction>>
+  citizenRepository: TaskEither<Error, Repository<Transaction>>,
+  publicRsaCertificate: NonEmptyString
 ): express.RequestHandler {
-  const handler = GetBPDTransactionsHandler(citizenRepository);
+  const handler = GetBPDTransactionsHandler(
+    citizenRepository,
+    publicRsaCertificate
+  );
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
-    OptionalHeaderMiddleware("x-citizen-fiscal-code", FiscalCode)
+    RequiredHeaderMiddleware("x-citizen-id", CitizenID)
   );
 
   return wrapRequestHandler(middlewaresWrap(handler));

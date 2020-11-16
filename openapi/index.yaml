@@ -53,7 +53,7 @@ paths:
             $ref: "#/definitions/ProblemJson"
   "/bpd/transactions":
     parameters:
-        - $ref: "#/parameters/FiscalCode"
+        - $ref: "#/parameters/CitizenID"
     get:
       operationId: GetBPDTransactions
       summary: Get BPD transactions info list
