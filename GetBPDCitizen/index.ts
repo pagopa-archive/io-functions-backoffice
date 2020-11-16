@@ -38,7 +38,10 @@ secureExpressApp(app);
 // Add express route
 app.get(
   "/api/v1/bpd/citizen",
-  GetBPDCitizen(getRepository(postgresConfig, Citizen))
+  GetBPDCitizen(
+    getRepository(postgresConfig, Citizen),
+    config.JWT_SUPPORT_TOKEN_PUBLIC_RSA_CERTIFICATE
+  )
 );
 
 const azureFunctionHandler = createAzureFunctionHandler(app);

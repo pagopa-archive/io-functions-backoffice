@@ -5,12 +5,10 @@ import { Either } from "fp-ts/lib/Either";
 import { identity } from "fp-ts/lib/function";
 import {
   fromEither,
-  fromLeft,
   fromPredicate,
   TaskEither,
   tryCatch
 } from "fp-ts/lib/TaskEither";
-import { taskEither } from "fp-ts/lib/TaskEither";
 import { ContextMiddleware } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import {
   withRequestMiddlewares,
@@ -29,15 +27,14 @@ import {
   ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { Repository } from "typeorm";
 import { BPDCitizen } from "../generated/definitions/BPDCitizen";
 import { CitizenID } from "../generated/definitions/CitizenID";
 import { PaymentMethod } from "../generated/definitions/PaymentMethod";
-import { SupportToken } from "../generated/definitions/SupportToken";
 import { Citizen } from "../models/citizen";
+import { withCitizenIdCheck } from "../utils/citizen_id";
 import { RequiredHeaderMiddleware } from "../utils/middleware/required_header";
-import { verifySupportToken } from "../utils/token";
 
 type ResponseErrorTypes =
   | IResponseErrorForbiddenNotAuthorized
@@ -84,31 +81,15 @@ export const toApiBPDCitizen = (
   );
 };
 
-const verifyCitizenId = (
-  citizenId: CitizenID,
-  publicRsaCertificate: NonEmptyString
-) =>
-  // TODO insert group check in case of a FiscalCode used by non admin users
-  SupportToken.is(citizenId)
-    ? verifySupportToken(publicRsaCertificate, citizenId)
-    : taskEither.of<IResponseErrorForbiddenNotAuthorized, FiscalCode>(
-        citizenId
-      );
-
 export function GetBPDCitizenHandler(
   citizenRepository: TaskEither<Error, Repository<Citizen>>,
   publicRsaCertificate: NonEmptyString
 ): IHttpHandler {
   return async (context, citizenId) => {
-    return verifyCitizenId(citizenId, publicRsaCertificate)
-      .foldTaskEither<
-        // tslint:disable-next-line: max-union-size
-        | IResponseErrorForbiddenNotAuthorized
-        | IResponseErrorValidation
-        | IResponseErrorInternal
-        | IResponseErrorNotFound,
-        readonly Citizen[]
-      >(fromLeft, requestFiscalCode =>
+    return withCitizenIdCheck(
+      citizenId,
+      publicRsaCertificate,
+      async requestFiscalCode =>
         citizenRepository
           .chain(citizen =>
             tryCatch(
@@ -121,27 +102,31 @@ export function GetBPDCitizenHandler(
               }
             )
           )
-          .mapLeft(err => ResponseErrorInternal(err.message))
-      )
-      .chain(
-        fromPredicate(
-          citizenData => citizenData.length > 0,
-          () => ResponseErrorNotFound("Not found", "Citizen not found")
-        )
-      )
-      .chain(citizenData =>
-        fromEither(toApiBPDCitizen(citizenData)).mapLeft(err =>
-          ResponseErrorValidation(
-            "Invalid BPDCitizen object",
-            readableReport(err)
+          .mapLeft<
+            | IResponseErrorInternal
+            | IResponseErrorNotFound
+            | IResponseErrorValidation
+          >(err => ResponseErrorInternal(err.message))
+          .chain(
+            fromPredicate(
+              citizenData => citizenData.length > 0,
+              () => ResponseErrorNotFound("Not found", "Citizen not found")
+            )
           )
-        )
-      )
-      .fold<ResponseErrorTypes | IResponseSuccessJson<BPDCitizen>>(
-        identity,
-        ResponseSuccessJson
-      )
-      .run();
+          .chain(citizenData =>
+            fromEither(toApiBPDCitizen(citizenData)).mapLeft(err =>
+              ResponseErrorValidation(
+                "Invalid BPDCitizen object",
+                readableReport(err)
+              )
+            )
+          )
+          .fold<ResponseErrorTypes | IResponseSuccessJson<BPDCitizen>>(
+            identity,
+            ResponseSuccessJson
+          )
+          .run()
+    );
   };
 }
 
