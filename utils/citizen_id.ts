@@ -1,4 +1,4 @@
-import { identity } from "fp-ts/lib/function";
+import { TaskEither } from "fp-ts/lib/TaskEither";
 import { fromEither, fromLeft } from "fp-ts/lib/TaskEither";
 import { taskEither } from "fp-ts/lib/TaskEither";
 import { taskify } from "fp-ts/lib/TaskEither";
@@ -20,11 +20,13 @@ const TokenPayload = t.interface({
 
 type TokenPayload = t.TypeOf<typeof TokenPayload>;
 
-type CitizenIDCheckReturnType =
-  | IResponseErrorForbiddenNotAuthorized
-  | IResponseErrorValidation;
-
-const verifySupportToken = (pubCert: NonEmptyString, token: SupportToken) =>
+const verifySupportToken = (
+  pubCert: NonEmptyString,
+  token: SupportToken
+): TaskEither<
+  IResponseErrorForbiddenNotAuthorized | IResponseErrorValidation,
+  FiscalCode
+> =>
   taskify<jwt.VerifyErrors, object>(cb =>
     jwt.verify(token, pubCert, { algorithms: ["RS256"] }, cb)
   )()
@@ -43,19 +45,17 @@ const verifySupportToken = (pubCert: NonEmptyString, token: SupportToken) =>
       )
     );
 
-export const withCitizenIdCheck = async <T>(
+export const withCitizenIdCheck = <T, S>(
   citizenId: CitizenID,
   publicRsaCertificate: NonEmptyString,
-  f: (fiscalCode: FiscalCode) => Promise<T>
+  f: (fiscalCode: FiscalCode) => TaskEither<T, S>
 ) =>
   // TODO insert group check in case of FiscalCode used by non admin users
   FiscalCode.is(citizenId)
     ? taskEither
-        .of<IResponseErrorForbiddenNotAuthorized, FiscalCode>(citizenId)
-        .map(_ => f(_))
-        .fold<CitizenIDCheckReturnType | Promise<T>>(identity, identity)
-        .run()
-    : verifySupportToken(publicRsaCertificate, citizenId)
-        .map(_ => f(_))
-        .fold<CitizenIDCheckReturnType | Promise<T>>(identity, identity)
-        .run();
+        .of<IResponseErrorForbiddenNotAuthorized | T, FiscalCode>(citizenId)
+        .chain(_ => f(_))
+    : verifySupportToken(publicRsaCertificate, citizenId).foldTaskEither<
+        T | IResponseErrorForbiddenNotAuthorized | IResponseErrorValidation,
+        S
+      >(fromLeft, _ => f(_));

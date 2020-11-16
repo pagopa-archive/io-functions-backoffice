@@ -89,7 +89,7 @@ export function GetBPDCitizenHandler(
     return withCitizenIdCheck(
       citizenId,
       publicRsaCertificate,
-      async requestFiscalCode =>
+      requestFiscalCode =>
         citizenRepository
           .chain(citizen =>
             tryCatch(
@@ -121,12 +121,13 @@ export function GetBPDCitizenHandler(
               )
             )
           )
-          .fold<ResponseErrorTypes | IResponseSuccessJson<BPDCitizen>>(
-            identity,
-            ResponseSuccessJson
-          )
-          .run()
-    );
+          .map(ResponseSuccessJson)
+    )
+      .fold<ResponseErrorTypes | IResponseSuccessJson<BPDCitizen>>(
+        identity,
+        identity
+      )
+      .run();
   };
 }
 
