@@ -23,7 +23,7 @@ SET default_table_access_method = heap;
 --
 -- Reset database drop table and views if exists
 --
-DROP VIEW IF EXISTS public.citizen_profile, public.transaction;
+DROP VIEW IF EXISTS public.v_bpd_citizen, public.v_bpd_winning_transaction;
 DROP TABLE IF EXISTS public.bpd_citizen, public.bpd_payment_instrument, public.bpd_winning_transaction;
 
 --
@@ -98,71 +98,67 @@ CREATE TABLE public.bpd_winning_transaction (
 ALTER TABLE public.bpd_winning_transaction OWNER TO testuser;
 
 --
--- Name: citizen_profile; Type: VIEW; Schema: public; Owner: testuser
+-- Name: v_bpd_citizen; Type: VIEW; Schema: public; Owner: testuser
 --
 
-CREATE VIEW public.citizen_profile AS
- SELECT a.fiscal_code_s AS fiscal_code,
-    a.enabled_b AS citizen_enabled,
-    a.timestamp_tc_t AS timestamp_tc,
-    a.payoff_instr_s AS pay_off_instr,
-    a.payoff_instr_type_c AS pay_off_instr_type_id,
-    a.insert_date_t AS onboarding_date,
-    a.update_date_t AS update_date,
-    a.insert_user_s AS onboarding_issuer_id,
-    a.update_user_s AS update_user,
-    b.insert_date_t AS payment_instrument_insert_date,
-    b.update_date_t AS payment_instrument_update_date,
-    b.insert_user_s AS payment_instrument_insert_user,
-    b.update_user_s AS payment_instrument_update_user,
-    b.hpan_s AS payment_instrument_hpan,
-    b.enabled_b AS payment_instrument_enabled,
-    b.status_c AS payment_instrument_status
-   FROM (public.bpd_citizen a
-     LEFT JOIN public.bpd_payment_instrument b ON (((a.fiscal_code_s)::text = (b.fiscal_code_s)::text)));
+CREATE VIEW public.v_bpd_citizen AS
+ SELECT cit.fiscal_code_s,
+    cit.enabled_b,
+    cit.payoff_instr_s,
+    cit.payoff_instr_type_c,
+    cit.timestamp_tc_t,
+    bpi.hpan_s,
+    bpi.status_c,
+    cit.insert_date_t AS ctz_insert_date_t,
+    cit.insert_user_s AS ctz_insert_user_s,
+    cit.update_date_t AS ctz_update_date_t,
+    cit.update_user_s AS ctz_update_user_s,
+    bpi.insert_date_t AS pay_istr_insert_date_t,
+    bpi.insert_user_s AS pay_istr_insert_user_s,
+    bpi.update_date_t AS pay_istr_update_date_t,
+    bpi.update_user_s AS pay_istr_update_user_s
+   FROM (public.bpd_citizen cit
+     LEFT JOIN public.bpd_payment_instrument bpi ON (((cit.fiscal_code_s)::text = (bpi.fiscal_code_s)::text)));
 
 
-ALTER TABLE public.citizen_profile OWNER TO testuser;
+ALTER TABLE public.v_bpd_citizen OWNER TO testuser;
 
 --
--- Name: transaction; Type: VIEW; Schema: public; Owner: testuser
+-- Name: v_bpd_winning_transaction; Type: VIEW; Schema: public; Owner: testuser
 --
 
-CREATE VIEW public.transaction AS
- SELECT bpd_payment_instrument.fiscal_code_s AS fiscal_code,
-    bpd_winning_transaction.hpan_s AS hpan,
-    bpd_winning_transaction.trx_timestamp_t AS trx_timestamp,
-    bpd_winning_transaction.acquirer_id_s AS acquirer_id,
-    bpd_winning_transaction.acquirer_c AS acquirer_descr,
-    bpd_winning_transaction.id_trx_acquirer_s AS id_trx_acquirer,
-    bpd_winning_transaction.id_trx_issuer_s AS id_trx_issuer,
-    bpd_winning_transaction.operation_type_c AS operation_type_id,
-    bpd_winning_transaction.operation_type_c AS operation_type_descr,
-    bpd_winning_transaction.circuit_type_c AS circuit_type_id,
-    bpd_winning_transaction.circuit_type_c AS circuit_type_descr,
-    bpd_winning_transaction.amount_i AS amount,
-    bpd_winning_transaction.amount_currency_c AS amount_currency,
-    bpd_winning_transaction.mcc_c AS mcc,
-    bpd_winning_transaction.mcc_descr_s AS mcc_descr,
-    bpd_winning_transaction.score_n AS score,
-    bpd_winning_transaction.award_period_id_n AS award_period_id,
-    bpd_winning_transaction.insert_date_t AS insert_date,
-    bpd_winning_transaction.insert_user_s AS insert_user,
-    bpd_winning_transaction.update_date_t AS update_date,
-    bpd_winning_transaction.update_user_s AS update_user,
-    bpd_winning_transaction.merchant_id_s AS merchant_id,
-    bpd_winning_transaction.merchant_id_s AS merchant_descr,
-    bpd_winning_transaction.correlation_id_s AS correlation_id,
-    bpd_winning_transaction.correlation_id_s AS correlation_desr,
-    bpd_winning_transaction.bin_s AS bin,
-    bpd_winning_transaction.terminal_id_s AS terminal_id,
-    bpd_winning_transaction.terminal_id_s AS terminal_descr,
-    bpd_winning_transaction.enabled_b AS enabled
-   FROM (public.bpd_winning_transaction
-     LEFT JOIN public.bpd_payment_instrument ON (((bpd_winning_transaction.hpan_s)::text = (bpd_payment_instrument.hpan_s)::text)));
+CREATE VIEW public.v_bpd_winning_transaction AS
+ SELECT bpi.fiscal_code_s,
+    bwt.trx_timestamp_t,
+    bwt.acquirer_id_s,
+    bwt.acquirer_c,
+    bwt.id_trx_acquirer_s,
+    bwt.id_trx_issuer_s,
+    bwt.hpan_s,
+    bwt.operation_type_c,
+    bwt.circuit_type_c,
+    bwt.amount_i,
+    bwt.amount_currency_c,
+    bwt.score_n,
+    bwt.award_period_id_n,
+    bwt.merchant_id_s,
+    bwt.correlation_id_s,
+    bwt.bin_s,
+    bwt.terminal_id_s,
+    bwt.enabled_b,
+    bwt.insert_date_t AS winn_trans_insert_date_t,
+    bwt.insert_user_s AS winn_trans_insert_user_s,
+    bwt.update_date_t AS winn_trans_update_date_t,
+    bwt.update_user_s AS winn_trans_update_user_s,
+    bpi.insert_date_t AS paym_instr_insert_date_t,
+    bpi.insert_user_s AS paym_instr_insert_user_s,
+    bpi.update_date_t AS paym_instr_update_date_t,
+    bpi.update_user_s AS paym_instr_update_user_s
+   FROM (public.bpd_winning_transaction bwt
+     JOIN public.bpd_payment_instrument bpi ON (((bwt.hpan_s)::text = (bpi.hpan_s)::text)));
 
 
-ALTER TABLE public.transaction OWNER TO testuser;
+ALTER TABLE public.v_bpd_winning_transaction OWNER TO testuser;
 
 --
 -- Data for Name: bpd_citizen; Type: TABLE DATA; Schema: public; Owner: testuser
@@ -207,16 +203,16 @@ ALTER TABLE ONLY public.bpd_payment_instrument
 
 
 --
--- Name: TABLE citizen_profile; Type: ACL; Schema: public; Owner: testuser
+-- Name: TABLE v_bpd_citizen; Type: ACL; Schema: public; Owner: testuser
 --
 
-GRANT ALL ON TABLE public.citizen_profile TO testuser;
+GRANT ALL ON TABLE public.v_bpd_citizen TO testuser;
 
 --
--- Name: TABLE transaction; Type: ACL; Schema: public; Owner: testuser
+-- Name: TABLE v_bpd_winning_transaction; Type: ACL; Schema: public; Owner: testuser
 --
 
-GRANT ALL ON TABLE public.transaction TO testuser;
+GRANT ALL ON TABLE public.v_bpd_winning_transaction TO testuser;
 
 
 --

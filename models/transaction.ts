@@ -3,87 +3,116 @@
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { AfterLoad, ViewColumn, ViewEntity } from "typeorm";
 
-@ViewEntity("transaction")
+@ViewEntity("v_bpd_winning_transaction")
 export class Transaction {
-  @ViewColumn()
+  @ViewColumn({
+    name: "fiscal_code_s"
+  })
   fiscal_code: FiscalCode;
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "hpan_s"
+  })
   hpan: string;
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "trx_timestamp_t"
+  })
   trx_timestamp: Date;
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "acquirer_id_s"
+  })
   acquirer_id?: string;
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "acquirer_c"
+  })
   acquirer_descr: string;
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "id_trx_acquirer_s"
+  })
   id_trx_acquirer: string;
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "id_trx_issuer_s"
+  })
   id_trx_issuer?: string;
 
-  @ViewColumn()
-  operation_type_id?: string;
+  @ViewColumn({
+    name: "operation_type_c"
+  })
+  operation_type_id?: string; // TODO: It's an enum type
 
-  @ViewColumn()
-  operation_type_descr?: string;
+  @ViewColumn({
+    name: "circuit_type_c"
+  })
+  circuit_type: string; // TODO: It's an enum type
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "amount_i"
+  })
   amount?: number;
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "amount_currency_c"
+  })
   amount_currency?: string;
 
-  @ViewColumn()
-  mcc?: string;
-
-  @ViewColumn()
-  mcc_descr?: string;
-
-  @ViewColumn()
+  @ViewColumn({
+    name: "score_n"
+  })
   score?: number;
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "award_period_id_n"
+  })
   award_period_id?: number;
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "winn_trans_insert_date_t"
+  })
   insert_date?: Date;
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "winn_trans_insert_user_s"
+  })
   insert_user?: string;
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "winn_trans_update_date_t"
+  })
   update_date?: Date;
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "winn_trans_update_user_s"
+  })
   update_user?: string;
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "merchant_id_s"
+  })
   merchant_id?: string;
 
-  @ViewColumn()
-  merchant_descr?: string;
-
-  @ViewColumn()
+  @ViewColumn({
+    name: "correlation_id_s"
+  })
   correlation_id?: string;
 
-  @ViewColumn()
-  correlation_desr?: string;
-
-  @ViewColumn()
+  @ViewColumn({
+    name: "bin_s"
+  })
   bin?: string;
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "terminal_id_s"
+  })
   terminal_id?: string;
 
-  @ViewColumn()
-  terminal_descr?: string;
-
-  @ViewColumn()
+  @ViewColumn({
+    name: "enabled_b"
+  })
   enabled?: boolean;
 
   @AfterLoad()

@@ -14,39 +14,56 @@ export enum StatusEnum {
 export const Status = enumType<StatusEnum>(StatusEnum, "status");
 export type Status = t.TypeOf<typeof Status>;
 
-@ViewEntity("citizen_profile")
+@ViewEntity("v_bpd_citizen")
 export class Citizen {
-  @ViewColumn()
+  @ViewColumn({
+    name: "fiscal_code_s"
+  })
   fiscal_code: FiscalCode;
 
-  @ViewColumn()
-  pay_off_instr?: Iban;
+  @ViewColumn({
+    name: "payoff_instr_s"
+  })
+  payoff_instr?: Iban;
 
-  @ViewColumn()
-  onboarding_date?: Date;
+  @ViewColumn({
+    name: "ctz_insert_date_t"
+  })
+  insert_date?: Date;
 
-  @ViewColumn()
-  onboarding_issuer_id?: string;
+  @ViewColumn({
+    name: "ctz_insert_user_s"
+  })
+  insert_user?: string;
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "ctz_update_date_t"
+  })
   update_date?: Date;
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "ctz_update_user_s"
+  })
   update_user?: string;
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "hpan_s"
+  })
   payment_instrument_hpan?: string;
 
-  @ViewColumn()
-  payment_instrument_enabled?: boolean;
-
-  @ViewColumn()
+  @ViewColumn({
+    name: "enabled_b"
+  })
   citizen_enabled?: boolean;
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "timestamp_tc_t"
+  })
   timestamp_tc: Date;
 
-  @ViewColumn()
+  @ViewColumn({
+    name: "status_c"
+  })
   payment_instrument_status?: Status;
 
   @AfterLoad()
