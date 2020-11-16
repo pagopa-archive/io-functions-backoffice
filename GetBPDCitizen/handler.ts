@@ -2,9 +2,9 @@ import * as express from "express";
 
 import { Context } from "@azure/functions";
 import { isEmpty } from "fp-ts/lib/Array";
-import { Either } from "fp-ts/lib/Either";
+import { Either, fromOption } from "fp-ts/lib/Either";
 import { identity } from "fp-ts/lib/function";
-import { isNone, Option } from "fp-ts/lib/Option";
+import { Option } from "fp-ts/lib/Option";
 import {
   fromEither,
   fromPredicate,
@@ -81,29 +81,35 @@ export function GetBPDCitizenHandler(
   citizenRepository: TaskEither<Error, Repository<Citizen>>
 ): IHttpHandler {
   return async (context, requestFiscalCode) => {
-    if (isNone(requestFiscalCode)) {
-      return ResponseErrorValidation(
-        "Bad request",
-        "Missing fiscal code header"
-      );
-    }
-    return citizenRepository
-      .chain(citizen =>
-        tryCatch(
-          () => citizen.find({ fiscal_code: requestFiscalCode.value }),
-          err => {
-            context.log.error(
-              `GetUserHandler|ERROR|Find citizen query error [${err}]`
-            );
-            return new Error("Citizen find query error");
-          }
-        )
+    return fromEither<
+      | IResponseErrorInternal
+      | IResponseErrorValidation
+      | IResponseErrorNotFound,
+      FiscalCode
+    >(
+      fromOption(
+        ResponseErrorValidation("Bad request", "Missing fiscal code header")
+      )(requestFiscalCode)
+    )
+      .chain(fiscalCode =>
+        citizenRepository
+          .chain(citizen =>
+            tryCatch(
+              () => citizen.find({ fiscal_code: fiscalCode }),
+              err => {
+                context.log.error(
+                  `GetUserHandler|ERROR|Find citizen query error [${err}]`
+                );
+                return new Error("Citizen find query error");
+              }
+            )
+          )
+          .mapLeft<
+            | IResponseErrorInternal
+            | IResponseErrorNotFound
+            | IResponseErrorValidation
+          >(err => ResponseErrorInternal(err.message))
       )
-      .mapLeft<
-        | IResponseErrorInternal
-        | IResponseErrorNotFound
-        | IResponseErrorValidation
-      >(err => ResponseErrorInternal(err.message))
       .chain(
         fromPredicate(
           citizenData => !isEmpty(citizenData),
