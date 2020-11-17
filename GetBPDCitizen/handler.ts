@@ -37,6 +37,7 @@ import { AuditLogTableRow, InsertOrReplaceEntity } from "../utils/audit_logs";
 import { OptionalHeaderMiddleware } from "../utils/middleware/optional_header";
 import { RequiredExpressUserMiddleware } from "../utils/middleware/required_express_user";
 import { AdUser } from "../utils/strategy/bearer_strategy";
+import { Task, task, tryCatch as tryCatchOfTask } from "fp-ts/lib/Task";
 
 type IHttpHandler = (
   context: Context,
@@ -82,8 +83,7 @@ export const toApiBPDCitizen = (
 };
 
 export function GetBPDCitizenHandler(
-  citizenRepository: TaskEither<Error, Repository<Citizen>>,
-  insertOrReplaceEntity: InsertOrReplaceEntity
+  citizenRepository: TaskEither<Error, Repository<Citizen>>
 ): IHttpHandler {
   return async (context, _, requestFiscalCode) => {
     return fromEither<
@@ -97,16 +97,7 @@ export function GetBPDCitizenHandler(
       )(requestFiscalCode)
     )
       .chain(fiscalCode => {
-        const logTableRow: AuditLogTableRow = {
-          AuthLevel: "Admin",
-          Citizen: fiscalCode,
-          OperationName: "GetBPDCitizen",
-          PartitionKey: _.oid, // Can we use email?
-          RowKey: context.executionContext.invocationId as string &
-            NonEmptyString
-        };
-        return insertOrReplaceEntity(logTableRow)
-          .chain(_1 => citizenRepository)
+        return citizenRepository
           .chain(citizen =>
             tryCatch(
               () => citizen.find({ fiscal_code: fiscalCode }),
@@ -153,10 +144,7 @@ export function GetBPDCitizen(
   citizenRepository: TaskEither<Error, Repository<Citizen>>,
   insertOrReplaceEntity: InsertOrReplaceEntity
 ): express.RequestHandler {
-  const handler = GetBPDCitizenHandler(
-    citizenRepository,
-    insertOrReplaceEntity
-  );
+  const handler = GetBPDCitizenHandler(citizenRepository);
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
@@ -164,5 +152,29 @@ export function GetBPDCitizen(
     OptionalHeaderMiddleware("x-citizen-fiscal-code", FiscalCode)
   );
 
-  return wrapRequestHandler(middlewaresWrap(handler));
+  const withTracing = (fn: IHttpHandler): IHttpHandler => {
+    return (...args) => {
+      const [context, { oid }, requestFiscalCode] = args;
+
+      return requestFiscalCode
+        .fold(task.of(void 0), fiscalCode => {
+          const logTableRow: AuditLogTableRow = {
+            AuthLevel: "Admin",
+            Citizen: fiscalCode,
+            OperationName: "GetBPDCitizen",
+            PartitionKey: oid, // Can we use email?
+            RowKey: context.executionContext.invocationId as string &
+              NonEmptyString
+          };
+          return insertOrReplaceEntity(logTableRow).fold(
+            err => console.error(""),
+            value => console.log("")
+          );
+        })
+        .chain(_ => new Task(() => fn(...args)))
+        .run();
+    };
+  };
+
+  return wrapRequestHandler(middlewaresWrap(withTracing(handler)));
 }
