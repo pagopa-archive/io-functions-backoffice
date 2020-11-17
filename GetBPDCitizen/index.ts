@@ -1,4 +1,5 @@
 import * as express from "express";
+import * as passport from "passport";
 import * as winston from "winston";
 
 import { Context } from "@azure/functions";
@@ -12,6 +13,8 @@ import { getRepository, IPostgresConnectionParams } from "../utils/database";
 import { GetBPDCitizen } from "./handler";
 
 import { getConfigOrThrow } from "../utils/config";
+import { GetOAuthVerifier } from "../utils/middleware/oauth_adb2c";
+import { setupBearerStrategy } from "../utils/strategy/bearer_strategy";
 
 const config = getConfigOrThrow();
 
@@ -35,9 +38,26 @@ winston.add(contextTransport);
 const app = express();
 secureExpressApp(app);
 
+const passportAuthenticator = new passport.Passport();
+
+/**
+ * Setup an authentication strategy (oauth) for express endpoints.
+ */
+setupBearerStrategy(
+  passportAuthenticator,
+  config.ADB2C_CONFIG,
+  async (userId, profile) => {
+    // executed when the user is logged in
+    // userId === profile.oid
+    // req.user === profile
+    logger?.info("setupBearerStrategy %s %s", userId, JSON.stringify(profile));
+  }
+);
+
 // Add express route
 app.get(
   "/api/v1/bpd/citizen",
+  GetOAuthVerifier(passportAuthenticator, config.ADB2C_POLICY_NAME),
   GetBPDCitizen(
     getRepository(postgresConfig, Citizen),
     config.JWT_SUPPORT_TOKEN_PUBLIC_RSA_CERTIFICATE

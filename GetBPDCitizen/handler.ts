@@ -34,7 +34,9 @@ import { CitizenID } from "../generated/definitions/CitizenID";
 import { PaymentMethod } from "../generated/definitions/PaymentMethod";
 import { Citizen } from "../models/citizen";
 import { withCitizenIdCheck } from "../utils/citizen_id";
+import { RequiredExpressUserMiddleware } from "../utils/middleware/required_express_user";
 import { RequiredHeaderMiddleware } from "../utils/middleware/required_header";
+import { AdUser } from "../utils/strategy/bearer_strategy";
 
 type ResponseErrorTypes =
   | IResponseErrorForbiddenNotAuthorized
@@ -44,6 +46,7 @@ type ResponseErrorTypes =
 
 type IHttpHandler = (
   context: Context,
+  user: AdUser,
   citizenId: CitizenID
 ) => Promise<IResponseSuccessJson<BPDCitizen> | ResponseErrorTypes>;
 
@@ -82,7 +85,7 @@ export function GetBPDCitizenHandler(
   citizenRepository: TaskEither<Error, Repository<Citizen>>,
   publicRsaCertificate: NonEmptyString
 ): IHttpHandler {
-  return async (context, citizenId) => {
+  return async (context, _, citizenId) => {
     return withCitizenIdCheck(
       citizenId,
       publicRsaCertificate,
@@ -136,6 +139,7 @@ export function GetBPDCitizen(
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
+    RequiredExpressUserMiddleware(AdUser),
     RequiredHeaderMiddleware("x-citizen-id", CitizenID)
   );
 

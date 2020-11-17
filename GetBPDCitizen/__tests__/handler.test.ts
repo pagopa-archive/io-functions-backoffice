@@ -2,13 +2,18 @@
 
 import { taskEither } from "fp-ts/lib/TaskEither";
 import { IResponseSuccessJson } from "italia-ts-commons/lib/responses";
-import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
+import {
+  EmailString,
+  FiscalCode,
+  NonEmptyString
+} from "italia-ts-commons/lib/strings";
 import { Repository } from "typeorm";
 import { context } from "../../__mocks__/durable-functions";
 import { BPDCitizen } from "../../generated/definitions/BPDCitizen";
 import { CitizenID } from "../../generated/definitions/CitizenID";
 import { SupportToken } from "../../generated/definitions/SupportToken";
 import { Citizen } from "../../models/citizen";
+import { AdUser } from "../../utils/strategy/bearer_strategy";
 import { GetBPDCitizenHandler } from "../handler";
 
 const mockFind = jest.fn();
@@ -28,6 +33,13 @@ FmprTzaax++spskX3QIDAQAB
 const aSupportToken = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJmaXNjYWxDb2RlIjoiQUFBQkJCMDFDMDJEMzQ1RCIsImlhdCI6MTYwNTU0NzU3NywiZXhwIjo4NTE3NTQ3NTc3LCJpc3MiOiJpby1iYWNrZW5kIiwianRpIjoiMDFFUTkxRk1NMTg4WUJNQks3WEZCRzdZQUoifQ.jvj2JEtxHhyFZJbzdeFfymyEEOhD4FPBm2wjNwStWMFqbD8B8CuKEAN_fl6tBrASdI0ZW2XfQujP_TejMFiAjvf696FZKUIyIJo58iOb0nfyRwTCCWUYuyFgkvVMnuMSo47rzp7LUSYx8VUaqz5pJLK3p8w9C6Q-yxrvxGJOZ6M` as SupportToken;
 const anInvalidSupportToken = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJmaXNjYWxDb2RlIjoiQUFBQkJCMDFDMDJEMzQ1RCIsImlhdCI6MTYwNTU0NzYzOCwiZXhwIjoxNjA1NTQ3NjM5LCJpc3MiOiJpby1iYWNrZW5kIiwianRpIjoiMDFFUTkxSEZaTUdGWkdFODUzTlg0TjIwTjYifQ.ENAJhnQB19jUKDYXyvf9LIps9tsRMGUIhsYKyBx8KQbhytKBzRBYaCskuvkHQbEE-CdK2kD66RoQIeg3-ulgA6uFe1aPrsAVS9sbxHKaz_xgHbB6MmyPiRYF9vuv-HsiVHLcL-XNOtczDmGdAsBz-uugeMkk2BjXqR2hf7hgP5Y` as SupportToken;
 const anotherInvalidSupportToken = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJmaXNjYWxDb2RlIjoiQUFBQkJCMDFDIiwiaWF0IjoxNjA1NTQ3NDYwLCJleHAiOjg1MTc1NDc0NjAsImlzcyI6ImlvLWJhY2tlbmQiLCJqdGkiOiIwMUVROTFDMVZGUUZSSlIwSzJBMEI4Q1o2UyJ9.j0OD1IDJFOqj3Hhh0t6m97RIS5Jgg7gMEWI35JIgxaUcPYwg77lp08njjdyDe88xkTpaMyXRN08EVvVdgcQTgGUrP2EV4SpSkFKWxQbNzdZqNEpRghTCjgxgQARml8CyU6pMn-c_baXKJsiEyWq5TpCGUAbhUQZVkV3liywTSr8` as SupportToken;
+
+const anAuthenticatedUser: AdUser = {
+  emails: ["email@example.com" as EmailString],
+  family_name: "Surname",
+  given_name: "Name",
+  oid: "anUserOID" as NonEmptyString
+};
 
 const aSuccessCase = (citizenId: CitizenID) =>
   jest.fn(async () => {
@@ -51,7 +63,7 @@ const aSuccessCase = (citizenId: CitizenID) =>
       ] as Citizen[];
     });
     const handler = GetBPDCitizenHandler(mockCitizenRepository, aPublicRsaCert);
-    const response = await handler(context, citizenId);
+    const response = await handler(context, anAuthenticatedUser, citizenId);
 
     expect(response.kind).toBe("IResponseSuccessJson");
     const responseValue = (response as IResponseSuccessJson<BPDCitizen>).value;
@@ -76,7 +88,7 @@ describe("GetBPDCitizenHandler", () => {
       return [];
     });
     const handler = GetBPDCitizenHandler(mockCitizenRepository, aPublicRsaCert);
-    const response = await handler(context, aFiscalCode);
+    const response = await handler(context, anAuthenticatedUser, aFiscalCode);
 
     expect(response.kind).toBe("IResponseErrorNotFound");
   });
@@ -87,7 +99,7 @@ describe("GetBPDCitizenHandler", () => {
       return Promise.reject(expectedError);
     });
     const handler = GetBPDCitizenHandler(mockCitizenRepository, aPublicRsaCert);
-    const response = await handler(context, aFiscalCode);
+    const response = await handler(context, anAuthenticatedUser, aFiscalCode);
 
     expect(context.log.error).toBeCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorInternal");
@@ -103,7 +115,7 @@ describe("GetBPDCitizenHandler", () => {
       ];
     });
     const handler = GetBPDCitizenHandler(mockCitizenRepository, aPublicRsaCert);
-    const response = await handler(context, aFiscalCode);
+    const response = await handler(context, anAuthenticatedUser, aFiscalCode);
 
     expect(response.kind).toBe("IResponseErrorValidation");
   });
@@ -118,7 +130,11 @@ describe("GetBPDCitizenHandler", () => {
       ];
     });
     const handler = GetBPDCitizenHandler(mockCitizenRepository, aPublicRsaCert);
-    const response = await handler(context, anInvalidSupportToken);
+    const response = await handler(
+      context,
+      anAuthenticatedUser,
+      anInvalidSupportToken
+    );
 
     expect(response.kind).toBe("IResponseErrorForbiddenNotAuthorized");
   });
@@ -128,7 +144,11 @@ describe("GetBPDCitizenHandler", () => {
       return [];
     });
     const handler = GetBPDCitizenHandler(mockCitizenRepository, aPublicRsaCert);
-    const response = await handler(context, anotherInvalidSupportToken);
+    const response = await handler(
+      context,
+      anAuthenticatedUser,
+      anotherInvalidSupportToken
+    );
 
     expect(response.kind).toBe("IResponseErrorValidation");
   });

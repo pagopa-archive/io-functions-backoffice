@@ -28,7 +28,9 @@ import { BPDTransactionList } from "../generated/definitions/BPDTransactionList"
 import { CitizenID } from "../generated/definitions/CitizenID";
 import { Transaction } from "../models/transaction";
 import { withCitizenIdCheck } from "../utils/citizen_id";
+import { RequiredExpressUserMiddleware } from "../utils/middleware/required_express_user";
 import { RequiredHeaderMiddleware } from "../utils/middleware/required_header";
+import { AdUser } from "../utils/strategy/bearer_strategy";
 
 type ErrorTypes =
   | IResponseErrorForbiddenNotAuthorized
@@ -38,6 +40,7 @@ type ErrorTypes =
 
 type IHttpHandler = (
   context: Context,
+  user: AdUser,
   citizenId: CitizenID
 ) => Promise<IResponseSuccessJson<BPDTransactionList> | ErrorTypes>;
 
@@ -61,7 +64,7 @@ export function GetBPDTransactionsHandler(
   transactionRepository: TaskEither<Error, Repository<Transaction>>,
   publicRsaCertificate: NonEmptyString
 ): IHttpHandler {
-  return async (context, citizenId) => {
+  return async (context, _, citizenId) => {
     return withCitizenIdCheck(citizenId, publicRsaCertificate, fiscalCode =>
       transactionRepository
         .chain(transactions =>
@@ -106,6 +109,7 @@ export function GetBPDTransactions(
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
+    RequiredExpressUserMiddleware(AdUser),
     RequiredHeaderMiddleware("x-citizen-id", CitizenID)
   );
 
