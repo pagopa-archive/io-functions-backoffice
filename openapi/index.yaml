@@ -16,7 +16,7 @@ schemes:
 paths:
   "/bpd/citizen":
     parameters:
-      - $ref: "#/parameters/FiscalCode"
+      - $ref: "#/parameters/CitizenID"
     get:
       operationId: GetBPDCitizen
       summary: Get BPD Citizen info
@@ -53,7 +53,7 @@ paths:
             $ref: "#/definitions/ProblemJson"
   "/bpd/transactions":
     parameters:
-        - $ref: "#/parameters/FiscalCode"
+        - $ref: "#/parameters/CitizenID"
     get:
       operationId: GetBPDTransactions
       summary: Get BPD transactions info list
@@ -126,6 +126,17 @@ definitions:
     required:
       - payment_instrument_hpan
       - payment_instrument_status
+  SupportToken:
+    type: string
+    pattern: "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$"
+    description: A JWT token used by Support Team
+  CitizenID:
+    description: Fiscal Code or Support Token for Citizen Identification
+    x-one-of: true
+    allOf:
+      - $ref: "#/definitions/FiscalCode"    
+      - $ref: "#/definitions/SupportToken"
+
   BPDTransactionList:
     type: object
     properties:
@@ -199,13 +210,9 @@ definitions:
       - trx_timestamp
       - hpan
 parameters:
-  FiscalCode:
-    name: x-citizen-fiscal-code
+  CitizenID:
+    name: x-citizen-id
     in: header
+    description: The fiscal code of the user or the JWT' s support token
     type: string
-    maxLength: 16
-    minLength: 16
-    required: false
-    description: The fiscal code of the user, all upper case.
-    pattern: "[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]"
-    x-example: SPNDNL80R13C555X
+    required: true
