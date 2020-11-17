@@ -35,10 +35,11 @@ paths:
               payment_methods:
                 - payment_instrument_hpan: "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
                   payment_instrument_status: "ACTIVE"
-              onboarding_date: "2011-10-05T14:48:00.000Z"
-              onboarding_issuer_id: "Bank"
+              insert_date: "2011-10-05T14:48:00.000Z"
+              insert_user: "Bank"
               update_date: "2011-10-05T14:48:00.000Z"
               update_user: "Bank"
+              payoff_instr: "IT90M0300203280482653729744"
         "400":
           description: Invalid request.
           schema:
@@ -84,18 +85,15 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.7.0/openapi/definitions.yaml#/FiscalCode"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.7.0/openapi/definitions.yaml#/ProblemJson"
-  Iban:
-    type: string
-    pattern: '[a-zA-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}'
   BPDCitizen:
     type: object
     properties:
       fiscal_code:
         $ref: "#/definitions/FiscalCode"
-      onboarding_date:
+      insert_date:
         type: string
         format: dateTime
-      onboarding_issuer_id:
+      insert_user:
         type: string
       citizen_enabled:
         type: boolean
@@ -111,8 +109,8 @@ definitions:
         format: dateTime
       update_user:
         type: string
-      pay_off_instr:
-        $ref: "#/definitions/Iban"
+      payoff_instr:
+        type: string
     required:
       - fiscal_code
       - timestamp_tc
@@ -166,15 +164,11 @@ definitions:
         type: string
       operation_type_id:
         type: string
-      operation_type_descr:
+      circuit_type:
         type: string
       amount:
         type: number
       amount_currency:
-        type: string
-      mcc:
-        type: string
-      mcc_descr:
         type: string
       score:
         type: number
@@ -192,17 +186,11 @@ definitions:
         type: string
       merchant_id:
         type: string
-      merchant_descr:
-        type: string
       correlation_id:
-        type: string
-      correlation_desr:
         type: string
       bin:
         type: string
       terminal_id:
-        type: string
-      terminal_descr:
         type: string
       enabled:
         type: boolean

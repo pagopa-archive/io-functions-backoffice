@@ -60,14 +60,14 @@ export const toApiBPDCitizen = (
         return {
           citizen_enabled: citizen.citizen_enabled,
           fiscal_code: citizen.fiscal_code,
-          onboarding_date: citizen.onboarding_date?.toISOString(),
-          onboarding_issuer_id: citizen.onboarding_issuer_id,
+          insert_date: citizen.insert_date?.toISOString(),
+          insert_user: citizen.insert_user,
           payment_methods: PaymentMethod.is(citizen) ? [citizen] : [],
           timestamp_tc: citizen.timestamp_tc.toISOString(),
           update_date: citizen.update_date?.toISOString(),
           update_user: citizen.update_user,
 
-          pay_off_instr: citizen.pay_off_instr
+          payoff_instr: citizen.payoff_instr
         };
       }
       if (PaymentMethod.is(citizen)) {
