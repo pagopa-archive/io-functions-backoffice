@@ -72,14 +72,16 @@ export function GetBPDTransactionsHandler(
         ResponseErrorValidation("Bad request", "Missing fiscal code header")
       )(requestFiscalCode)
     )
-      .chain(fiscalCode =>
-        insertOrReplaceEntity({
+      .chain(fiscalCode => {
+        const logTableRow: AuditLogTableRow = {
           AuthLevel: "Admin",
-          Citizen: requestFiscalCode.toUndefined(),
+          Citizen: fiscalCode,
           OperationName: "GetBPDTransactions",
           PartitionKey: _.oid, // Can we use email?
-          RowKey: `${context.executionContext.invocationId}` as NonEmptyString
-        })
+          RowKey: context.executionContext.invocationId as string &
+            NonEmptyString
+        };
+        return insertOrReplaceEntity(logTableRow)
           .chain(_1 => transactionRepository)
           .chain(transactions =>
             tryCatch(
@@ -94,8 +96,8 @@ export function GetBPDTransactionsHandler(
           )
           .mapLeft<IResponseErrorInternal | IResponseErrorValidation>(err =>
             ResponseErrorInternal(err.message)
-          )
-      )
+          );
+      })
       .chain(transactionsData =>
         fromEither(toApiBPDTransactionList(transactionsData)).mapLeft(err =>
           ResponseErrorValidation(

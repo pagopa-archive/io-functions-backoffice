@@ -96,14 +96,16 @@ export function GetBPDCitizenHandler(
         ResponseErrorValidation("Bad request", "Missing fiscal code header")
       )(requestFiscalCode)
     )
-      .chain(fiscalCode =>
-        insertOrReplaceEntity({
+      .chain(fiscalCode => {
+        const logTableRow: AuditLogTableRow = {
           AuthLevel: "Admin",
-          Citizen: requestFiscalCode.toUndefined(),
+          Citizen: fiscalCode,
           OperationName: "GetBPDCitizen",
           PartitionKey: _.oid, // Can we use email?
-          RowKey: context.executionContext.invocationId as NonEmptyString
-        })
+          RowKey: context.executionContext.invocationId as string &
+            NonEmptyString
+        };
+        return insertOrReplaceEntity(logTableRow)
           .chain(_1 => citizenRepository)
           .chain(citizen =>
             tryCatch(
@@ -120,8 +122,8 @@ export function GetBPDCitizenHandler(
             | IResponseErrorInternal
             | IResponseErrorNotFound
             | IResponseErrorValidation
-          >(err => ResponseErrorInternal(err.message))
-      )
+          >(err => ResponseErrorInternal(err.message));
+      })
       .chain(
         fromPredicate(
           citizenData => !isEmpty(citizenData),
