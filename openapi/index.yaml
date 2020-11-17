@@ -13,6 +13,8 @@ host: backoffice-api.io.italia.it
 basePath: "/api/v1"
 schemes:
   - https
+security:
+  - Bearer: []
 paths:
   "/bpd/citizen":
     parameters:
@@ -204,3 +206,8 @@ parameters:
     description: The fiscal code of the user or the JWT' s support token
     type: string
     required: true
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
