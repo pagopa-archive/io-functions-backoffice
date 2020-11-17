@@ -25,14 +25,14 @@ Deploy appens with this [pipeline](./azure-pipelines.yml)
 
 Those are all Environment variables needed by the application:
 
-| Variable name                          | Description                                                                       | type   |
-|----------------------------------------|-----------------------------------------------------------------------------------|--------|
-| DASHBOARD_STORAGE_CONNECTION_STRING    | Storage connection string                                                         | string |
-| SLOT_TASK_HUBNAME                      | The unique slot task hubname                                                      | string |
-| POSTGRES_HOSTNAME                      | Host for the postgres database                                                    | string |
-| POSTGRES_PORT                          | Port for the postgres database                                                    | number |
-| POSTGRES_USERNAME                      | Username for the postgres database                                                | string |
-| POSTGRES_PASSWORD                      | Password for the postgres database                                                | string |
-| POSTGRES_DB_NAME                       | Postgres database name                                                            | string |
-| POSTGRES_SCHEMA                        | Postgres schema name                                                              | string |
-
+| Variable name                            | Description                                                                       | type   |
+|------------------------------------------|-----------------------------------------------------------------------------------|--------|
+| DASHBOARD_STORAGE_CONNECTION_STRING      | Storage connection string                                                         | string |
+| SLOT_TASK_HUBNAME                        | The unique slot task hubname                                                      | string |
+| POSTGRES_HOSTNAME                        | Host for the postgres database                                                    | string |
+| POSTGRES_PORT                            | Port for the postgres database                                                    | number |
+| POSTGRES_USERNAME                        | Username for the postgres database                                                | string |
+| POSTGRES_PASSWORD                        | Password for the postgres database                                                | string |
+| POSTGRES_DB_NAME                         | Postgres database name                                                            | string |
+| POSTGRES_SCHEMA                          | Postgres schema name                                                              | string |
+| JWT_SUPPORT_TOKEN_PUBLIC_RSA_CERTIFICATE | The support token's public certificate used to verify JWT's signature             | string |

@@ -14,7 +14,9 @@ export const IConfig = t.interface({
   POSTGRES_PASSWORD: NonEmptyString,
   POSTGRES_USERNAME: NonEmptyString,
 
-  POSTGRES_SCHEMA: NonEmptyString
+  POSTGRES_SCHEMA: NonEmptyString,
+
+  JWT_SUPPORT_TOKEN_PUBLIC_RSA_CERTIFICATE: NonEmptyString
 });
 
 // No need to re-evaluate this object for each call

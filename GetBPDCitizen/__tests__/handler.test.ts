@@ -1,12 +1,13 @@
 /* tslint:disable: no-any */
 
-import { none, some } from "fp-ts/lib/Option";
 import { taskEither } from "fp-ts/lib/TaskEither";
 import { IResponseSuccessJson } from "italia-ts-commons/lib/responses";
-import { FiscalCode } from "italia-ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 import { Repository } from "typeorm";
 import { context } from "../../__mocks__/durable-functions";
 import { BPDCitizen } from "../../generated/definitions/BPDCitizen";
+import { CitizenID } from "../../generated/definitions/CitizenID";
+import { SupportToken } from "../../generated/definitions/SupportToken";
 import { Citizen } from "../../models/citizen";
 import { GetBPDCitizenHandler } from "../handler";
 
@@ -17,9 +18,19 @@ const mockCitizenRepository = taskEither.of<Error, Repository<Citizen>>(({
 
 const aFiscalCode = "AAABBB01C02D345D" as FiscalCode;
 const aTimestamp = new Date();
+const aPublicRsaCert = `-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCc3FR1mjQDrhvaDF8UpdtQQknh
+MAyxT1o6eCwWIiF+ZHsnnnn8XI++V11+uqSlRlh9gamt4XKqc8/4vKTKzxBYJPV/
+TuJDDBC1kbs6SGpqbMjnHk4hUXeSlxbvuksmnwEzmT7u9jYlCj5Zjmr+pBLKBoTk
+FmprTzaax++spskX3QIDAQAB
+-----END PUBLIC KEY-----` as NonEmptyString;
 
-describe("GetBPDCitizenHandler", () => {
-  it("should return a success response if the user was found on db", async () => {
+const aSupportToken = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJmaXNjYWxDb2RlIjoiQUFBQkJCMDFDMDJEMzQ1RCIsImlhdCI6MTYwNTU0NzU3NywiZXhwIjo4NTE3NTQ3NTc3LCJpc3MiOiJpby1iYWNrZW5kIiwianRpIjoiMDFFUTkxRk1NMTg4WUJNQks3WEZCRzdZQUoifQ.jvj2JEtxHhyFZJbzdeFfymyEEOhD4FPBm2wjNwStWMFqbD8B8CuKEAN_fl6tBrASdI0ZW2XfQujP_TejMFiAjvf696FZKUIyIJo58iOb0nfyRwTCCWUYuyFgkvVMnuMSo47rzp7LUSYx8VUaqz5pJLK3p8w9C6Q-yxrvxGJOZ6M` as SupportToken;
+const anInvalidSupportToken = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJmaXNjYWxDb2RlIjoiQUFBQkJCMDFDMDJEMzQ1RCIsImlhdCI6MTYwNTU0NzYzOCwiZXhwIjoxNjA1NTQ3NjM5LCJpc3MiOiJpby1iYWNrZW5kIiwianRpIjoiMDFFUTkxSEZaTUdGWkdFODUzTlg0TjIwTjYifQ.ENAJhnQB19jUKDYXyvf9LIps9tsRMGUIhsYKyBx8KQbhytKBzRBYaCskuvkHQbEE-CdK2kD66RoQIeg3-ulgA6uFe1aPrsAVS9sbxHKaz_xgHbB6MmyPiRYF9vuv-HsiVHLcL-XNOtczDmGdAsBz-uugeMkk2BjXqR2hf7hgP5Y` as SupportToken;
+const anotherInvalidSupportToken = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJmaXNjYWxDb2RlIjoiQUFBQkJCMDFDIiwiaWF0IjoxNjA1NTQ3NDYwLCJleHAiOjg1MTc1NDc0NjAsImlzcyI6ImlvLWJhY2tlbmQiLCJqdGkiOiIwMUVROTFDMVZGUUZSSlIwSzJBMEI4Q1o2UyJ9.j0OD1IDJFOqj3Hhh0t6m97RIS5Jgg7gMEWI35JIgxaUcPYwg77lp08njjdyDe88xkTpaMyXRN08EVvVdgcQTgGUrP2EV4SpSkFKWxQbNzdZqNEpRghTCjgxgQARml8CyU6pMn-c_baXKJsiEyWq5TpCGUAbhUQZVkV3liywTSr8` as SupportToken;
+
+const aSuccessCase = (citizenId: CitizenID) =>
+  jest.fn(async () => {
     mockFind.mockImplementationOnce(async () => {
       return [
         {
@@ -39,8 +50,8 @@ describe("GetBPDCitizenHandler", () => {
         // tslint:disable-next-line: readonly-array
       ] as Citizen[];
     });
-    const handler = GetBPDCitizenHandler(mockCitizenRepository);
-    const response = await handler(context, some(aFiscalCode));
+    const handler = GetBPDCitizenHandler(mockCitizenRepository, aPublicRsaCert);
+    const response = await handler(context, citizenId);
 
     expect(response.kind).toBe("IResponseSuccessJson");
     const responseValue = (response as IResponseSuccessJson<BPDCitizen>).value;
@@ -51,13 +62,21 @@ describe("GetBPDCitizenHandler", () => {
     } as BPDCitizen);
     expect(responseValue.payment_methods).toHaveLength(2);
   });
+describe("GetBPDCitizenHandler", () => {
+  it("should return a success response if the user was found on db", async () => {
+    aSuccessCase(aFiscalCode);
+  });
+
+  it("should return a success response if the user was found on db and a correct support token is provided", async () => {
+    aSuccessCase(aSupportToken);
+  });
 
   it("should return a not found response if the user is missing in db", async () => {
     mockFind.mockImplementationOnce(async () => {
       return [];
     });
-    const handler = GetBPDCitizenHandler(mockCitizenRepository);
-    const response = await handler(context, some(aFiscalCode));
+    const handler = GetBPDCitizenHandler(mockCitizenRepository, aPublicRsaCert);
+    const response = await handler(context, aFiscalCode);
 
     expect(response.kind).toBe("IResponseErrorNotFound");
   });
@@ -67,18 +86,11 @@ describe("GetBPDCitizenHandler", () => {
     mockFind.mockImplementationOnce(() => {
       return Promise.reject(expectedError);
     });
-    const handler = GetBPDCitizenHandler(mockCitizenRepository);
-    const response = await handler(context, some(aFiscalCode));
+    const handler = GetBPDCitizenHandler(mockCitizenRepository, aPublicRsaCert);
+    const response = await handler(context, aFiscalCode);
 
     expect(context.log.error).toBeCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorInternal");
-  });
-
-  it("should return a validation error if the fiscal code is missing", async () => {
-    const handler = GetBPDCitizenHandler(mockCitizenRepository);
-    const response = await handler(context, none);
-
-    expect(response.kind).toBe("IResponseErrorValidation");
   });
 
   it("should return a validation error if the response decode fail", async () => {
@@ -90,8 +102,33 @@ describe("GetBPDCitizenHandler", () => {
         } as Citizen
       ];
     });
-    const handler = GetBPDCitizenHandler(mockCitizenRepository);
-    const response = await handler(context, some(aFiscalCode));
+    const handler = GetBPDCitizenHandler(mockCitizenRepository, aPublicRsaCert);
+    const response = await handler(context, aFiscalCode);
+
+    expect(response.kind).toBe("IResponseErrorValidation");
+  });
+
+  it("should return a forbidden error if the support token is invalid", async () => {
+    mockFind.mockImplementationOnce(async () => {
+      return [
+        {
+          fiscal_code: aFiscalCode,
+          timestamp_tc: aTimestamp
+        } as Citizen
+      ];
+    });
+    const handler = GetBPDCitizenHandler(mockCitizenRepository, aPublicRsaCert);
+    const response = await handler(context, anInvalidSupportToken);
+
+    expect(response.kind).toBe("IResponseErrorForbiddenNotAuthorized");
+  });
+
+  it("should return a validation error if the support token contains an invalid FiscalCode", async () => {
+    mockFind.mockImplementationOnce(async () => {
+      return [];
+    });
+    const handler = GetBPDCitizenHandler(mockCitizenRepository, aPublicRsaCert);
+    const response = await handler(context, anotherInvalidSupportToken);
 
     expect(response.kind).toBe("IResponseErrorValidation");
   });
