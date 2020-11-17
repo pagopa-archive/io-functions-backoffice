@@ -58,16 +58,16 @@ export const toApiBPDCitizen = (
     domainObj.reduce((acc: BPDCitizen | undefined, citizen) => {
       if (acc === undefined) {
         return {
-          citizen_enabled: citizen.citizen_enabled,
           fiscal_code: citizen.fiscal_code,
+          timestamp_tc: citizen.timestamp_tc.toISOString(),
+          payoff_instr: citizen.payoff_instr,
+          payoff_instr_type: citizen.payoff_instr_type,
+          enabled: citizen.enabled,
           insert_date: citizen.insert_date?.toISOString(),
           insert_user: citizen.insert_user,
-          payment_methods: PaymentMethod.is(citizen) ? [citizen] : [],
-          timestamp_tc: citizen.timestamp_tc.toISOString(),
           update_date: citizen.update_date?.toISOString(),
           update_user: citizen.update_user,
-
-          payoff_instr: citizen.payoff_instr
+          payment_methods: PaymentMethod.is(citizen) ? [citizen] : []
         };
       }
       if (PaymentMethod.is(citizen)) {
