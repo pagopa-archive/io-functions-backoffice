@@ -83,9 +83,6 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.7.0/openapi/definitions.yaml#/FiscalCode"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.7.0/openapi/definitions.yaml#/ProblemJson"
-  Iban:
-    type: string
-    pattern: '[a-zA-Z]{2}[0-9]{2}[a-zA-Z0-9]{1,30}'
   BPDCitizen:
     type: object
     properties:
@@ -111,7 +108,7 @@ definitions:
       update_user:
         type: string
       payoff_instr:
-        $ref: "#/definitions/Iban"
+        type: string
     required:
       - fiscal_code
       - timestamp_tc

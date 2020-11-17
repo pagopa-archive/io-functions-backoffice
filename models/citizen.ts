@@ -3,7 +3,6 @@ import * as t from "io-ts";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { enumType } from "italia-ts-commons/lib/types";
 import { AfterLoad, ViewColumn, ViewEntity } from "typeorm";
-import { Iban } from "../generated/definitions/Iban";
 
 export enum StatusEnum {
   "ACTIVE" = "ACTIVE",
@@ -24,7 +23,7 @@ export class Citizen {
   @ViewColumn({
     name: "payoff_instr_s"
   })
-  payoff_instr?: Iban;
+  payoff_instr?: string;
 
   @ViewColumn({
     name: "ctz_insert_date_t"
