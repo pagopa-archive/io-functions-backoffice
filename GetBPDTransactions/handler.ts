@@ -52,7 +52,13 @@ export const toApiBPDTransactionList = (
     transactions: domainObj.map(transaction => {
       return {
         ...transaction,
+        acquirer_descr: transaction.acquirer_c, // TODO: It's an enum type
+        amount_currency_descr: "EUR", // TODO: fixed to 978 = EUR
+        circuit_type_descr: transaction.circuit_type_c, // TODO: It's an enum type
         insert_date: transaction.insert_date?.toISOString(),
+        operation_type_descr: transaction.operation_type_c, // TODO: It's an enum type
+        payment_instrument_insert_date: transaction.payment_instrument_insert_date?.toISOString(),
+        payment_instrument_update_date: transaction.payment_instrument_update_date?.toISOString(),
         trx_timestamp: transaction.trx_timestamp.toISOString(),
         update_date: transaction.update_date?.toISOString()
       } as BPDTransaction;

@@ -136,7 +136,6 @@ definitions:
     allOf:
       - $ref: "#/definitions/FiscalCode"    
       - $ref: "#/definitions/SupportToken"
-
   BPDTransactionList:
     type: object
     properties:
@@ -156,34 +155,32 @@ definitions:
         format: dateTime
       acquirer_id:
         type: string
+      acquirer_c:
+        type: string
       acquirer_descr:
         type: string
       id_trx_acquirer:
         type: string
       id_trx_issuer:
         type: string
-      operation_type_id:
+      operation_type_c:
         type: string
-      circuit_type:
+      operation_type_descr:
+        type: string
+      circuit_type_c:
+        type: string
+      circuit_type_descr:
         type: string
       amount:
         type: number
-      amount_currency:
+      amount_currency_c:
+        type: string
+      amount_currency_descr:
         type: string
       score:
         type: number
       award_period_id:
         type: number
-      insert_date:
-        type: string
-        format: dateTime
-      insert_user:
-        type: string
-      update_date:
-        type: string
-        format: dateTime
-      update_user:
-        type: string
       merchant_id:
         type: string
       correlation_id:
@@ -194,8 +191,28 @@ definitions:
         type: string
       enabled:
         type: boolean
+      insert_date:
+        type: string
+        format: dateTime
+      insert_user:
+        type: string
+      update_date:
+        type: string
+        format: dateTime
+      update_user:
+        type: string
+      payment_instrument_insert_date:
+        type: string
+        format: dateTime
+      payment_instrument_insert_user:
+        type: string
+      payment_instrument_update_date:
+        type: string
+        format: dateTime
+      payment_instrument_update_user:
+        type: string
     required:
-      - acquirer_descr
+      - acquirer_c
       - id_trx_acquirer
       - trx_timestamp
       - hpan
