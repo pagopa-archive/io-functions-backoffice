@@ -29,16 +29,16 @@ import {
   ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 import { Repository } from "typeorm";
 import { BPDCitizen } from "../generated/definitions/BPDCitizen";
-import { CitizenID } from "../generated/definitions/CitizenID";
 import { PaymentMethod } from "../generated/definitions/PaymentMethod";
 import { Citizen } from "../models/citizen";
 import { IServicePrincipalCreds } from "../utils/adb2c";
+import { InsertOrReplaceEntity, withAudit } from "../utils/audit_logs";
 import { withCitizenIdCheck } from "../utils/citizen_id";
+import { RequestCitizenToFiscalCode } from "../utils/middleware/citizen_id";
 import { RequiredExpressUserMiddleware } from "../utils/middleware/required_express_user";
-import { RequiredHeaderMiddleware } from "../utils/middleware/required_header";
 import { AdUser } from "../utils/strategy/bearer_strategy";
 
 type ResponseErrorTypes =
@@ -50,7 +50,7 @@ type ResponseErrorTypes =
 type IHttpHandler = (
   context: Context,
   user: AdUser,
-  citizenId: CitizenID
+  citizenId: FiscalCode
 ) => Promise<IResponseSuccessJson<BPDCitizen> | ResponseErrorTypes>;
 
 // Convert model object to API object
@@ -104,54 +104,41 @@ export const toApiBPDCitizen = (
 };
 
 export function GetBPDCitizenHandler(
-  citizenRepository: TaskEither<Error, Repository<Citizen>>,
-  publicRsaCertificate: NonEmptyString,
-  adb2cCreds: IServicePrincipalCreds,
-  adb2cAdminGroup: NonEmptyString,
-  cacheTtl: NonNegativeInteger
+  citizenRepository: TaskEither<Error, Repository<Citizen>>
 ): IHttpHandler {
-  return async (context, _, citizenId) => {
-    return withCitizenIdCheck(
-      _.oid,
-      citizenId,
-      publicRsaCertificate,
-      adb2cCreds,
-      adb2cAdminGroup,
-      cacheTtl,
-      requestFiscalCode =>
-        citizenRepository
-          .chain(citizen =>
-            tryCatch(
-              () => citizen.find({ fiscal_code: requestFiscalCode }),
-              err => {
-                context.log.error(
-                  `GetUserHandler|ERROR|Find citizen query error [${err}]`
-                );
-                return new Error("Citizen find query error");
-              }
-            )
+  return async (context, _, fiscalCode) => {
+    return citizenRepository
+      .chain(citizen =>
+        tryCatch(
+          () => citizen.find({ fiscal_code: fiscalCode }),
+          (err: unknown) => {
+            context.log.error(
+              `GetUserHandler|ERROR|Find citizen query error [${err}]`
+            );
+            return new Error("Citizen find query error");
+          }
+        )
+      )
+      .mapLeft<
+        | IResponseErrorInternal
+        | IResponseErrorNotFound
+        | IResponseErrorValidation
+      >(err => ResponseErrorInternal(err.message))
+      .chain(
+        fromPredicate(
+          citizenData => citizenData.length > 0,
+          () => ResponseErrorNotFound("Not found", "Citizen not found")
+        )
+      )
+      .chain(citizenData =>
+        fromEither(toApiBPDCitizen(citizenData)).mapLeft(err =>
+          ResponseErrorValidation(
+            "Invalid BPDCitizen object",
+            readableReport(err)
           )
-          .mapLeft<
-            | IResponseErrorInternal
-            | IResponseErrorNotFound
-            | IResponseErrorValidation
-          >(err => ResponseErrorInternal(err.message))
-          .chain(
-            fromPredicate(
-              citizenData => citizenData.length > 0,
-              () => ResponseErrorNotFound("Not found", "Citizen not found")
-            )
-          )
-          .chain(citizenData =>
-            fromEither(toApiBPDCitizen(citizenData)).mapLeft(err =>
-              ResponseErrorValidation(
-                "Invalid BPDCitizen object",
-                readableReport(err)
-              )
-            )
-          )
-          .map(ResponseSuccessJson)
-    )
+        )
+      )
+      .map(ResponseSuccessJson)
       .fold<ResponseErrorTypes | IResponseSuccessJson<BPDCitizen>>(
         identity,
         identity
@@ -162,23 +149,27 @@ export function GetBPDCitizenHandler(
 
 export function GetBPDCitizen(
   citizenRepository: TaskEither<Error, Repository<Citizen>>,
+  insertOrReplaceEntity: InsertOrReplaceEntity,
   publicRsaCertificate: NonEmptyString,
   adb2cCreds: IServicePrincipalCreds,
   adb2cAdminGroup: NonEmptyString,
   cacheTtl: NonNegativeInteger
 ): express.RequestHandler {
-  const handler = GetBPDCitizenHandler(
-    citizenRepository,
-    publicRsaCertificate,
-    adb2cCreds,
-    adb2cAdminGroup,
-    cacheTtl
-  );
-
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
     RequiredExpressUserMiddleware(AdUser),
-    RequiredHeaderMiddleware("x-citizen-id", CitizenID)
+    RequestCitizenToFiscalCode(publicRsaCertificate)
+  );
+
+  const handler = withAudit(insertOrReplaceEntity)(
+    GetBPDCitizenHandler(citizenRepository),
+    (context, { oid }, fiscalCode) => ({
+      AuthLevel: "Admin",
+      Citizen: fiscalCode,
+      OperationName: "GetBPDCitizen",
+      PartitionKey: oid, // Can we use email?
+      RowKey: context.executionContext.invocationId as string & NonEmptyString
+    })
   );
 
   return wrapRequestHandler(middlewaresWrap(handler));
