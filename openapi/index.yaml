@@ -173,7 +173,7 @@ definitions:
         format: dateTime
       acquirer_id:
         type: string
-      acquirer_c:
+      acquirer:
         type: string
       acquirer_descr:
         type: string
@@ -181,17 +181,17 @@ definitions:
         type: string
       id_trx_issuer:
         type: string
-      operation_type_c:
+      operation_type:
         type: string
       operation_type_descr:
         type: string
-      circuit_type_c:
+      circuit_type:
         type: string
       circuit_type_descr:
         type: string
       amount:
         type: number
-      amount_currency_c:
+      amount_currency:
         type: string
       amount_currency_descr:
         type: string
@@ -230,7 +230,7 @@ definitions:
       payment_instrument_update_user:
         type: string
     required:
-      - acquirer_c
+      - acquirer
       - id_trx_acquirer
       - trx_timestamp
       - hpan

@@ -28,7 +28,7 @@ export class Transaction {
   @ViewColumn({
     name: "acquirer_c"
   })
-  acquirer_c: string; // TODO: It's an enum type
+  acquirer: string; // TODO: It's an enum type
 
   @ViewColumn({
     name: "id_trx_acquirer_s"
@@ -43,12 +43,12 @@ export class Transaction {
   @ViewColumn({
     name: "operation_type_c"
   })
-  operation_type_c?: string; // TODO: It's an enum type
+  operation_type?: string; // TODO: It's an enum type
 
   @ViewColumn({
     name: "circuit_type_c"
   })
-  circuit_type_c: string; // TODO: It's an enum type
+  circuit_type: string; // TODO: It's an enum type
 
   @ViewColumn({
     name: "amount_i"
@@ -58,7 +58,7 @@ export class Transaction {
   @ViewColumn({
     name: "amount_currency_c"
   })
-  amount_currency_c?: string; // TODO: fixed to 978 = EUR
+  amount_currency?: string; // TODO: fixed to 978 = EUR
 
   @ViewColumn({
     name: "score_n"
