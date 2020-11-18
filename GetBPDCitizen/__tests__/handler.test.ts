@@ -53,7 +53,11 @@ describe("GetBPDCitizenHandler", () => {
           fiscal_code: aFiscalCode,
           payment_instrument_hpan:
             "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          payment_instrument_insert_date: aTimestamp,
+          payment_instrument_insert_user: "An user",
           payment_instrument_status: "ACTIVE",
+          payment_instrument_update_date: aTimestamp,
+          payment_instrument_update_user: "An user",
           timestamp_tc: aTimestamp
         },
         {
