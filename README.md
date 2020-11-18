@@ -1,7 +1,7 @@
 # IO Functions Backoffice
 
 [![codecov](https://codecov.io/gh/pagopa/io-functions-backoffice/branch/master/graph/badge.svg)](https://codecov.io/gh/pagopa/io-functions-backoffice)
-[![Build Status](https://dev.azure.com/pagopa-io/io-functions-backoffice/_apis/build/status/pagopa.io-functions-backoffice?branchName=master)](https://dev.azure.com/pagopa-io/io-functions-backoffice/_build/latest?definitionId=37&branchName=master)
+[![Build Status](https://dev.azure.com/pagopa-io/io-backoffice/_apis/build/status/pagopa.io-backoffice-backend?branchName=master)](https://dev.azure.com/pagopa-io/io-backoffice/_build/latest?definitionId=37&branchName=master)
 
 This repository contains the code for the backend used by the Backoffice.
 
@@ -19,7 +19,7 @@ open http://localhost/some/path/test
 ## Deploy
 
 Deploy appens with this [pipeline](./azure-pipelines.yml)
-(workflow) configured on [Azure DevOps](https://dev.azure.com).
+(workflow) configured on [Azure DevOps - io-backoffice](https://dev.azure.com/pagopa-io/io-backoffice).
 
 ## Environment variables
 
