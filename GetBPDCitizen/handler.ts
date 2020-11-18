@@ -3,6 +3,7 @@ import * as express from "express";
 import { Context } from "@azure/functions";
 import { Either } from "fp-ts/lib/Either";
 import { identity } from "fp-ts/lib/function";
+import { fromNullable, isSome, Option } from "fp-ts/lib/Option";
 import {
   fromEither,
   fromPredicate,
@@ -56,13 +57,32 @@ export const toApiBPDCitizen = (
 ): Either<t.Errors, BPDCitizen> => {
   return BPDCitizen.decode(
     domainObj.reduce((acc: BPDCitizen | undefined, citizen) => {
+      const paymentMethod: Option<PaymentMethod> = fromNullable(
+        citizen.payment_instrument_hpan
+      )
+        .chain(hpan =>
+          fromNullable(citizen.payment_instrument_status).map(status => ({
+            hpan,
+            status
+          }))
+        )
+        .map(
+          p =>
+            ({
+              ...citizen,
+              payment_instrument_hpan: p.hpan,
+              payment_instrument_insert_date: citizen.payment_instrument_insert_date?.toISOString(),
+              payment_instrument_status: p.status,
+              payment_instrument_update_date: citizen.payment_instrument_insert_date?.toISOString()
+            } as PaymentMethod)
+        );
       if (acc === undefined) {
         return {
           enabled: citizen.enabled,
           fiscal_code: citizen.fiscal_code,
           insert_date: citizen.insert_date?.toISOString(),
           insert_user: citizen.insert_user,
-          payment_methods: PaymentMethod.is(citizen) ? [citizen] : [],
+          payment_methods: isSome(paymentMethod) ? [paymentMethod.value] : [],
           payoff_instr: citizen.payoff_instr,
           payoff_instr_type: citizen.payoff_instr_type,
           timestamp_tc: citizen.timestamp_tc.toISOString(),
@@ -70,10 +90,10 @@ export const toApiBPDCitizen = (
           update_user: citizen.update_user
         };
       }
-      if (PaymentMethod.is(citizen)) {
+      if (isSome(paymentMethod)) {
         return {
           ...acc,
-          payment_methods: [...acc.payment_methods, citizen]
+          payment_methods: [...acc.payment_methods, paymentMethod.value]
         };
       }
       return acc;
