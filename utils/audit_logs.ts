@@ -1,6 +1,6 @@
 import { TableService } from "azure-storage";
 import { toError } from "fp-ts/lib/Either";
-import { taskEither } from "fp-ts/lib/TaskEither";
+import { taskEither, taskify } from "fp-ts/lib/TaskEither";
 import { TaskEither, tryCatch } from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 import {
@@ -36,18 +36,9 @@ export const GetInsertOrReplaceEntity = (
   tableService: TableService,
   tableName: NonEmptyString
 ): InsertOrReplaceEntity => (entity: AuditLogTableRow) =>
-  tryCatch<Error, unknown>(
-    () =>
-      new Promise((resolve, reject) =>
-        tableService.insertOrReplaceEntity(tableName, entity, (err, result) => {
-          if (err) {
-            return reject(err);
-          }
-          return resolve(result);
-        })
-      ),
-    err => err as Error
-  );
+  taskify<Error, unknown>(cb =>
+    tableService.insertOrReplaceEntity(tableName, entity, cb)
+  )();
 
 /**
  * Augment an http handler to trace its execution
