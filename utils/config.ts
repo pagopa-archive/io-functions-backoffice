@@ -23,6 +23,9 @@ export const IConfig = t.interface({
   ADB2C_POLICY_NAME: NonEmptyString,
   ADB2C_TENANT_NAME: NonEmptyString,
 
+  DASHBOARD_LOGS_TABLE_NAME: NonEmptyString,
+  DASHBOARD_STORAGE_CONNECTION_STRING: NonEmptyString,
+
   ADB2C_CONFIG: t.any // TODO: Define the ADB2C_CONFIG type
 });
 
