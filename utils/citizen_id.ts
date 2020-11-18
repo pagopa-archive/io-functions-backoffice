@@ -88,28 +88,29 @@ const checkUserGroups = (
       taskEither.of(userGroups.includes(adminGroup))
   );
 
-export const withCitizenIdCheck = <T, S>(
+export const withCitizenIdCheck = (
   userId: NonEmptyString,
   citizenId: CitizenID,
   publicRsaCertificate: NonEmptyString,
   adb2cCreds: IServicePrincipalCreds,
   canQueryFiscalCodeGroup: NonEmptyString,
-  cacheTtl: NonNegativeInteger,
-  f: (fiscalCode: FiscalCode) => TaskEither<T, S>
+  cacheTtl: NonNegativeInteger
 ) =>
   // TODO insert group check in case of FiscalCode used by non admin users
   FiscalCode.is(citizenId)
-    ? checkUserGroups(userId, canQueryFiscalCodeGroup, adb2cCreds, cacheTtl)
-        .foldTaskEither<
-          IResponseErrorForbiddenNotAuthorized | IResponseErrorInternal | T,
-          FiscalCode
-        >(fromLeft, isAdmin =>
-          !isAdmin
-            ? fromLeft(ResponseErrorForbiddenNotAuthorized)
-            : taskEither.of(citizenId)
-        )
-        .chain(_ => f(_))
-    : verifySupportToken(publicRsaCertificate, citizenId).foldTaskEither<
-        T | IResponseErrorForbiddenNotAuthorized | IResponseErrorValidation,
-        S
-      >(fromLeft, _ => f(_));
+    ? checkUserGroups(
+        userId,
+        canQueryFiscalCodeGroup,
+        adb2cCreds,
+        cacheTtl
+      ).foldTaskEither<
+        | IResponseErrorForbiddenNotAuthorized
+        | IResponseErrorInternal
+        | IResponseErrorValidation,
+        FiscalCode
+      >(fromLeft, isAdmin =>
+        !isAdmin
+          ? fromLeft(ResponseErrorForbiddenNotAuthorized)
+          : taskEither.of(citizenId)
+      )
+    : verifySupportToken(publicRsaCertificate, citizenId);
