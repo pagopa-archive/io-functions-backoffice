@@ -28,7 +28,7 @@ export class Transaction {
   @ViewColumn({
     name: "acquirer_c"
   })
-  acquirer_descr: string;
+  acquirer: string; // TODO: It's an enum type
 
   @ViewColumn({
     name: "id_trx_acquirer_s"
@@ -43,7 +43,7 @@ export class Transaction {
   @ViewColumn({
     name: "operation_type_c"
   })
-  operation_type_id?: string; // TODO: It's an enum type
+  operation_type?: string; // TODO: It's an enum type
 
   @ViewColumn({
     name: "circuit_type_c"
@@ -58,7 +58,7 @@ export class Transaction {
   @ViewColumn({
     name: "amount_currency_c"
   })
-  amount_currency?: string;
+  amount_currency?: string; // TODO: fixed to 978 = EUR
 
   @ViewColumn({
     name: "score_n"
@@ -114,6 +114,26 @@ export class Transaction {
     name: "enabled_b"
   })
   enabled?: boolean;
+
+  @ViewColumn({
+    name: "paym_instr_insert_date_t"
+  })
+  payment_instrument_insert_date?: Date;
+
+  @ViewColumn({
+    name: "paym_instr_insert_user_s"
+  })
+  payment_instrument_insert_user?: string;
+
+  @ViewColumn({
+    name: "paym_instr_update_date_t"
+  })
+  payment_instrument_update_date?: Date;
+
+  @ViewColumn({
+    name: "paym_instr_update_user_s"
+  })
+  payment_instrument_update_user?: string;
 
   @AfterLoad()
   // Convert all null values to undefined
