@@ -121,17 +121,17 @@ export class Transaction {
   payment_instrument_insert_date?: Date;
 
   @ViewColumn({
-    name: "paym_instr_insert_date_t"
+    name: "paym_instr_insert_user_s"
   })
   payment_instrument_insert_user?: string;
 
   @ViewColumn({
-    name: "paym_instr_insert_date_t"
+    name: "paym_instr_update_date_t"
   })
   payment_instrument_update_date?: Date;
 
   @ViewColumn({
-    name: "paym_instr_insert_date_t"
+    name: "paym_instr_update_user_s"
   })
   payment_instrument_update_user?: string;
 
