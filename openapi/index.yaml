@@ -17,12 +17,12 @@ security:
   - Bearer: []
 paths:
   "/bpd/citizen":
-    parameters:
-      - $ref: "#/parameters/CitizenID"
     get:
       operationId: GetBPDCitizen
       summary: Get BPD Citizen info
       description: Get the Citizen BPD info
+      parameters:
+        - $ref: "#/parameters/CitizenID"
       responses:
         "200":
           description: Found.
@@ -61,12 +61,12 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
   "/bpd/transactions":
-    parameters:
-        - $ref: "#/parameters/CitizenID"
     get:
       operationId: GetBPDTransactions
       summary: Get BPD transactions info list
       description: Get the BPD transactions info list
+      parameters:
+          - $ref: "#/parameters/CitizenID"
       responses:
         "200":
           description: Found.
@@ -152,7 +152,7 @@ definitions:
     description: Fiscal Code or Support Token for Citizen Identification
     x-one-of: true
     allOf:
-      - $ref: "#/definitions/FiscalCode"    
+      - $ref: "#/definitions/FiscalCode"
       - $ref: "#/definitions/SupportToken"
 
   BPDTransactionList:
