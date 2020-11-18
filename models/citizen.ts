@@ -1,17 +1,7 @@
 // tslint:disable: member-access variable-name
-import * as t from "io-ts";
 import { FiscalCode } from "italia-ts-commons/lib/strings";
-import { enumType } from "italia-ts-commons/lib/types";
 import { AfterLoad, ViewColumn, ViewEntity } from "typeorm";
-
-export enum StatusEnum {
-  "ACTIVE" = "ACTIVE",
-
-  "INACTIVE" = "INACTIVE"
-}
-
-export const Status = enumType<StatusEnum>(StatusEnum, "status");
-export type Status = t.TypeOf<typeof Status>;
+import { Payment_instrument_statusEnum } from "../generated/definitions/PaymentMethod";
 
 @ViewEntity("v_bpd_citizen")
 export class Citizen {
@@ -21,9 +11,19 @@ export class Citizen {
   fiscal_code: FiscalCode;
 
   @ViewColumn({
+    name: "timestamp_tc_t"
+  })
+  timestamp_tc: Date;
+
+  @ViewColumn({
     name: "payoff_instr_s"
   })
   payoff_instr?: string;
+
+  @ViewColumn({
+    name: "payoff_instr_type_c"
+  })
+  payoff_instr_type?: string;
 
   @ViewColumn({
     name: "ctz_insert_date_t"
@@ -46,24 +46,39 @@ export class Citizen {
   update_user?: string;
 
   @ViewColumn({
+    name: "enabled_b"
+  })
+  enabled?: boolean;
+
+  @ViewColumn({
     name: "hpan_s"
   })
   payment_instrument_hpan?: string;
 
   @ViewColumn({
-    name: "enabled_b"
-  })
-  citizen_enabled?: boolean;
-
-  @ViewColumn({
-    name: "timestamp_tc_t"
-  })
-  timestamp_tc: Date;
-
-  @ViewColumn({
     name: "status_c"
   })
-  payment_instrument_status?: Status;
+  payment_instrument_status?: Payment_instrument_statusEnum;
+
+  @ViewColumn({
+    name: "pay_istr_insert_date_t"
+  })
+  payment_instrument_insert_date?: Date;
+
+  @ViewColumn({
+    name: "pay_istr_insert_user_s"
+  })
+  payment_instrument_insert_user?: string;
+
+  @ViewColumn({
+    name: "pay_istr_update_date_t"
+  })
+  payment_instrument_update_date?: Date;
+
+  @ViewColumn({
+    name: "pay_istr_update_user_s"
+  })
+  payment_instrument_update_user?: string;
 
   @AfterLoad()
   // Convert all null values to undefined
