@@ -17,12 +17,12 @@ security:
   - Bearer: []
 paths:
   "/bpd/citizen":
-    parameters:
-      - $ref: "#/parameters/CitizenID"
     get:
       operationId: GetBPDCitizen
       summary: Get BPD Citizen info
       description: Get the Citizen BPD info
+      parameters:
+        - $ref: "#/parameters/CitizenID"
       responses:
         "200":
           description: Found.
@@ -32,14 +32,20 @@ paths:
             application/json:
               fiscal_code: "AAABBB01C02D345A"
               timestamp_tc: "2011-10-05T14:48:00.000Z"
-              payment_methods:
-                - payment_instrument_hpan: "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
-                  payment_instrument_status: "ACTIVE"
+              payoff_instr: "IT90M0300203280482653729744"
+              payoff_instr_type: "IBAN"
+              enabled: "true"
               insert_date: "2011-10-05T14:48:00.000Z"
               insert_user: "Bank"
               update_date: "2011-10-05T14:48:00.000Z"
               update_user: "Bank"
-              payoff_instr: "IT90M0300203280482653729744"
+              payment_methods:
+                - payment_instrument_hpan: "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+                  payment_instrument_status: "ACTIVE"
+                  payment_instrument_insert_date: "2011-10-05T14:48:00.000Z"
+                  payment_instrument_insert_user: "Bank"
+                  payment_instrument_update_date: "2011-10-05T14:48:00.000Z"
+                  payment_instrument_update_user: "Bank"
         "400":
           description: Invalid request.
           schema:
@@ -55,12 +61,12 @@ paths:
           schema:
             $ref: "#/definitions/ProblemJson"
   "/bpd/transactions":
-    parameters:
-        - $ref: "#/parameters/CitizenID"
     get:
       operationId: GetBPDTransactions
       summary: Get BPD transactions info list
       description: Get the BPD transactions info list
+      parameters:
+          - $ref: "#/parameters/CitizenID"
       responses:
         "200":
           description: Found.
@@ -90,27 +96,29 @@ definitions:
     properties:
       fiscal_code:
         $ref: "#/definitions/FiscalCode"
+      timestamp_tc:
+        type: string
+        format: dateTime
+      payoff_instr:
+        type: string
+      payoff_instr_type:
+        type: string
       insert_date:
         type: string
         format: dateTime
       insert_user:
         type: string
-      citizen_enabled:
-        type: boolean
-      timestamp_tc:
-        type: string
-        format: dateTime
-      payment_methods:
-        type: array
-        items:
-          $ref: "#/definitions/PaymentMethod"
       update_date:
         type: string
         format: dateTime
       update_user:
         type: string
-      payoff_instr:
-        type: string
+      enabled:
+        type: boolean
+      payment_methods:
+        type: array
+        items:
+          $ref: "#/definitions/PaymentMethod"
     required:
       - fiscal_code
       - timestamp_tc
@@ -123,6 +131,16 @@ definitions:
       payment_instrument_status:
         type: string
         enum: [ACTIVE, INACTIVE]
+      payment_instrument_insert_date:
+        type: string
+        format: dateTime
+      payment_instrument_insert_user:
+        type: string
+      payment_instrument_update_date:
+        type: string
+        format: dateTime
+      payment_instrument_update_user:
+        type: string
     required:
       - payment_instrument_hpan
       - payment_instrument_status
@@ -134,7 +152,7 @@ definitions:
     description: Fiscal Code or Support Token for Citizen Identification
     x-one-of: true
     allOf:
-      - $ref: "#/definitions/FiscalCode"    
+      - $ref: "#/definitions/FiscalCode"
       - $ref: "#/definitions/SupportToken"
   BPDTransactionList:
     type: object
