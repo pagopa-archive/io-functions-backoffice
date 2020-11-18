@@ -1,6 +1,5 @@
 /* tslint:disable: no-any */
 
-import { none, some } from "fp-ts/lib/Option";
 import { taskEither } from "fp-ts/lib/TaskEither";
 import { IResponseSuccessJson } from "italia-ts-commons/lib/responses";
 import {
@@ -23,12 +22,6 @@ const mockTransactionRepository = taskEither.of<Error, Repository<Transaction>>(
 );
 
 const aFiscalCode = "AAABBB01C02D345D" as FiscalCode;
-const aPublicRsaCert = `-----BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCc3FR1mjQDrhvaDF8UpdtQQknh
-MAyxT1o6eCwWIiF+ZHsnnnn8XI++V11+uqSlRlh9gamt4XKqc8/4vKTKzxBYJPV/
-TuJDDBC1kbs6SGpqbMjnHk4hUXeSlxbvuksmnwEzmT7u9jYlCj5Zjmr+pBLKBoTk
-FmprTzaax++spskX3QIDAQAB
------END PUBLIC KEY-----` as NonEmptyString;
 const anAcquirer = "Acquirer1";
 const aTimestamp = new Date();
 
@@ -40,6 +33,9 @@ const anAuthenticatedUser: AdUser = {
 };
 
 describe("GetBPDTransactionsHandler", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it("should return a success response if query success", async () => {
     mockFind.mockImplementationOnce(async () => {
       return [
@@ -62,10 +58,7 @@ describe("GetBPDTransactionsHandler", () => {
         // tslint:disable-next-line: readonly-array
       ] as Transaction[];
     });
-    const handler = GetBPDTransactionsHandler(
-      mockTransactionRepository,
-      aPublicRsaCert
-    );
+    const handler = GetBPDTransactionsHandler(mockTransactionRepository);
     const response = await handler(context, anAuthenticatedUser, aFiscalCode);
 
     expect(response.kind).toBe("IResponseSuccessJson");
@@ -81,10 +74,7 @@ describe("GetBPDTransactionsHandler", () => {
     mockFind.mockImplementationOnce(async () => {
       return [];
     });
-    const handler = GetBPDTransactionsHandler(
-      mockTransactionRepository,
-      aPublicRsaCert
-    );
+    const handler = GetBPDTransactionsHandler(mockTransactionRepository);
     const response = await handler(context, anAuthenticatedUser, aFiscalCode);
 
     expect(response.kind).toBe("IResponseSuccessJson");
@@ -101,10 +91,7 @@ describe("GetBPDTransactionsHandler", () => {
     mockFind.mockImplementationOnce(() => {
       return Promise.reject(expectedError);
     });
-    const handler = GetBPDTransactionsHandler(
-      mockTransactionRepository,
-      aPublicRsaCert
-    );
+    const handler = GetBPDTransactionsHandler(mockTransactionRepository);
     const response = await handler(context, anAuthenticatedUser, aFiscalCode);
 
     expect(context.log.error).toBeCalledTimes(1);
@@ -122,10 +109,7 @@ describe("GetBPDTransactionsHandler", () => {
         }
       ];
     });
-    const handler = GetBPDTransactionsHandler(
-      mockTransactionRepository,
-      aPublicRsaCert
-    );
+    const handler = GetBPDTransactionsHandler(mockTransactionRepository);
     const response = await handler(context, anAuthenticatedUser, aFiscalCode);
 
     expect(response.kind).toBe("IResponseErrorValidation");
