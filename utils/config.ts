@@ -1,5 +1,8 @@
 import * as t from "io-ts";
-import { NumberFromString } from "italia-ts-commons/lib/numbers";
+import {
+  NonNegativeInteger,
+  NumberFromString
+} from "italia-ts-commons/lib/numbers";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { IBearerStrategyOptionWithRequest } from "passport-azure-ad";
@@ -19,11 +22,19 @@ export const IConfig = t.interface({
 
   JWT_SUPPORT_TOKEN_PUBLIC_RSA_CERTIFICATE: NonEmptyString,
 
+  ADB2C_ADMIN_GROUP_NAME: NonEmptyString,
+
   ADB2C_CLIENT_ID: NonEmptyString,
+
+  ADB2C_CLIENT_KEY: NonEmptyString,
   ADB2C_POLICY_NAME: NonEmptyString,
+  ADB2C_TENANT_ID: NonEmptyString,
+
   ADB2C_TENANT_NAME: NonEmptyString,
 
-  ADB2C_CONFIG: t.any // TODO: Define the ADB2C_CONFIG type
+  ADB2C_CONFIG: t.any, // TODO: Define the ADB2C_CONFIG type
+
+  IN_MEMORY_CACHE_TTL: NonNegativeInteger
 });
 
 export const creds: IBearerStrategyOptionWithRequest = {

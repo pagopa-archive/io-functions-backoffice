@@ -12,6 +12,7 @@ import { Citizen } from "../models/citizen";
 import { getRepository, IPostgresConnectionParams } from "../utils/database";
 import { GetBPDCitizen } from "./handler";
 
+import { IServicePrincipalCreds } from "../utils/adb2c";
 import { getConfigOrThrow } from "../utils/config";
 import { GetOAuthVerifier } from "../utils/middleware/oauth_adb2c";
 import { setupBearerStrategy } from "../utils/strategy/bearer_strategy";
@@ -54,13 +55,22 @@ setupBearerStrategy(
   }
 );
 
+const adb2cCreds: IServicePrincipalCreds = {
+  clientId: config.ADB2C_CLIENT_ID,
+  secret: config.ADB2C_CLIENT_KEY,
+  tenantId: config.ADB2C_TENANT_ID
+};
+
 // Add express route
 app.get(
   "/api/v1/bpd/citizen",
   GetOAuthVerifier(passportAuthenticator, config.ADB2C_POLICY_NAME),
   GetBPDCitizen(
     getRepository(postgresConfig, Citizen),
-    config.JWT_SUPPORT_TOKEN_PUBLIC_RSA_CERTIFICATE
+    config.JWT_SUPPORT_TOKEN_PUBLIC_RSA_CERTIFICATE,
+    adb2cCreds,
+    config.ADB2C_ADMIN_GROUP_NAME,
+    config.IN_MEMORY_CACHE_TTL
   )
 );
 

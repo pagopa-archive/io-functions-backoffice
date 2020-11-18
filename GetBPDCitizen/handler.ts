@@ -15,6 +15,7 @@ import {
   wrapRequestHandler
 } from "io-functions-commons/dist/src/utils/request_middleware";
 import * as t from "io-ts";
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import {
   IResponseErrorForbiddenNotAuthorized,
@@ -33,6 +34,7 @@ import { BPDCitizen } from "../generated/definitions/BPDCitizen";
 import { CitizenID } from "../generated/definitions/CitizenID";
 import { PaymentMethod } from "../generated/definitions/PaymentMethod";
 import { Citizen } from "../models/citizen";
+import { IServicePrincipalCreds } from "../utils/adb2c";
 import { withCitizenIdCheck } from "../utils/citizen_id";
 import { RequiredExpressUserMiddleware } from "../utils/middleware/required_express_user";
 import { RequiredHeaderMiddleware } from "../utils/middleware/required_header";
@@ -83,12 +85,19 @@ export const toApiBPDCitizen = (
 
 export function GetBPDCitizenHandler(
   citizenRepository: TaskEither<Error, Repository<Citizen>>,
-  publicRsaCertificate: NonEmptyString
+  publicRsaCertificate: NonEmptyString,
+  adb2cCreds: IServicePrincipalCreds,
+  adb2cAdminGroup: NonEmptyString,
+  cacheTtl: NonNegativeInteger
 ): IHttpHandler {
   return async (context, _, citizenId) => {
     return withCitizenIdCheck(
+      _.oid,
       citizenId,
       publicRsaCertificate,
+      adb2cCreds,
+      adb2cAdminGroup,
+      cacheTtl,
       requestFiscalCode =>
         citizenRepository
           .chain(citizen =>
@@ -133,9 +142,18 @@ export function GetBPDCitizenHandler(
 
 export function GetBPDCitizen(
   citizenRepository: TaskEither<Error, Repository<Citizen>>,
-  publicRsaCertificate: NonEmptyString
+  publicRsaCertificate: NonEmptyString,
+  adb2cCreds: IServicePrincipalCreds,
+  adb2cAdminGroup: NonEmptyString,
+  cacheTtl: NonNegativeInteger
 ): express.RequestHandler {
-  const handler = GetBPDCitizenHandler(citizenRepository, publicRsaCertificate);
+  const handler = GetBPDCitizenHandler(
+    citizenRepository,
+    publicRsaCertificate,
+    adb2cCreds,
+    adb2cAdminGroup,
+    cacheTtl
+  );
 
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
