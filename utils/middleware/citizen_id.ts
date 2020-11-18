@@ -31,22 +31,15 @@ export const RequestCitizenToFiscalCode = (
   FiscalCode
 > => async request => {
   return (
-    taskEither
-      .of<
-        IResponseErrorValidation | IResponseErrorForbiddenNotAuthorized,
-        void
-      >(void 0)
-      // validate the header is present and its value is in the correct shape
-      .chain(_ =>
-        tryCatch(
-          () => RequiredHeaderMiddleware(headerName, CitizenID)(request),
-          e =>
-            ResponseErrorValidation(
-              `Invalid ${headerName} header`,
-              toError(e).message
-            )
-        )
-      )
+    // validate the header is present and its value is in the correct shape
+    tryCatch(
+      () => RequiredHeaderMiddleware(headerName, CitizenID)(request),
+      e =>
+        ResponseErrorValidation(
+          `Invalid ${headerName} header`,
+          toError(e).message
+        ) as IResponseErrorValidation | IResponseErrorForbiddenNotAuthorized
+    )
       .chain(fromEither)
       // validate the value is either a fiscal code or a valid JWT. In the latter case, the fiscal code is resolved
       .chain(c =>
