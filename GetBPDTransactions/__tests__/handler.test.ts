@@ -32,6 +32,11 @@ const anAuthenticatedUser: AdUser = {
   oid: "anUserOID" as NonEmptyString
 };
 
+const aUserAndFiscalCode = {
+  fiscalCode: aFiscalCode,
+  user: anAuthenticatedUser
+};
+
 describe("GetBPDTransactionsHandler", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -59,7 +64,7 @@ describe("GetBPDTransactionsHandler", () => {
       ] as Transaction[];
     });
     const handler = GetBPDTransactionsHandler(mockTransactionRepository);
-    const response = await handler(context, anAuthenticatedUser, aFiscalCode);
+    const response = await handler(context, aUserAndFiscalCode);
 
     expect(response.kind).toBe("IResponseSuccessJson");
     const responseValue = (response as IResponseSuccessJson<BPDTransactionList>)
@@ -75,7 +80,7 @@ describe("GetBPDTransactionsHandler", () => {
       return [];
     });
     const handler = GetBPDTransactionsHandler(mockTransactionRepository);
-    const response = await handler(context, anAuthenticatedUser, aFiscalCode);
+    const response = await handler(context, aUserAndFiscalCode);
 
     expect(response.kind).toBe("IResponseSuccessJson");
     const responseValue = (response as IResponseSuccessJson<BPDTransactionList>)
@@ -92,7 +97,7 @@ describe("GetBPDTransactionsHandler", () => {
       return Promise.reject(expectedError);
     });
     const handler = GetBPDTransactionsHandler(mockTransactionRepository);
-    const response = await handler(context, anAuthenticatedUser, aFiscalCode);
+    const response = await handler(context, aUserAndFiscalCode);
 
     expect(context.log.error).toBeCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorInternal");
@@ -110,7 +115,7 @@ describe("GetBPDTransactionsHandler", () => {
       ];
     });
     const handler = GetBPDTransactionsHandler(mockTransactionRepository);
-    const response = await handler(context, anAuthenticatedUser, aFiscalCode);
+    const response = await handler(context, aUserAndFiscalCode);
 
     expect(response.kind).toBe("IResponseErrorValidation");
   });

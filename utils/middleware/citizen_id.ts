@@ -17,13 +17,13 @@ import { AdUser } from "../strategy/bearer_strategy";
 import { RequiredExpressUserMiddleware } from "./required_express_user";
 import { RequiredHeaderMiddleware } from "./required_header";
 
-const RequestCitizenToOidAndFiscalCode = t.interface({
+const RequestCitizenToAdUserAndFiscalCode = t.interface({
   fiscalCode: FiscalCode,
-  oid: NonEmptyString
+  user: AdUser
 });
 
-export type RequestCitizenToOidAndFiscalCode = t.TypeOf<
-  typeof RequestCitizenToOidAndFiscalCode
+export type RequestCitizenToAdUserAndFiscalCode = t.TypeOf<
+  typeof RequestCitizenToAdUserAndFiscalCode
 >;
 
 /**
@@ -47,7 +47,7 @@ export const RequestCitizenToFiscalCode = (
   | "IResponseErrorValidation"
   | "IResponseErrorForbiddenNotAuthorized"
   | "IResponseErrorInternal",
-  RequestCitizenToOidAndFiscalCode
+  RequestCitizenToAdUserAndFiscalCode
 > => async request => {
   return (
     tryCatch(
@@ -68,7 +68,7 @@ export const RequestCitizenToFiscalCode = (
           .chain(fromEither)
           .map(citizenId => ({
             citizenId,
-            oid: _.oid
+            user: _
           }))
       )
       // validate the value is either a fiscal code or a valid JWT. In the latter case, the fiscal code is resolved
@@ -76,16 +76,16 @@ export const RequestCitizenToFiscalCode = (
         | IResponseErrorValidation
         | IResponseErrorForbiddenNotAuthorized
         | IResponseErrorInternal,
-        RequestCitizenToOidAndFiscalCode
-      >(fromLeft, ({ citizenId, oid }) =>
+        RequestCitizenToAdUserAndFiscalCode
+      >(fromLeft, ({ citizenId, user }) =>
         withCitizenIdCheck(
-          oid,
+          user.oid,
           citizenId,
           publicRsaCertificate,
           adb2cCreds,
           adb2cAdminGroup,
           cacheTtl
-        ).map(__ => ({ oid, fiscalCode: __ }))
+        ).map(__ => ({ user, fiscalCode: __ }))
       )
       .run()
   );

@@ -10,6 +10,7 @@ import {
   wrapRequestHandler
 } from "io-functions-commons/dist/src/utils/request_middleware";
 import * as t from "io-ts";
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import {
   IResponseErrorForbiddenNotAuthorized,
@@ -21,15 +22,17 @@ import {
   ResponseErrorValidation,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
+import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { Repository } from "typeorm";
 import { BPDTransaction } from "../generated/definitions/BPDTransaction";
 import { BPDTransactionList } from "../generated/definitions/BPDTransactionList";
 import { Transaction } from "../models/transaction";
+import { IServicePrincipalCreds } from "../utils/adb2c";
 import { InsertOrReplaceEntity, withAudit } from "../utils/audit_logs";
-import { RequestCitizenToFiscalCode } from "../utils/middleware/citizen_id";
-import { RequiredExpressUserMiddleware } from "../utils/middleware/required_express_user";
-import { AdUser } from "../utils/strategy/bearer_strategy";
+import {
+  RequestCitizenToAdUserAndFiscalCode,
+  RequestCitizenToFiscalCode
+} from "../utils/middleware/citizen_id";
 
 type ErrorTypes =
   | IResponseErrorForbiddenNotAuthorized
@@ -39,8 +42,7 @@ type ErrorTypes =
 
 type IHttpHandler = (
   context: Context,
-  user: AdUser,
-  fiscalCode: FiscalCode
+  userAndCitizenId: RequestCitizenToAdUserAndFiscalCode
 ) => Promise<IResponseSuccessJson<BPDTransactionList> | ErrorTypes>;
 
 // Convert model object to API object
@@ -62,11 +64,12 @@ export const toApiBPDTransactionList = (
 export function GetBPDTransactionsHandler(
   transactionRepository: TaskEither<Error, Repository<Transaction>>
 ): IHttpHandler {
-  return async (context, _, fiscalCode) => {
+  return async (context, userAndfiscalCode) => {
     return transactionRepository
       .chain(transactions =>
         tryCatch(
-          () => transactions.find({ fiscal_code: fiscalCode }),
+          () =>
+            transactions.find({ fiscal_code: userAndfiscalCode.fiscalCode }),
           err => {
             context.log.error(
               `GetBPDTransactionsHandler|ERROR|Find citizen transactions query error [${err}]`
@@ -98,21 +101,28 @@ export function GetBPDTransactionsHandler(
 export function GetBPDTransactions(
   citizenRepository: TaskEither<Error, Repository<Transaction>>,
   insertOrReplaceEntity: InsertOrReplaceEntity,
-  publicRsaCertificate: NonEmptyString
+  publicRsaCertificate: NonEmptyString,
+  adb2cCreds: IServicePrincipalCreds,
+  adb2cAdminGroup: NonEmptyString,
+  cacheTtl: NonNegativeInteger
 ): express.RequestHandler {
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
-    RequiredExpressUserMiddleware(AdUser),
-    RequestCitizenToFiscalCode(publicRsaCertificate)
+    RequestCitizenToFiscalCode(
+      publicRsaCertificate,
+      adb2cCreds,
+      adb2cAdminGroup,
+      cacheTtl
+    )
   );
 
   const handler = withAudit(insertOrReplaceEntity)(
     GetBPDTransactionsHandler(citizenRepository),
-    (context, { oid }, fiscalCode) => ({
+    (context, { user, fiscalCode }) => ({
       AuthLevel: "Admin",
       Citizen: fiscalCode,
       OperationName: "GetBPDCitizen",
-      PartitionKey: oid, // Can we use email?
+      PartitionKey: user.oid, // Can we use email?
       RowKey: context.executionContext.invocationId as string & NonEmptyString
     })
   );

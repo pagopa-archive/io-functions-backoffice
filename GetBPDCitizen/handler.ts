@@ -37,8 +37,8 @@ import { Citizen } from "../models/citizen";
 import { IServicePrincipalCreds } from "../utils/adb2c";
 import { InsertOrReplaceEntity, withAudit } from "../utils/audit_logs";
 import {
-  RequestCitizenToFiscalCode,
-  RequestCitizenToOidAndFiscalCode
+  RequestCitizenToAdUserAndFiscalCode,
+  RequestCitizenToFiscalCode
 } from "../utils/middleware/citizen_id";
 
 type ResponseErrorTypes =
@@ -49,7 +49,7 @@ type ResponseErrorTypes =
 
 type IHttpHandler = (
   context: Context,
-  userAndCitizenId: RequestCitizenToOidAndFiscalCode
+  userAndCitizenId: RequestCitizenToAdUserAndFiscalCode
 ) => Promise<IResponseSuccessJson<BPDCitizen> | ResponseErrorTypes>;
 
 // Convert model object to API object
@@ -166,11 +166,11 @@ export function GetBPDCitizen(
 
   const handler = withAudit(insertOrReplaceEntity)(
     GetBPDCitizenHandler(citizenRepository),
-    (context, { oid, fiscalCode }) => ({
+    (context, { user, fiscalCode }) => ({
       AuthLevel: "Admin",
       Citizen: fiscalCode,
       OperationName: "GetBPDCitizen",
-      PartitionKey: oid, // Can we use email?
+      PartitionKey: user.oid, // Can we use email?
       RowKey: context.executionContext.invocationId as string & NonEmptyString
     })
   );
