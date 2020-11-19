@@ -39,6 +39,7 @@ const mockUser: AdUser = {
   emails: ["user@mail.com" as EmailString],
   family_name: "family_name",
   given_name: "given_name",
+  groups: [anAdminGroup],
   oid: aUserOid
 };
 const mockRequest = ({

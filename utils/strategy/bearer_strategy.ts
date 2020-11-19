@@ -11,17 +11,23 @@ import {
   IBearerStrategyOptionWithRequest
 } from "passport-azure-ad";
 
-/**
- * Format of the Active directory B2C user data.
- * See the ADB2C tenant configuration for custom attributes (extensions).
- */
-export const AdUser = t.interface({
+const AdUserR = t.interface({
   emails: t.array(EmailString),
   family_name: t.string,
   given_name: t.string,
   oid: NonEmptyString
 });
 
+const AdUserO = t.partial({
+  groups: t.array(NonEmptyString)
+});
+
+/**
+ * Format of the Active directory B2C user data.
+ * See the ADB2C tenant configuration for custom attributes (extensions).
+ */
+
+export const AdUser = t.exact(t.intersection([AdUserR, AdUserO], "AdUser"));
 export type AdUser = t.TypeOf<typeof AdUser>;
 
 // -----------------------------------------------------------------------------

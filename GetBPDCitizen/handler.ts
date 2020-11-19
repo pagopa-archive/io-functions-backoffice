@@ -34,6 +34,7 @@ import { Repository } from "typeorm";
 import { BPDCitizen } from "../generated/definitions/BPDCitizen";
 import { PaymentMethod } from "../generated/definitions/PaymentMethod";
 import { Citizen } from "../models/citizen";
+import { isAdminAuthLevel } from "../utils/ad_user";
 import { IServicePrincipalCreds } from "../utils/adb2c";
 import { InsertOrReplaceEntity, withAudit } from "../utils/audit_logs";
 import {
@@ -167,7 +168,7 @@ export function GetBPDCitizen(
   const handler = withAudit(insertOrReplaceEntity)(
     GetBPDCitizenHandler(citizenRepository),
     (context, { user, fiscalCode }) => ({
-      AuthLevel: "Admin",
+      AuthLevel: isAdminAuthLevel(user, adb2cAdminGroup) ? "Admin" : "Support",
       Citizen: fiscalCode,
       OperationName: "GetBPDCitizen",
       PartitionKey: user.oid, // Can we use email?

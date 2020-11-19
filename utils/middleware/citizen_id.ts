@@ -1,4 +1,5 @@
 import { toError } from "fp-ts/lib/Either";
+import { identity } from "fp-ts/lib/function";
 import { fromEither, fromLeft, tryCatch } from "fp-ts/lib/TaskEither";
 import { IRequestMiddleware } from "io-functions-commons/dist/src/utils/request_middleware";
 import * as t from "io-ts";
@@ -52,9 +53,11 @@ export const RequestCitizenToFiscalCode = (
   return (
     // validate AdUser is present and its value is in the correct shape
     tryCatch(
-      () => RequiredExpressUserMiddleware(AdUser)(request),
+      () =>
+        RequiredExpressUserMiddleware(AdUser, adb2cCreds, cacheTtl)(request),
       err => ResponseErrorValidation(`Invalid AdUser`, toError(err).message)
     )
+      .mapLeft<IResponseErrorValidation | IResponseErrorInternal>(identity)
       .chain(fromEither)
       // validate the header is present and its value is in the correct shape
       .chain(_ =>
@@ -80,13 +83,14 @@ export const RequestCitizenToFiscalCode = (
         RequestCitizenToAdUserAndFiscalCode
       >(fromLeft, ({ citizenId, user }) =>
         withCitizenIdCheck(
-          user.oid,
+          user,
           citizenId,
           publicRsaCertificate,
-          adb2cCreds,
-          adb2cAdminGroup,
-          cacheTtl
-        ).map(__ => ({ user, fiscalCode: __ }))
+          adb2cAdminGroup
+        ).map(__ => ({
+          fiscalCode: __,
+          user
+        }))
       )
       .run()
   );
