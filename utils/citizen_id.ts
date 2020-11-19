@@ -6,7 +6,7 @@ import { fromEither, fromLeft } from "fp-ts/lib/TaskEither";
 import { taskEither } from "fp-ts/lib/TaskEither";
 import { taskify } from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { NumberFromString } from "italia-ts-commons/lib/numbers";
 import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
@@ -57,7 +57,7 @@ const checkUserGroups = (
   userId: NonEmptyString,
   adminGroup: NonEmptyString,
   adb2cCreds: IServicePrincipalCreds,
-  cacheTtl: NonNegativeInteger
+  cacheTtl: NumberFromString
 ) =>
   fromNullable(memcache.get(userId)).foldL(
     () =>
@@ -94,9 +94,8 @@ export const withCitizenIdCheck = (
   publicRsaCertificate: NonEmptyString,
   adb2cCreds: IServicePrincipalCreds,
   canQueryFiscalCodeGroup: NonEmptyString,
-  cacheTtl: NonNegativeInteger
+  cacheTtl: NumberFromString
 ) =>
-  // TODO insert group check in case of FiscalCode used by non admin users
   FiscalCode.is(citizenId)
     ? checkUserGroups(
         userId,

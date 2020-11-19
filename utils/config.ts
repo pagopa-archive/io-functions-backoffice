@@ -1,8 +1,5 @@
 import * as t from "io-ts";
-import {
-  NonNegativeInteger,
-  NumberFromString
-} from "italia-ts-commons/lib/numbers";
+import { NumberFromString } from "italia-ts-commons/lib/numbers";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { IBearerStrategyOptionWithRequest } from "passport-azure-ad";
@@ -35,7 +32,7 @@ export const IConfig = t.interface({
   ADB2C_CONFIG: t.any, // TODO: Define the ADB2C_CONFIG type
   DASHBOARD_LOGS_TABLE_NAME: NonEmptyString,
   DASHBOARD_STORAGE_CONNECTION_STRING: NonEmptyString,
-  IN_MEMORY_CACHE_TTL: NonNegativeInteger
+  IN_MEMORY_CACHE_TTL: NumberFromString
 });
 
 export const creds: IBearerStrategyOptionWithRequest = {

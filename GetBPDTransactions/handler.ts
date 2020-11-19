@@ -10,7 +10,7 @@ import {
   wrapRequestHandler
 } from "io-functions-commons/dist/src/utils/request_middleware";
 import * as t from "io-ts";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { NumberFromString } from "italia-ts-commons/lib/numbers";
 import { readableReport } from "italia-ts-commons/lib/reporters";
 import {
   IResponseErrorForbiddenNotAuthorized,
@@ -110,7 +110,7 @@ export function GetBPDTransactions(
   publicRsaCertificate: NonEmptyString,
   adb2cCreds: IServicePrincipalCreds,
   adb2cAdminGroup: NonEmptyString,
-  cacheTtl: NonNegativeInteger
+  cacheTtl: NumberFromString
 ): express.RequestHandler {
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),

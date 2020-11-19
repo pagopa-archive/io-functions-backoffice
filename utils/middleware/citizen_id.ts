@@ -2,7 +2,7 @@ import { toError } from "fp-ts/lib/Either";
 import { fromEither, fromLeft, tryCatch } from "fp-ts/lib/TaskEither";
 import { IRequestMiddleware } from "io-functions-commons/dist/src/utils/request_middleware";
 import * as t from "io-ts";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { NumberFromString } from "italia-ts-commons/lib/numbers";
 import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
@@ -41,7 +41,7 @@ export const RequestCitizenToFiscalCode = (
   publicRsaCertificate: NonEmptyString,
   adb2cCreds: IServicePrincipalCreds,
   adb2cAdminGroup: NonEmptyString,
-  cacheTtl: NonNegativeInteger,
+  cacheTtl: NumberFromString,
   headerName = "x-citizen-id"
 ): IRequestMiddleware<
   | "IResponseErrorValidation"
@@ -50,6 +50,7 @@ export const RequestCitizenToFiscalCode = (
   RequestCitizenToAdUserAndFiscalCode
 > => async request => {
   return (
+    // validate AdUser is present and its value is in the correct shape
     tryCatch(
       () => RequiredExpressUserMiddleware(AdUser)(request),
       err => ResponseErrorValidation(`Invalid AdUser`, toError(err).message)
