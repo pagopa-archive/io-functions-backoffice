@@ -7,7 +7,7 @@
       "name": "req",
       "route": "bpd/transactions",
       "methods": [
-        "get"
+        "get", "options"
       ]
     },
     {

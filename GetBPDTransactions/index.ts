@@ -13,6 +13,7 @@ import { Transaction } from "../models/transaction";
 import { getRepository, IPostgresConnectionParams } from "../utils/database";
 import { GetBPDTransactions } from "./handler";
 
+import * as cors from "cors";
 import { GetInsertOrReplaceEntity } from "../utils/audit_logs";
 import { getConfigOrThrow } from "../utils/config";
 import { GetOAuthVerifier } from "../utils/middleware/oauth_adb2c";
@@ -59,6 +60,7 @@ setupBearerStrategy(
 // Setup Express
 const app = express();
 secureExpressApp(app);
+app.use(cors());
 
 // Add express route
 app.get(

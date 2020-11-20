@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@azure/functions": "^1.0.3",
+    "@types/cors": "^2.8.8",
     "@types/express": "^4.16.0",
     "@types/jest": "^24.0.15",
     "@types/jsonwebtoken": "^8.5.0",
@@ -52,6 +53,7 @@
   },
   "dependencies": {
     "azure-storage": "^2.10.3",
+    "cors": "^2.8.5",
     "durable-functions": "^1.2.4",
     "express": "^4.15.3",
     "fp-ts": "1.17.4",

@@ -7,7 +7,7 @@
       "name": "req",
       "route": "bpd/citizen",
       "methods": [
-        "get"
+        "get", "options"
       ]
     },
     {

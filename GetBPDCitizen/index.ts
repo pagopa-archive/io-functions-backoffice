@@ -13,6 +13,7 @@ import { Citizen } from "../models/citizen";
 import { getRepository, IPostgresConnectionParams } from "../utils/database";
 import { GetBPDCitizen } from "./handler";
 
+import * as cors from "cors";
 import { GetInsertOrReplaceEntity } from "../utils/audit_logs";
 import { getConfigOrThrow } from "../utils/config";
 import { GetOAuthVerifier } from "../utils/middleware/oauth_adb2c";
@@ -43,6 +44,7 @@ winston.add(contextTransport);
 // Setup Express
 const app = express();
 secureExpressApp(app);
+app.use(cors());
 
 const passportAuthenticator = new passport.Passport();
 
