@@ -54,6 +54,7 @@
   "dependencies": {
     "@azure/graph": "^4.0.1",
     "@azure/ms-rest-nodeauth": "^2.0.5",
+    "azure-storage": "^2.10.3",
     "durable-functions": "^1.2.4",
     "express": "^4.15.3",
     "fp-ts": "1.17.4",
