@@ -50,7 +50,7 @@ services:
   fixtures:
     image: fixtures
     env_file:
-      - .env
+      - env.example
     build:
       context: ./
       dockerfile: docker/fixtures/Dockerfile

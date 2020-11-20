@@ -51,6 +51,7 @@
     "typescript": "^3.7.0"
   },
   "dependencies": {
+    "azure-storage": "^2.10.3",
     "durable-functions": "^1.2.4",
     "express": "^4.15.3",
     "fp-ts": "1.17.4",
