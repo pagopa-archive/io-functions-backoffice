@@ -29,7 +29,7 @@ services:
       - "traefik.http.services.functions-backoffice.loadbalancer.server.port=7071"
 
       # apply middleware to route
-      - "traefik.http.routers.functions-backoffice.middlewares=testheader,fn-backoffice-stripprefix"
+      - "traefik.http.routers.functions-backoffice.middlewares=testheader,api-replacepathregex,fn-backoffice-stripprefix"
 
   fnstorage:
     image: azurite
@@ -108,6 +108,8 @@ services:
       #- "traefik.http.middlewares.testheader.headers.contenttypenosniff=true"
       #- "traefik.http.middlewares.testheader.headers.framedeny=true"
       #- "traefik.http.middlewares.testheader.headers.browserxssfilter=true"
+      - "traefik.http.middlewares.api-replacepathregex.replacepathregex.regex=^/backoffice/(.*)"
+      - "traefik.http.middlewares.api-replacepathregex.replacepathregex.replacement=/backoffice/api/v1/$$1"
 
 networks:
   io-fn:
