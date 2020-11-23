@@ -13,7 +13,7 @@ services:
       - languageWorkers__node__arguments=--inspect=0.0.0.0:5858
     working_dir: /usr/src/app
     ports:
-      - "80:7071"
+      - "7071:7071"
       - "5858:5858"
     networks:
       - io-fn
@@ -22,6 +22,14 @@ services:
       - fixtures
     volumes:
       - .:/usr/src/app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.functions-backoffice.rule=PathPrefix(`/backoffice`)"
+      - "traefik.http.routers.functions-backoffice.entrypoints=web"
+      - "traefik.http.services.functions-backoffice.loadbalancer.server.port=7071"
+
+      # apply middleware to route
+      - "traefik.http.routers.functions-backoffice.middlewares=cors-header,fn-backoffice-replacepathregex,fn-backoffice-stripprefix"
 
   fnstorage:
     image: azurite
@@ -66,7 +74,6 @@ services:
     build:
       context: ./
       dockerfile: docker/postgres/Dockerfile
-    restart: always
     command: -c ssl=on -c ssl_cert_file=/var/lib/postgresql/server.crt -c ssl_key_file=/var/lib/postgresql/server.key
     ports:
       - "5532:5432"
@@ -74,6 +81,35 @@ services:
       POSTGRES_USER: testuser
       POSTGRES_DB: postgres
       POSTGRES_PASSWORD: test
+
+  traefik:
+    image: traefik:v2.0
+    command: |-
+      --entrypoints.web.address=:80
+      --providers.docker=true
+      --providers.docker.network=io-fn
+      --log.level=ERROR
+    ports:
+      - 80:80
+    networks:
+      - io-fn
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      # Add API prefix
+      - "traefik.http.middlewares.fn-backoffice-stripprefix.stripprefix.prefixes=/backoffice"
+      # CORS
+      - "traefik.http.middlewares.cors-header.headers.accesscontrolallowmethods=GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS"
+      - "traefik.http.middlewares.cors-header.headers.accesscontrolallowheaders=authorization,x-citizen-id"
+      #- "traefik.http.middlewares.cors-header.headers.contentsecuritypolicy=default-src 'none'; upgrade-insecure-requests"
+      - "traefik.http.middlewares.cors-header.headers.accesscontrolalloworigin=*"
+      - "traefik.http.middlewares.cors-header.headers.accesscontrolmaxage=100"
+      - "traefik.http.middlewares.cors-header.headers.addvaryheader=true"
+      #- "traefik.http.middlewares.cors-header.headers.contenttypenosniff=true"
+      #- "traefik.http.middlewares.cors-header.headers.framedeny=true"
+      #- "traefik.http.middlewares.cors-header.headers.browserxssfilter=true"
+      - "traefik.http.middlewares.fn-backoffice-replacepathregex.replacepathregex.regex=^/backoffice/(.*)"
+      - "traefik.http.middlewares.fn-backoffice-replacepathregex.replacepathregex.replacement=/backoffice/api/v1/$$1"
 
 networks:
   io-fn:
