@@ -78,7 +78,11 @@ describe("RequestCitizenToFiscalCode", () => {
       aCacheTTL
     )(mockRequest);
     expect(response).toEqual(
-      right({ fiscalCode: aFiscalCode, user: mockUser })
+      right({
+        citizenIdType: "FiscalCode",
+        fiscalCode: aFiscalCode,
+        user: mockUser
+      })
     );
   });
   it("should extract a fiscalCode from a valid JWT provided in header", async () => {
@@ -90,7 +94,11 @@ describe("RequestCitizenToFiscalCode", () => {
       aCacheTTL
     )(mockRequest);
     expect(response).toEqual(
-      right({ fiscalCode: aFiscalCode, user: mockUser })
+      right({
+        citizenIdType: "SupportToken",
+        fiscalCode: aFiscalCode,
+        user: mockUser
+      })
     );
   });
   it("should return a Validation error if the header is empty", async () => {

@@ -12,6 +12,7 @@ import {
 } from "italia-ts-commons/lib/responses";
 import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 import { CitizenID } from "../../generated/definitions/CitizenID";
+import { CitizenIDType } from "../../utils/citizen_id";
 import { IServicePrincipalCreds } from "../adb2c";
 import { withCitizenIdCheck } from "../citizen_id";
 import { AdUser } from "../strategy/bearer_strategy";
@@ -19,6 +20,7 @@ import { RequiredExpressUserMiddleware } from "./required_express_user";
 import { RequiredHeaderMiddleware } from "./required_header";
 
 const RequestCitizenToAdUserAndFiscalCode = t.interface({
+  citizenIdType: CitizenIDType,
   fiscalCode: FiscalCode,
   user: AdUser
 });
@@ -87,8 +89,8 @@ export const RequestCitizenToFiscalCode = (
           citizenId,
           publicRsaCertificate,
           adb2cAdminGroup
-        ).map(__ => ({
-          fiscalCode: __,
+        ).map(fiscalCodeAndCitizenIdType => ({
+          ...fiscalCodeAndCitizenIdType,
           user
         }))
       )

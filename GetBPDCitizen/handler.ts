@@ -167,11 +167,12 @@ export function GetBPDCitizen(
 
   const handler = withAudit(insertOrReplaceEntity)(
     GetBPDCitizenHandler(citizenRepository),
-    (context, { user, fiscalCode }) => ({
+    (context, { user, fiscalCode, citizenIdType }) => ({
       AuthLevel: isAdminAuthLevel(user, adb2cAdminGroup) ? "Admin" : "Support",
       Citizen: fiscalCode,
       OperationName: "GetBPDCitizen",
       PartitionKey: user.oid, // Can we use email?
+      QueryParamType: citizenIdType,
       RowKey: context.executionContext.invocationId as string & NonEmptyString
     })
   );

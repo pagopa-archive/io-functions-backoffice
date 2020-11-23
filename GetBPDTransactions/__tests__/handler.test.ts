@@ -11,6 +11,7 @@ import { Repository } from "typeorm";
 import { context } from "../../__mocks__/durable-functions";
 import { BPDTransactionList } from "../../generated/definitions/BPDTransactionList";
 import { Transaction } from "../../models/transaction";
+import { RequestCitizenToAdUserAndFiscalCode } from "../../utils/middleware/citizen_id";
 import { AdUser } from "../../utils/strategy/bearer_strategy";
 import { GetBPDTransactionsHandler } from "../handler";
 
@@ -32,7 +33,8 @@ const anAuthenticatedUser: AdUser = {
   oid: "anUserOID" as NonEmptyString
 };
 
-const aUserAndFiscalCode = {
+const aUserAndFiscalCode: RequestCitizenToAdUserAndFiscalCode = {
+  citizenIdType: "FiscalCode",
   fiscalCode: aFiscalCode,
   user: anAuthenticatedUser
 };

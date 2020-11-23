@@ -22,6 +22,20 @@ const TokenPayload = t.interface({
 
 type TokenPayload = t.TypeOf<typeof TokenPayload>;
 
+export const CitizenIDType = t.union([
+  t.literal("FiscalCode"),
+  t.literal("SupportToken")
+]);
+
+const FiscalCodeAndCitizenIdType = t.interface({
+  citizenIdType: CitizenIDType,
+  fiscalCode: FiscalCode
+});
+
+export type FiscalCodeAndCitizenIdType = t.TypeOf<
+  typeof FiscalCodeAndCitizenIdType
+>;
+
 const verifySupportToken = (
   pubCert: NonEmptyString,
   token: SupportToken
@@ -54,7 +68,7 @@ export const withCitizenIdCheck = (
   canQueryFiscalCodeGroup: NonEmptyString
 ): TaskEither<
   IResponseErrorForbiddenNotAuthorized | IResponseErrorValidation,
-  FiscalCode
+  FiscalCodeAndCitizenIdType
 > =>
   FiscalCode.is(citizenId)
     ? taskEither
@@ -65,6 +79,16 @@ export const withCitizenIdCheck = (
         .chain(isAdmin =>
           !isAdmin
             ? fromLeft(ResponseErrorForbiddenNotAuthorized)
-            : taskEither.of(citizenId)
+            : taskEither.of(
+                FiscalCodeAndCitizenIdType.encode({
+                  citizenIdType: "FiscalCode",
+                  fiscalCode: citizenId
+                })
+              )
         )
-    : verifySupportToken(publicRsaCertificate, citizenId);
+    : verifySupportToken(publicRsaCertificate, citizenId).map(_ =>
+        FiscalCodeAndCitizenIdType.encode({
+          citizenIdType: "SupportToken",
+          fiscalCode: _
+        })
+      );

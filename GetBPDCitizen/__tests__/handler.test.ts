@@ -59,6 +59,7 @@ describe("GetBPDCitizenHandler", () => {
     });
     const handler = GetBPDCitizenHandler(mockCitizenRepository);
     const response = await handler(context, {
+      citizenIdType: "FiscalCode",
       fiscalCode: aFiscalCode,
       user: anAuthenticatedUser
     });
@@ -78,6 +79,7 @@ describe("GetBPDCitizenHandler", () => {
     });
     const handler = GetBPDCitizenHandler(mockCitizenRepository);
     const response = await handler(context, {
+      citizenIdType: "FiscalCode",
       fiscalCode: aFiscalCode,
       user: anAuthenticatedUser
     });
@@ -92,6 +94,7 @@ describe("GetBPDCitizenHandler", () => {
     });
     const handler = GetBPDCitizenHandler(mockCitizenRepository);
     const response = await handler(context, {
+      citizenIdType: "FiscalCode",
       fiscalCode: aFiscalCode,
       user: anAuthenticatedUser
     });
@@ -110,6 +113,7 @@ describe("GetBPDCitizenHandler", () => {
     });
     const handler = GetBPDCitizenHandler(mockCitizenRepository);
     const response = await handler(context, {
+      citizenIdType: "FiscalCode",
       fiscalCode: aFiscalCode,
       user: anAuthenticatedUser
     });
