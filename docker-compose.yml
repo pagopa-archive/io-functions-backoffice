@@ -29,7 +29,7 @@ services:
       - "traefik.http.services.functions-backoffice.loadbalancer.server.port=7071"
 
       # apply middleware to route
-      - "traefik.http.routers.functions-backoffice.middlewares=testheader,api-replacepathregex,fn-backoffice-stripprefix"
+      - "traefik.http.routers.functions-backoffice.middlewares=cors-header,fn-backoffice-replacepathregex,fn-backoffice-stripprefix"
 
   fnstorage:
     image: azurite
@@ -99,17 +99,17 @@ services:
       # Add API prefix
       - "traefik.http.middlewares.fn-backoffice-stripprefix.stripprefix.prefixes=/backoffice"
       # CORS
-      - "traefik.http.middlewares.testheader.headers.accesscontrolallowmethods=GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS"
-      - "traefik.http.middlewares.testheader.headers.accesscontrolallowheaders=authorization,x-citizen-id"
-      #- "traefik.http.middlewares.testheader.headers.contentsecuritypolicy=default-src 'none'; upgrade-insecure-requests"
-      - "traefik.http.middlewares.testheader.headers.accesscontrolalloworigin=*"
-      - "traefik.http.middlewares.testheader.headers.accesscontrolmaxage=100"
-      - "traefik.http.middlewares.testheader.headers.addvaryheader=true"
-      #- "traefik.http.middlewares.testheader.headers.contenttypenosniff=true"
-      #- "traefik.http.middlewares.testheader.headers.framedeny=true"
-      #- "traefik.http.middlewares.testheader.headers.browserxssfilter=true"
-      - "traefik.http.middlewares.api-replacepathregex.replacepathregex.regex=^/backoffice/(.*)"
-      - "traefik.http.middlewares.api-replacepathregex.replacepathregex.replacement=/backoffice/api/v1/$$1"
+      - "traefik.http.middlewares.cors-header.headers.accesscontrolallowmethods=GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS"
+      - "traefik.http.middlewares.cors-header.headers.accesscontrolallowheaders=authorization,x-citizen-id"
+      #- "traefik.http.middlewares.cors-header.headers.contentsecuritypolicy=default-src 'none'; upgrade-insecure-requests"
+      - "traefik.http.middlewares.cors-header.headers.accesscontrolalloworigin=*"
+      - "traefik.http.middlewares.cors-header.headers.accesscontrolmaxage=100"
+      - "traefik.http.middlewares.cors-header.headers.addvaryheader=true"
+      #- "traefik.http.middlewares.cors-header.headers.contenttypenosniff=true"
+      #- "traefik.http.middlewares.cors-header.headers.framedeny=true"
+      #- "traefik.http.middlewares.cors-header.headers.browserxssfilter=true"
+      - "traefik.http.middlewares.fn-backoffice-replacepathregex.replacepathregex.regex=^/backoffice/(.*)"
+      - "traefik.http.middlewares.fn-backoffice-replacepathregex.replacepathregex.replacement=/backoffice/api/v1/$$1"
 
 networks:
   io-fn:
