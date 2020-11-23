@@ -51,7 +51,7 @@ export function getConnection(
               password: params.password,
               port: params.port,
               schema: params.schema,
-              // ssl: true,
+              ssl: true,
               type: "postgres",
               username: params.username
             }),
