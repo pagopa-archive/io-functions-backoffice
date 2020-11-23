@@ -24,6 +24,7 @@ const anAuditLog: AuditLogTableRow = {
   Citizen: aFiscalCode,
   OperationName: "GetBPDCitizen",
   PartitionKey: "aPartitionKey" as NonEmptyString,
+  QueryParamType: "FiscalCode",
   RowKey: "aRowKey" as NonEmptyString
 };
 

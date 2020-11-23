@@ -10,13 +10,7 @@ import {
 import { Repository } from "typeorm";
 import { context } from "../../__mocks__/durable-functions";
 import { BPDCitizen } from "../../generated/definitions/BPDCitizen";
-import { CitizenID } from "../../generated/definitions/CitizenID";
-import { SupportToken } from "../../generated/definitions/SupportToken";
 import { Citizen } from "../../models/citizen";
-import {
-  AuditLogTableRow,
-  InsertOrReplaceEntity
-} from "../../utils/audit_logs";
 import { AdUser } from "../../utils/strategy/bearer_strategy";
 import { GetBPDCitizenHandler } from "../handler";
 
@@ -35,13 +29,6 @@ const anAuthenticatedUser: AdUser = {
   oid: "anUserOID" as NonEmptyString
 };
 
-const expectedAdminAuditLog: AuditLogTableRow = {
-  AuthLevel: "Admin",
-  Citizen: aFiscalCode,
-  OperationName: "GetBPDCitizen",
-  PartitionKey: anAuthenticatedUser.oid,
-  RowKey: expect.any(String)
-};
 describe("GetBPDCitizenHandler", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -71,7 +58,11 @@ describe("GetBPDCitizenHandler", () => {
       ] as Citizen[];
     });
     const handler = GetBPDCitizenHandler(mockCitizenRepository);
-    const response = await handler(context, anAuthenticatedUser, aFiscalCode);
+    const response = await handler(context, {
+      citizenIdType: "FiscalCode",
+      fiscalCode: aFiscalCode,
+      user: anAuthenticatedUser
+    });
     expect(response.kind).toBe("IResponseSuccessJson");
     const responseValue = (response as IResponseSuccessJson<BPDCitizen>).value;
     expect(responseValue).toEqual({
@@ -87,7 +78,11 @@ describe("GetBPDCitizenHandler", () => {
       return [];
     });
     const handler = GetBPDCitizenHandler(mockCitizenRepository);
-    const response = await handler(context, anAuthenticatedUser, aFiscalCode);
+    const response = await handler(context, {
+      citizenIdType: "FiscalCode",
+      fiscalCode: aFiscalCode,
+      user: anAuthenticatedUser
+    });
 
     expect(response.kind).toBe("IResponseErrorNotFound");
   });
@@ -98,7 +93,11 @@ describe("GetBPDCitizenHandler", () => {
       return Promise.reject(expectedError);
     });
     const handler = GetBPDCitizenHandler(mockCitizenRepository);
-    const response = await handler(context, anAuthenticatedUser, aFiscalCode);
+    const response = await handler(context, {
+      citizenIdType: "FiscalCode",
+      fiscalCode: aFiscalCode,
+      user: anAuthenticatedUser
+    });
     expect(context.log.error).toBeCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorInternal");
   });
@@ -113,7 +112,11 @@ describe("GetBPDCitizenHandler", () => {
       ];
     });
     const handler = GetBPDCitizenHandler(mockCitizenRepository);
-    const response = await handler(context, anAuthenticatedUser, aFiscalCode);
+    const response = await handler(context, {
+      citizenIdType: "FiscalCode",
+      fiscalCode: aFiscalCode,
+      user: anAuthenticatedUser
+    });
     expect(response.kind).toBe("IResponseErrorValidation");
   });
 });

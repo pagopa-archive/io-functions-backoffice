@@ -11,6 +11,7 @@ import { Repository } from "typeorm";
 import { context } from "../../__mocks__/durable-functions";
 import { BPDTransactionList } from "../../generated/definitions/BPDTransactionList";
 import { Transaction } from "../../models/transaction";
+import { RequestCitizenToAdUserAndFiscalCode } from "../../utils/middleware/citizen_id";
 import { AdUser } from "../../utils/strategy/bearer_strategy";
 import { GetBPDTransactionsHandler } from "../handler";
 
@@ -30,6 +31,12 @@ const anAuthenticatedUser: AdUser = {
   family_name: "Surname",
   given_name: "Name",
   oid: "anUserOID" as NonEmptyString
+};
+
+const aUserAndFiscalCode: RequestCitizenToAdUserAndFiscalCode = {
+  citizenIdType: "FiscalCode",
+  fiscalCode: aFiscalCode,
+  user: anAuthenticatedUser
 };
 
 describe("GetBPDTransactionsHandler", () => {
@@ -59,7 +66,7 @@ describe("GetBPDTransactionsHandler", () => {
       ] as Transaction[];
     });
     const handler = GetBPDTransactionsHandler(mockTransactionRepository);
-    const response = await handler(context, anAuthenticatedUser, aFiscalCode);
+    const response = await handler(context, aUserAndFiscalCode);
 
     expect(response.kind).toBe("IResponseSuccessJson");
     const responseValue = (response as IResponseSuccessJson<BPDTransactionList>)
@@ -75,7 +82,7 @@ describe("GetBPDTransactionsHandler", () => {
       return [];
     });
     const handler = GetBPDTransactionsHandler(mockTransactionRepository);
-    const response = await handler(context, anAuthenticatedUser, aFiscalCode);
+    const response = await handler(context, aUserAndFiscalCode);
 
     expect(response.kind).toBe("IResponseSuccessJson");
     const responseValue = (response as IResponseSuccessJson<BPDTransactionList>)
@@ -92,7 +99,7 @@ describe("GetBPDTransactionsHandler", () => {
       return Promise.reject(expectedError);
     });
     const handler = GetBPDTransactionsHandler(mockTransactionRepository);
-    const response = await handler(context, anAuthenticatedUser, aFiscalCode);
+    const response = await handler(context, aUserAndFiscalCode);
 
     expect(context.log.error).toBeCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorInternal");
@@ -110,7 +117,7 @@ describe("GetBPDTransactionsHandler", () => {
       ];
     });
     const handler = GetBPDTransactionsHandler(mockTransactionRepository);
-    const response = await handler(context, anAuthenticatedUser, aFiscalCode);
+    const response = await handler(context, aUserAndFiscalCode);
 
     expect(response.kind).toBe("IResponseErrorValidation");
   });

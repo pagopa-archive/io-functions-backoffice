@@ -13,6 +13,7 @@ import { Transaction } from "../models/transaction";
 import { getRepository, IPostgresConnectionParams } from "../utils/database";
 import { GetBPDTransactions } from "./handler";
 
+import { IServicePrincipalCreds } from "../utils/adb2c";
 import { GetInsertOrReplaceEntity } from "../utils/audit_logs";
 import { getConfigOrThrow } from "../utils/config";
 import { GetOAuthVerifier } from "../utils/middleware/oauth_adb2c";
@@ -31,6 +32,12 @@ const postgresConfig: IPostgresConnectionParams = {
   port: config.POSTGRES_PORT,
   schema: config.POSTGRES_SCHEMA,
   username: config.POSTGRES_USERNAME
+};
+
+const adb2cCreds: IServicePrincipalCreds = {
+  clientId: config.ADB2C_CLIENT_ID,
+  secret: config.ADB2C_CLIENT_KEY,
+  tenantId: config.ADB2C_TENANT_ID
 };
 
 // tslint:disable-next-line: no-let
@@ -67,7 +74,10 @@ app.get(
   GetBPDTransactions(
     getRepository(postgresConfig, Transaction),
     GetInsertOrReplaceEntity(tableService, config.DASHBOARD_LOGS_TABLE_NAME),
-    config.JWT_SUPPORT_TOKEN_PUBLIC_RSA_CERTIFICATE
+    config.JWT_SUPPORT_TOKEN_PUBLIC_RSA_CERTIFICATE,
+    adb2cCreds,
+    config.ADB2C_ADMIN_GROUP_NAME,
+    config.IN_MEMORY_CACHE_TTL
   )
 );
 
