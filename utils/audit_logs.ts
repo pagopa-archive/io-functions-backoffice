@@ -17,6 +17,7 @@ const AuditLogTableRowR = t.interface({
     t.literal("GetBPDTransactions")
   ]),
   PartitionKey: NonEmptyString,
+  QueryParamType: t.union([t.literal("FiscalCode"), t.literal("SupportToken")]),
   RowKey: NonEmptyString
 });
 

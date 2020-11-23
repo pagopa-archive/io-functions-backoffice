@@ -36,3 +36,10 @@ Those are all Environment variables needed by the application:
 | POSTGRES_DB_NAME                         | Postgres database name                                                            | string |
 | POSTGRES_SCHEMA                          | Postgres schema name                                                              | string |
 | JWT_SUPPORT_TOKEN_PUBLIC_RSA_CERTIFICATE | The support token's public certificate used to verify JWT's signature             | string |
+| ADB2C_TENANT_NAME                        | The Active Directory B2C tenant name                                              | string |
+| ADB2C_TENANT_ID                          | The Active Directory B2C tenant identifier                                        | string |
+| ADB2C_CLIENT_ID                          | The Active Directory B2C client identifier                                        | string |
+| ADB2C_CLIENT_KEY                         | The Active Directory B2C client's secret key                                      | string |
+| ADB2C_POLICY_NAME                        | The Active Directory B2C policy name                                              | string |
+| ADB2C_ADMIN_GROUP_NAME                   | The Active Directory B2C group that identifies admin users                        | string |
+| IN_MEMORY_CACHE_TTL                      | A time to live value for in memory cache that stores user's groups                | number |

@@ -13,12 +13,28 @@ import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 import * as jwt from "jsonwebtoken";
 import { CitizenID } from "../generated/definitions/CitizenID";
 import { SupportToken } from "../generated/definitions/SupportToken";
+import { isAdminAuthLevel } from "./ad_user";
+import { AdUser } from "./strategy/bearer_strategy";
 
 const TokenPayload = t.interface({
   fiscalCode: FiscalCode
 });
 
 type TokenPayload = t.TypeOf<typeof TokenPayload>;
+
+export const CitizenIDType = t.union([
+  t.literal("FiscalCode"),
+  t.literal("SupportToken")
+]);
+
+const FiscalCodeAndCitizenIdType = t.interface({
+  citizenIdType: CitizenIDType,
+  fiscalCode: FiscalCode
+});
+
+export type FiscalCodeAndCitizenIdType = t.TypeOf<
+  typeof FiscalCodeAndCitizenIdType
+>;
 
 const verifySupportToken = (
   pubCert: NonEmptyString,
@@ -45,17 +61,34 @@ const verifySupportToken = (
       )
     );
 
-export const withCitizenIdCheck = <T, S>(
+export const withCitizenIdCheck = (
+  adUser: AdUser,
   citizenId: CitizenID,
   publicRsaCertificate: NonEmptyString,
-  f: (fiscalCode: FiscalCode) => TaskEither<T, S>
-) =>
-  // TODO insert group check in case of FiscalCode used by non admin users
+  canQueryFiscalCodeGroup: NonEmptyString
+): TaskEither<
+  IResponseErrorForbiddenNotAuthorized | IResponseErrorValidation,
+  FiscalCodeAndCitizenIdType
+> =>
   FiscalCode.is(citizenId)
     ? taskEither
-        .of<IResponseErrorForbiddenNotAuthorized | T, FiscalCode>(citizenId)
-        .chain(_ => f(_))
-    : verifySupportToken(publicRsaCertificate, citizenId).foldTaskEither<
-        T | IResponseErrorForbiddenNotAuthorized | IResponseErrorValidation,
-        S
-      >(fromLeft, _ => f(_));
+        .of<
+          IResponseErrorForbiddenNotAuthorized | IResponseErrorValidation,
+          boolean
+        >(isAdminAuthLevel(adUser, canQueryFiscalCodeGroup))
+        .chain(isAdmin =>
+          !isAdmin
+            ? fromLeft(ResponseErrorForbiddenNotAuthorized)
+            : taskEither.of(
+                FiscalCodeAndCitizenIdType.encode({
+                  citizenIdType: "FiscalCode",
+                  fiscalCode: citizenId
+                })
+              )
+        )
+    : verifySupportToken(publicRsaCertificate, citizenId).map(_ =>
+        FiscalCodeAndCitizenIdType.encode({
+          citizenIdType: "SupportToken",
+          fiscalCode: _
+        })
+      );

@@ -19,14 +19,20 @@ export const IConfig = t.interface({
 
   JWT_SUPPORT_TOKEN_PUBLIC_RSA_CERTIFICATE: NonEmptyString,
 
+  ADB2C_ADMIN_GROUP_NAME: NonEmptyString,
+
   ADB2C_CLIENT_ID: NonEmptyString,
+
+  ADB2C_CLIENT_KEY: NonEmptyString,
   ADB2C_POLICY_NAME: NonEmptyString,
+  ADB2C_TENANT_ID: NonEmptyString,
+
   ADB2C_TENANT_NAME: NonEmptyString,
 
+  ADB2C_CONFIG: t.any, // TODO: Define the ADB2C_CONFIG type
   DASHBOARD_LOGS_TABLE_NAME: NonEmptyString,
   DASHBOARD_STORAGE_CONNECTION_STRING: NonEmptyString,
-
-  ADB2C_CONFIG: t.any // TODO: Define the ADB2C_CONFIG type
+  IN_MEMORY_CACHE_TTL: NumberFromString
 });
 
 export const creds: IBearerStrategyOptionWithRequest = {
