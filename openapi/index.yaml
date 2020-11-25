@@ -92,9 +92,9 @@ paths:
             $ref: "#/definitions/ProblemJson"
   "/bpd/payment-instruments/:hpan":
     get:
-      operationId: GetBPDTransactions
-      summary: Get BPD transactions info list
-      description: Get the BPD transactions info list
+      operationId: GetBPDPaymentInstrument
+      summary: Get hpan detail
+      description: Get hpan detail related to a fiscal code
       parameters:
           - $ref: "#/parameters/CitizenID"
       responses:
