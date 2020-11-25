@@ -14,6 +14,7 @@ import {
   Repository
 } from "typeorm";
 import { Citizen } from "../models/citizen";
+import { PaymentIntrument } from "../models/payment_instrument";
 import { Transaction } from "../models/transaction";
 
 export interface IPostgresConnectionParams {
@@ -46,7 +47,7 @@ export function getConnection(
           () =>
             createConnection({
               database: params.database,
-              entities: [Citizen, Transaction],
+              entities: [Citizen, Transaction, PaymentIntrument],
               host: params.host,
               password: params.password,
               port: params.port,

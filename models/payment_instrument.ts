@@ -3,82 +3,82 @@ import { FiscalCode } from "italia-ts-commons/lib/strings";
 import { AfterLoad, ViewColumn, ViewEntity } from "typeorm";
 import { PaymentMethodStatusEnum } from "../generated/definitions/PaymentMethodStatus";
 
-@ViewEntity("v_bpd_citizen")
-export class Citizen {
+@ViewEntity("v_bpd_payment_instrument")
+export class PaymentIntrument {
   @ViewColumn({
     name: "fiscal_code_s"
   })
   fiscal_code: FiscalCode;
 
   @ViewColumn({
-    name: "timestamp_tc_t"
-  })
-  timestamp_tc: Date;
-
-  @ViewColumn({
-    name: "payoff_instr_s"
-  })
-  payoff_instr?: string;
-
-  @ViewColumn({
-    name: "payoff_instr_type_c"
-  })
-  payoff_instr_type?: string;
-
-  @ViewColumn({
-    name: "ctz_insert_date_t"
-  })
-  insert_date?: Date;
-
-  @ViewColumn({
-    name: "ctz_insert_user_s"
-  })
-  insert_user?: string;
-
-  @ViewColumn({
-    name: "ctz_update_date_t"
-  })
-  update_date?: Date;
-
-  @ViewColumn({
-    name: "ctz_update_user_s"
-  })
-  update_user?: string;
-
-  @ViewColumn({
-    name: "enabled_b"
-  })
-  enabled?: boolean;
-
-  @ViewColumn({
     name: "hpan_s"
   })
-  payment_instrument_hpan?: string;
+  hpan: string;
 
   @ViewColumn({
     name: "status_c"
   })
-  payment_instrument_status?: PaymentMethodStatusEnum;
+  status: PaymentMethodStatusEnum;
 
   @ViewColumn({
-    name: "pay_istr_insert_date_t"
+    name: "channel_s"
   })
-  payment_instrument_insert_date?: Date;
+  channel?: string;
 
   @ViewColumn({
-    name: "pay_istr_insert_user_s"
+    name: "enabled_b"
   })
-  payment_instrument_insert_user?: string;
+  enabled: boolean;
 
   @ViewColumn({
-    name: "pay_istr_update_date_t"
+    name: "enrollment_t"
   })
-  payment_instrument_update_date?: Date;
+  enrollment: Date;
 
   @ViewColumn({
-    name: "pay_istr_update_user_s"
+    name: "cancellation_t"
   })
-  payment_instrument_update_user?: string;
+  cancellation?: Date;
+
+  @ViewColumn({
+    name: "paym_istr_insert_date_t"
+  })
+  paym_istr_insert_date?: Date;
+
+  @ViewColumn({
+    name: "paym_istr_insert_user_s"
+  })
+  paym_istr_insert_user?: string;
+
+  @ViewColumn({
+    name: "paym_istr_update_date_t"
+  })
+  paym_istr_update_date?: Date;
+
+  @ViewColumn({
+    name: "paym_istr_update_user_s"
+  })
+  paym_istr_update_user?: string;
+
+  @ViewColumn({
+    name: "paym_istr_hist_insert_date_t"
+  })
+  paym_istr_hist_insert_date?: Date;
+
+  @ViewColumn({
+    name: "paym_istr_hist_insert_user_s"
+  })
+  paym_istr_hist_insert_user?: string;
+
+  @ViewColumn({
+    name: "paym_istr_hist_update_date_t"
+  })
+  paym_istr_hist_update_date?: Date;
+
+  @ViewColumn({
+    name: "paym_istr_hist_update_user_s"
+  })
+  paym_istr_hist_update_user?: string;
 
   @AfterLoad()
   // Convert all null values to undefined

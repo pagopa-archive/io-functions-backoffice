@@ -52,6 +52,10 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "401":
           description: Unauthorized
+        "403":
+          description: Forbidden
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "404":
           description: Not found.
           schema:
@@ -78,6 +82,40 @@ paths:
             $ref: "#/definitions/ProblemJson"
         "401":
           description: Unauthorized
+        "403":
+          description: Forbidden
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "500":
+          description: Internal server Error
+          schema:
+            $ref: "#/definitions/ProblemJson"
+  "/bpd/payment-instruments/:hpan":
+    get:
+      operationId: GetBPDTransactions
+      summary: Get BPD transactions info list
+      description: Get the BPD transactions info list
+      parameters:
+          - $ref: "#/parameters/CitizenID"
+      responses:
+        "200":
+          description: Found.
+          schema:
+            "$ref": "#/definitions/BPDTransactionList"
+        "400":
+          description: Invalid request.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "404":
+          description: Not found.
+          schema:
+            $ref: "#/definitions/ProblemJson"
         "500":
           description: Internal server Error
           schema:
@@ -91,6 +129,61 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.7.0/openapi/definitions.yaml#/FiscalCode"
   ProblemJson:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.7.0/openapi/definitions.yaml#/ProblemJson"
+  PaymentMethodStatus:
+    type: string
+    enum: [ACTIVE, INACTIVE]
+  PaymentMethodDetails:
+    type: object
+    properties:
+      fiscal_code:
+        $ref: "#/definitions/FiscalCode"
+      hpan:
+        type: string
+      enabled:
+        type: boolean
+      paym_istr_update_date:
+        type: string
+        format: dateTime
+      paym_istr_insert_date:
+        type: string
+        format: dateTime
+      paym_istr_update_user:
+        type: string
+      paym_istr_insert_user:
+        type: string
+      activation_periods:
+        type: array
+        items:
+          $ref: "#/definitions/ActivationPeriods"
+    required:
+      - fiscal_code
+      - hpan
+      - activation_periods
+      - enabled
+  ActivationPeriods:
+    type: object
+    properties:
+      enrollment:
+        type: string
+        format: dateTime
+      cancellation:
+        type: string
+        format: dateTime
+      paym_istr_hist_insert_date:
+        type: string
+        format: dateTime
+      paym_istr_hist_insert_user:
+        type: string
+      paym_istr_hist_update_date:
+        type: string
+        format: dateTime
+      paym_istr_hist_update_user:
+        type: string
+      status:
+        $ref: "#/definitions/PaymentMethodStatus"
+    required:
+      - enrollment
+      - status
   BPDCitizen:
     type: object
     properties:
@@ -129,8 +222,7 @@ definitions:
       payment_instrument_hpan:
         type: string
       payment_instrument_status:
-        type: string
-        enum: [ACTIVE, INACTIVE]
+        $ref: "#/definitions/PaymentMethodStatus"
       payment_instrument_insert_date:
         type: string
         format: dateTime
