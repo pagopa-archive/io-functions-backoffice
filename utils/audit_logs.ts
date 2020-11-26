@@ -8,10 +8,15 @@ import {
   IResponseErrorInternal,
   ResponseErrorInternal
 } from "italia-ts-commons/lib/responses";
-import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
+import {
+  EmailString,
+  FiscalCode,
+  NonEmptyString
+} from "italia-ts-commons/lib/strings";
 
 const AuditLogTableRowR = t.interface({
   AuthLevel: t.union([t.literal("Admin"), t.literal("Support")]),
+  Email: EmailString,
   OperationName: t.union([
     t.literal("GetBPDCitizen"),
     t.literal("GetBPDTransactions")
