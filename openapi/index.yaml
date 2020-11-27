@@ -146,7 +146,7 @@ definitions:
       - payment_instrument_status
   SupportToken:
     type: string
-    pattern: "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$"
+    pattern: "^[A-Za-z0-9-_=]+[.][A-Za-z0-9-_=]+[.][A-Za-z0-9-_.+/=]*$"
     description: A JWT token used by Support Team
   CitizenID:
     description: Fiscal Code or Support Token for Citizen Identification
@@ -177,6 +177,31 @@ definitions:
         type: string
       acquirer_descr:
         type: string
+        enum: [
+          Nexi,
+          IntesaSanPaolo,
+          Poste,
+          Unicredit,
+          BancaSella,
+          Nexi_UBI,
+          Nexi_ICCREA,
+          AmericanExpress,
+          Satispay,
+          ICCREA,
+          Diners,
+          Axepta_BNP,
+          SumUP,
+          Bancomat,
+          BancomatPay,
+          SiaPay,
+          Paytipper,
+          Reiffeisen,
+          Cedacri,
+          Deutsche,
+          MPS,
+          EquensWorldline,
+          Other
+        ]
       id_trx_acquirer:
         type: string
       id_trx_issuer:
@@ -185,10 +210,31 @@ definitions:
         type: string
       operation_type_descr:
         type: string
+        enum: [
+          Payment,
+          Transfer,
+          ApplePay,
+          GooglePay,
+          Other
+        ]
       circuit_type:
         type: string
       circuit_type_descr:
         type: string
+        enum: [
+          Pagobancomat,
+          Visa,
+          Mastercard,
+          Amex,
+          JCB,
+          UnionPay,
+          Diners,
+          Codice_PostePay,
+          BancomatPay,
+          SatisPay,
+          Circuito_Privativo,
+          Other
+        ]
       amount:
         type: number
       amount_currency:
