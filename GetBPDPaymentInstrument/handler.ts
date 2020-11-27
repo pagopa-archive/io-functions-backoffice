@@ -171,6 +171,7 @@ export function GetBPDPaymentInstrument(
     (context, _, { user, fiscalCode, citizenIdType }) => ({
       AuthLevel: isAdminAuthLevel(user, adb2cAdminGroup) ? "Admin" : "Support",
       Citizen: fiscalCode,
+      Email: user.emails[0],
       OperationName: "GetBPDPaymentInstruments",
       PartitionKey: user.oid, // Can we use email?
       QueryParamType: citizenIdType,
