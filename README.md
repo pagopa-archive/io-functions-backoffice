@@ -9,6 +9,11 @@ This repository contains the code for the backend used by the Backoffice.
 
 ```shell
 cp env.example .env
+```
+
+Replace in `.env` file the envs `JWT_SUPPORT_TOKEN_PUBLIC_RSA_CERTIFICATE`, `ADB2C_CLIENT_KEY` and `ADB2C_TENANT_ID` with the proper values.
+
+```shell
 yarn install
 yarn build
 docker-compose up -d --build
