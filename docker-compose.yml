@@ -68,6 +68,8 @@ services:
       - postgres
     networks:
       - io-fn
+    labels:
+      - "traefik.enable=false"
 
   postgres:
     image: postgres
@@ -85,6 +87,7 @@ services:
   traefik:
     image: traefik:v2.0
     command: |-
+      --accesslog
       --entrypoints.web.address=:80
       --providers.docker=true
       --providers.docker.network=io-fn
