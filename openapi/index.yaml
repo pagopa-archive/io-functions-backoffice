@@ -141,15 +141,15 @@ definitions:
         type: string
       enabled:
         type: boolean
-      paym_istr_update_date:
+      update_date:
         type: string
         format: dateTime
-      paym_istr_insert_date:
+      insert_date:
         type: string
         format: dateTime
-      paym_istr_update_user:
+      update_user:
         type: string
-      paym_istr_insert_user:
+      insert_user:
         type: string
       activation_periods:
         type: array
@@ -169,15 +169,15 @@ definitions:
       cancellation:
         type: string
         format: dateTime
-      paym_istr_hist_insert_date:
+      hist_insert_date:
         type: string
         format: dateTime
-      paym_istr_hist_insert_user:
+      hist_insert_user:
         type: string
-      paym_istr_hist_update_date:
+      hist_update_date:
         type: string
         format: dateTime
-      paym_istr_hist_update_user:
+      hist_update_user:
         type: string
       status:
         $ref: "#/definitions/PaymentMethodStatus"

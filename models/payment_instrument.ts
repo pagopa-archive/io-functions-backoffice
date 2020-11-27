@@ -43,42 +43,42 @@ export class PaymentIntrument {
   @ViewColumn({
     name: "paym_istr_insert_date_t"
   })
-  paym_istr_insert_date?: Date;
+  insert_date?: Date;
 
   @ViewColumn({
     name: "paym_istr_insert_user_s"
   })
-  paym_istr_insert_user?: string;
+  insert_user?: string;
 
   @ViewColumn({
     name: "paym_istr_update_date_t"
   })
-  paym_istr_update_date?: Date;
+  update_date?: Date;
 
   @ViewColumn({
     name: "paym_istr_update_user_s"
   })
-  paym_istr_update_user?: string;
+  update_user?: string;
 
   @ViewColumn({
     name: "paym_istr_hist_insert_date_t"
   })
-  paym_istr_hist_insert_date?: Date;
+  hist_insert_date?: Date;
 
   @ViewColumn({
     name: "paym_istr_hist_insert_user_s"
   })
-  paym_istr_hist_insert_user?: string;
+  hist_insert_user?: string;
 
   @ViewColumn({
     name: "paym_istr_hist_update_date_t"
   })
-  paym_istr_hist_update_date?: Date;
+  hist_update_date?: Date;
 
   @ViewColumn({
     name: "paym_istr_hist_update_user_s"
   })
-  paym_istr_hist_update_user?: string;
+  hist_update_user?: string;
 
   @AfterLoad()
   // Convert all null values to undefined

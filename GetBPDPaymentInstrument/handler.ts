@@ -66,12 +66,12 @@ function toApiPaymentInstrumentDetail(
               ...pi,
               cancellation: pi.cancellation?.toISOString(),
               enrollment: pi.enrollment.toISOString(),
-              paym_istr_hist_insert_date: pi.paym_istr_hist_insert_date?.toISOString(),
-              paym_istr_hist_update_date: pi.paym_istr_hist_update_date?.toISOString()
+              hist_insert_date: pi.hist_insert_date?.toISOString(),
+              hist_update_date: pi.hist_update_date?.toISOString()
             }
           ],
-          paym_istr_insert_date: pi.paym_istr_insert_date?.toISOString(),
-          paym_istr_update_date: pi.paym_istr_update_date?.toISOString()
+          insert_date: pi.insert_date?.toISOString(),
+          update_date: pi.update_date?.toISOString()
         } as PaymentMethodDetails;
       }
       return {
@@ -82,8 +82,8 @@ function toApiPaymentInstrumentDetail(
             ...pi,
             cancellation: pi.cancellation?.toISOString(),
             enrollment: pi.enrollment.toISOString(),
-            paym_istr_hist_insert_date: pi.paym_istr_hist_insert_date?.toISOString(),
-            paym_istr_hist_update_date: pi.paym_istr_hist_update_date?.toISOString()
+            hist_insert_date: pi.hist_insert_date?.toISOString(),
+            hist_update_date: pi.hist_update_date?.toISOString()
           }
         ]
       } as PaymentMethodDetails;
