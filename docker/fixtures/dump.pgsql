@@ -270,9 +270,9 @@ INSERT INTO public.bpd_payment_instrument_history (hpan_s, fiscal_code_s, deacti
 -- Data for Name: bpd_winning_transaction; Type: TABLE DATA; Schema: public; Owner: testuser
 --
 
-INSERT INTO public.bpd_winning_transaction VALUES ('32875', '978', 10, 0, "01", '807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966', '1234567890123', NULL, NULL, "00", 2, '2020-10-31 10:02:31.11989+00', '2020-10-31 10:02:31.11989+00', NULL, NULL, NULL, true, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO public.bpd_winning_transaction VALUES ('36081', '978', 31, 0, "01", '807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966', '2345678901555', NULL, NULL, "00", 7, '2020-10-31 10:02:31.11989+00', '2020-10-31 10:02:31.11989+00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO public.bpd_winning_transaction VALUES ('02008', '978', 31, 0, "00", '7726b99f6eff4f80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a29', '2345678901555', NULL, NULL, "00", 7, '2020-10-31 10:02:31.11989+00', '2020-10-31 10:02:31.11989+00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO public.bpd_winning_transaction VALUES ('32875', '978', 10, NULL, '01', '807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966', '1234567890123', NULL, NULL, '00', 2, '2020-10-31 10:02:31.11989+00', '2020-10-31 10:02:31.11989+00', NULL, NULL, NULL, true, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO public.bpd_winning_transaction VALUES ('36081', '978', 31, NULL, '01', '807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966', '2345678901555', NULL, NULL, '00', 7, '2020-10-31 10:02:31.11989+00', '2020-10-31 10:02:31.11989+00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO public.bpd_winning_transaction VALUES ('02008', '978', 31, NULL, '00', '7726b99f6eff4f80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a29', '2345678901555', NULL, NULL, '00', 7, '2020-10-31 10:02:31.11989+00', '2020-10-31 10:02:31.11989+00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 --
 -- Name: bpd_citizen bpd_citizen_pkey; Type: CONSTRAINT; Schema: public; Owner: testuser
