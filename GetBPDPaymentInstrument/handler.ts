@@ -173,7 +173,7 @@ export function GetBPDPaymentInstrument(
       Citizen: fiscalCode,
       Email: user.emails[0],
       OperationName: "GetBPDPaymentInstruments",
-      PartitionKey: user.oid, // Can we use email?
+      PartitionKey: user.oid,
       QueryParamType: citizenIdType,
       RowKey: context.executionContext.invocationId as string & NonEmptyString
     })
