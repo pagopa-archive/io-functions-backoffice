@@ -10,7 +10,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "extensions:install": "func extensions install",
-    "start": "dotenv -e .env.prod func start --javascript",
+    "start": "dotenv -e .env func start --javascript",
     "predev": "npm-run-all generate build",
     "dev": "npm-run-all --parallel start watch",
     "pretest": "npm-run-all generate:*",
