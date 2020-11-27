@@ -23,7 +23,9 @@ const mockTransactionRepository = taskEither.of<Error, Repository<Transaction>>(
 );
 
 const aFiscalCode = "AAABBB01C02D345D" as FiscalCode;
-const anAcquirer = "Acquirer1";
+const anAcquirer = "32875";
+const aCircuitType = "01";
+const aOperationType = "00";
 const aTimestamp = new Date();
 
 const anAuthenticatedUser: AdUser = {
@@ -48,18 +50,22 @@ describe("GetBPDTransactionsHandler", () => {
       return [
         {
           acquirer: anAcquirer,
+          circuit_type: aCircuitType,
           fiscal_code: aFiscalCode,
           hpan:
             "55ad015a3bf4f1b2b0b822cd15d6c15b0f00a089f86d081884c7d659a2feaa0c",
           id_trx_acquirer: "123456789012",
+          operation_type: aOperationType,
           trx_timestamp: aTimestamp
         },
         {
           acquirer: anAcquirer,
+          circuit_type: aCircuitType,
           fiscal_code: aFiscalCode,
           hpan:
             "0b822cd15d6c15b0f00a089f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b",
           id_trx_acquirer: "123456789013",
+          operation_type: aOperationType,
           trx_timestamp: aTimestamp
         }
         // tslint:disable-next-line: readonly-array

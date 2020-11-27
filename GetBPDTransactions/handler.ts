@@ -3,6 +3,7 @@ import * as express from "express";
 import { Context } from "@azure/functions";
 import { Either } from "fp-ts/lib/Either";
 import { identity } from "fp-ts/lib/function";
+import { fromNullable } from "fp-ts/lib/Option";
 import { fromEither, TaskEither, tryCatch } from "fp-ts/lib/TaskEither";
 import { ContextMiddleware } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import {
@@ -31,6 +32,11 @@ import { isAdminAuthLevel } from "../utils/ad_user";
 import { IServicePrincipalCreds } from "../utils/adb2c";
 import { InsertOrReplaceEntity, withAudit } from "../utils/audit_logs";
 import {
+  getAcquirer,
+  getCircuitType,
+  getOperationType
+} from "../utils/conversion";
+import {
   RequestCitizenToAdUserAndFiscalCode,
   RequestCitizenToFiscalCode
 } from "../utils/middleware/citizen_id";
@@ -54,11 +60,13 @@ export const toApiBPDTransactionList = (
     transactions: domainObj.map(transaction => {
       return {
         ...transaction,
-        acquirer_descr: transaction.acquirer, // TODO: It's an enum type
+        acquirer_descr: getAcquirer(transaction.acquirer),
         amount_currency_descr: "EUR", // TODO: fixed to 978 = EUR
-        circuit_type_descr: transaction.circuit_type, // TODO: It's an enum type
+        circuit_type_descr: getCircuitType(transaction.circuit_type),
         insert_date: transaction.insert_date?.toISOString(),
-        operation_type_descr: transaction.operation_type, // TODO: It's an enum type
+        operation_type_descr: fromNullable(transaction.operation_type)
+          .map(getOperationType)
+          .toUndefined(),
         payment_instrument_insert_date: transaction.payment_instrument_insert_date?.toISOString(),
         payment_instrument_update_date: transaction.payment_instrument_update_date?.toISOString(),
         trx_timestamp: transaction.trx_timestamp.toISOString(),
