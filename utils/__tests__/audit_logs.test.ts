@@ -3,11 +3,16 @@ import {
   IResponseSuccessJson,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
-import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
+import {
+  EmailString,
+  FiscalCode,
+  NonEmptyString
+} from "italia-ts-commons/lib/strings";
 import { AuditLogTableRow, withAudit } from "../audit_logs";
 
 const param1 = "1" as NonEmptyString;
 const param2 = "AAABBB01C02D345E" as FiscalCode;
+const anEmail = "email@example.it" as EmailString;
 
 const mockInsertOrReplaceEntity = jest
   .fn()
@@ -22,6 +27,7 @@ const aFiscalCode = "AAABBB01C02D345E" as FiscalCode;
 const anAuditLog: AuditLogTableRow = {
   AuthLevel: "Admin",
   Citizen: aFiscalCode,
+  Email: anEmail,
   OperationName: "GetBPDCitizen",
   PartitionKey: "aPartitionKey" as NonEmptyString,
   QueryParamType: "FiscalCode",
