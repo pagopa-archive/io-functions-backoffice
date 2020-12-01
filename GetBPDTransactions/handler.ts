@@ -67,8 +67,6 @@ export const toApiBPDTransactionList = (
         operation_type_descr: fromNullable(transaction.operation_type)
           .map(getOperationType)
           .toUndefined(),
-        payment_instrument_insert_date: transaction.payment_instrument_insert_date?.toISOString(),
-        payment_instrument_update_date: transaction.payment_instrument_update_date?.toISOString(),
         trx_timestamp: transaction.trx_timestamp.toISOString(),
         update_date: transaction.update_date?.toISOString()
       } as BPDTransaction;

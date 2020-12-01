@@ -265,16 +265,6 @@ definitions:
         format: dateTime
       update_user:
         type: string
-      payment_instrument_insert_date:
-        type: string
-        format: dateTime
-      payment_instrument_insert_user:
-        type: string
-      payment_instrument_update_date:
-        type: string
-        format: dateTime
-      payment_instrument_update_user:
-        type: string
     required:
       - acquirer
       - id_trx_acquirer
