@@ -115,26 +115,6 @@ export class Transaction {
   })
   enabled?: boolean;
 
-  @ViewColumn({
-    name: "paym_instr_insert_date_t"
-  })
-  payment_instrument_insert_date?: Date;
-
-  @ViewColumn({
-    name: "paym_instr_insert_user_s"
-  })
-  payment_instrument_insert_user?: string;
-
-  @ViewColumn({
-    name: "paym_instr_update_date_t"
-  })
-  payment_instrument_update_date?: Date;
-
-  @ViewColumn({
-    name: "paym_instr_update_user_s"
-  })
-  payment_instrument_update_user?: string;
-
   @AfterLoad()
   // Convert all null values to undefined
   protected removeNullValues(): void {

@@ -93,7 +93,9 @@ CREATE TABLE public.bpd_winning_transaction (
     acquirer_id_s character varying,
     id_trx_issuer_s character varying,
     bin_s character varying,
-    terminal_id_s character varying
+    terminal_id_s character varying,
+    fiscal_code_s character varying,
+    elab_ranking_b boolean
 );
 
 ALTER TABLE public.bpd_winning_transaction OWNER TO testuser;
@@ -149,7 +151,7 @@ ALTER TABLE public.v_bpd_citizen OWNER TO testuser;
 --
 
 CREATE VIEW public.v_bpd_winning_transaction AS
- SELECT bpi.fiscal_code_s,
+ SELECT bwt.fiscal_code_s,
     bwt.trx_timestamp_t,
     bwt.acquirer_id_s,
     bwt.acquirer_c,
@@ -170,13 +172,8 @@ CREATE VIEW public.v_bpd_winning_transaction AS
     bwt.insert_date_t AS winn_trans_insert_date_t,
     bwt.insert_user_s AS winn_trans_insert_user_s,
     bwt.update_date_t AS winn_trans_update_date_t,
-    bwt.update_user_s AS winn_trans_update_user_s,
-    bpi.insert_date_t AS paym_instr_insert_date_t,
-    bpi.insert_user_s AS paym_instr_insert_user_s,
-    bpi.update_date_t AS paym_instr_update_date_t,
-    bpi.update_user_s AS paym_instr_update_user_s
-   FROM (public.bpd_winning_transaction bwt
-     JOIN public.bpd_payment_instrument bpi ON (((bwt.hpan_s)::text = (bpi.hpan_s)::text)));
+    bwt.update_user_s AS winn_trans_update_user_s
+   FROM public.bpd_winning_transaction bwt;
 
 
 ALTER TABLE public.v_bpd_winning_transaction OWNER TO testuser;
@@ -270,9 +267,9 @@ INSERT INTO public.bpd_payment_instrument_history (hpan_s, fiscal_code_s, deacti
 -- Data for Name: bpd_winning_transaction; Type: TABLE DATA; Schema: public; Owner: testuser
 --
 
-INSERT INTO public.bpd_winning_transaction VALUES ('32875', '978', 10, NULL, '01', '807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966', '1234567890123', NULL, NULL, '00', 2, '2020-10-31 10:02:31.11989+00', '2020-10-31 10:02:31.11989+00', NULL, NULL, NULL, true, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO public.bpd_winning_transaction VALUES ('36081', '978', 31, NULL, '01', '807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966', '2345678901555', NULL, NULL, '00', 7, '2020-10-31 10:02:31.11989+00', '2020-10-31 10:02:31.11989+00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO public.bpd_winning_transaction VALUES ('02008', '978', 31, NULL, '00', '7726b99f6eff4f80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a29', '2345678901555', NULL, NULL, '00', 7, '2020-10-31 10:02:31.11989+00', '2020-10-31 10:02:31.11989+00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO public.bpd_winning_transaction VALUES ('32875', '978', 10, NULL, '01', '807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966', '1234567890123', NULL, NULL, '00', 2, '2020-10-31 10:02:31.11989+00', '2020-10-31 10:02:31.11989+00', NULL, NULL, NULL, true, NULL, NULL, NULL, NULL, NULL, NULL, 'AAABBB01C02D345A', true);
+INSERT INTO public.bpd_winning_transaction VALUES ('36081', '978', 31, NULL, '01', '807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966', '2345678901555', NULL, NULL, '00', 7, '2020-10-31 10:02:31.11989+00', '2020-10-31 10:02:31.11989+00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'AAABBB01C02D345A', true);
+INSERT INTO public.bpd_winning_transaction VALUES ('02008', '978', 31, NULL, '00', '7726b99f6eff4f80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a29', '2345678901555', NULL, NULL, '00', 7, '2020-10-31 10:02:31.11989+00', '2020-10-31 10:02:31.11989+00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'AAABBB01C02D345A', true);
 
 --
 -- Name: bpd_citizen bpd_citizen_pkey; Type: CONSTRAINT; Schema: public; Owner: testuser
