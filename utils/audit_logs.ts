@@ -19,7 +19,8 @@ const AuditLogTableRowR = t.interface({
   Email: EmailString,
   OperationName: t.union([
     t.literal("GetBPDCitizen"),
-    t.literal("GetBPDTransactions")
+    t.literal("GetBPDTransactions"),
+    t.literal("GetBPDPaymentInstruments")
   ]),
   PartitionKey: NonEmptyString,
   QueryParamType: t.union([t.literal("FiscalCode"), t.literal("SupportToken")]),

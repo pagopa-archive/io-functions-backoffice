@@ -23,8 +23,8 @@ SET default_table_access_method = heap;
 --
 -- Reset database drop table and views if exists
 --
-DROP VIEW IF EXISTS public.v_bpd_citizen, public.v_bpd_winning_transaction;
-DROP TABLE IF EXISTS public.bpd_citizen, public.bpd_payment_instrument, public.bpd_winning_transaction;
+DROP VIEW IF EXISTS public.v_bpd_citizen, public.v_bpd_winning_transaction, public.v_bpd_payment_instrument;
+DROP TABLE IF EXISTS public.bpd_citizen, public.bpd_payment_instrument, public.bpd_winning_transaction, public.bpd_payment_instrument_history;
 
 --
 -- Name: bpd_citizen; Type: TABLE; Schema: public; Owner: testuser
@@ -59,7 +59,8 @@ CREATE TABLE public.bpd_payment_instrument (
     insert_user_s character varying(40),
     update_date_t timestamp(6) with time zone,
     update_user_s character varying(40),
-    enabled_b boolean
+    enabled_b boolean,
+    channel_s character varying(64)
 );
 
 
@@ -98,6 +99,26 @@ CREATE TABLE public.bpd_winning_transaction (
 );
 
 ALTER TABLE public.bpd_winning_transaction OWNER TO testuser;
+
+--
+-- TOC entry 261 (class 1259 OID 19242)
+-- Name: bpd_payment_instrument_history; Type: TABLE; Schema: public; Owner: testuser
+--
+
+CREATE TABLE public.bpd_payment_instrument_history (
+    hpan_s character varying(64) NOT NULL,
+    activation_t timestamp with time zone NOT NULL,
+    deactivation_t timestamp with time zone,
+    id_n bigint NOT NULL,
+    fiscal_code_s character varying(16),
+    insert_date_t timestamp with time zone,
+    insert_user_s character varying(40),
+    update_date_t timestamp with time zone,
+    update_user_s character varying(40)
+);
+
+
+ALTER TABLE public.bpd_payment_instrument_history OWNER TO testuser;
 
 --
 -- Name: v_bpd_citizen; Type: VIEW; Schema: public; Owner: testuser
@@ -158,6 +179,65 @@ CREATE VIEW public.v_bpd_winning_transaction AS
 ALTER TABLE public.v_bpd_winning_transaction OWNER TO testuser;
 
 --
+-- Name: v_bpd_payment_instrument; Type: VIEW; Schema: public; Owner: testuser
+--
+
+CREATE VIEW public.v_bpd_payment_instrument AS
+ SELECT bpi.fiscal_code_s,
+    bpih.hpan_s,
+        CASE
+            WHEN (bpih.deactivation_t IS NOT NULL) THEN 'INACTIVE'::text
+            ELSE 'ACTIVE'::text
+        END AS status_c,
+    bpi.channel_s,
+    bpi.enabled_b,
+    bpih.activation_t AS enrollment_t,
+    bpih.deactivation_t AS cancellation_t,
+    NULL::text AS paym_istr_hist_insert_date_t,
+    NULL::text AS paym_istr_hist_insert_user_s,
+    NULL::text AS paym_istr_hist_update_date_t,
+    NULL::text AS paym_istr_hist_update_user_s,
+    bpi.insert_date_t AS paym_istr_insert_date_t,
+    bpi.insert_user_s AS paym_istr_insert_user_s,
+    bpi.update_date_t AS paym_istr_update_date_t,
+    bpi.update_user_s AS paym_istr_update_user_s
+   FROM (public.bpd_payment_instrument_history bpih
+     JOIN public.bpd_payment_instrument bpi ON (((bpih.hpan_s)::text = (bpi.hpan_s)::text)));
+
+
+ALTER TABLE public.v_bpd_payment_instrument OWNER TO testuser;
+
+--
+-- TOC entry 262 (class 1259 OID 19245)
+-- Name: bpd_payment_instrument_history_id_n_seq; Type: SEQUENCE; Schema: public; Owner: testuser
+--
+
+CREATE SEQUENCE public.bpd_payment_instrument_history_id_n_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.bpd_payment_instrument_history_id_n_seq OWNER TO testuser;
+
+--
+-- TOC entry 4398 (class 0 OID 0)
+-- Dependencies: 262
+-- Name: bpd_payment_instrument_history_id_n_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: testuser
+--
+
+ALTER SEQUENCE public.bpd_payment_instrument_history_id_n_seq OWNED BY public.bpd_payment_instrument_history.id_n;
+
+--
+-- TOC entry 4258 (class 2604 OID 19256)
+-- Name: bpd_payment_instrument_history id_n; Type: DEFAULT; Schema: public; Owner: testuser
+--
+
+ALTER TABLE ONLY public.bpd_payment_instrument_history ALTER COLUMN id_n SET DEFAULT nextval('public.bpd_payment_instrument_history_id_n_seq'::regclass);
+
+--
 -- Data for Name: bpd_citizen; Type: TABLE DATA; Schema: public; Owner: testuser
 --
 
@@ -175,6 +255,13 @@ INSERT INTO public.bpd_citizen (fiscal_code_s, payoff_instr_s, payoff_instr_type
 
 INSERT INTO public.bpd_payment_instrument (hpan_s, fiscal_code_s, cancellation_t, status_c, enrollment_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b) VALUES ('807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966', 'AAABBB01C02D345A', NULL, 'ACTIVE', '2020-10-30 11:02:08.749861+01', '2020-10-30 11:02:08.749861+01', NULL, NULL, NULL, true);
 INSERT INTO public.bpd_payment_instrument (hpan_s, fiscal_code_s, cancellation_t, status_c, enrollment_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b) VALUES ('7726b99f6eff4f80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a29', 'AAABBB01C02D345A', NULL, 'INACTIVE', '2020-10-30 11:02:31.11989+01', '2020-10-30 11:02:31.11989+01', NULL, NULL, NULL, false);
+
+--
+-- Data for Name: bpd_payment_instrument_history; Type: TABLE DATA; Schema: public; Owner: testuser
+--
+
+INSERT INTO public.bpd_payment_instrument_history (hpan_s, fiscal_code_s, deactivation_t, activation_t, insert_date_t, insert_user_s, update_date_t, update_user_s) VALUES ('807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966', 'AAABBB01C02D345A', '2020-10-30 11:02:08.749861+01', '2020-10-30 11:02:08.749861+01', NULL, NULL, NULL, NULL);
+INSERT INTO public.bpd_payment_instrument_history (hpan_s, fiscal_code_s, deactivation_t, activation_t, insert_date_t, insert_user_s, update_date_t, update_user_s) VALUES ('7726b99f6eff4f80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a29', 'AAABBB01C02D345A', '2020-10-30 11:02:31.11989+01', '2020-10-30 11:02:31.11989+01', NULL, NULL, NULL, NULL);
 
 --
 -- Data for Name: bpd_winning_transaction; Type: TABLE DATA; Schema: public; Owner: testuser
@@ -199,6 +286,22 @@ ALTER TABLE ONLY public.bpd_citizen
 ALTER TABLE ONLY public.bpd_payment_instrument
     ADD CONSTRAINT bpd_payment_instrument_pkey PRIMARY KEY (hpan_s);
 
+--
+-- TOC entry 4260 (class 2606 OID 19274)
+-- Name: bpd_payment_instrument_history bpd_payment_instrument_history_pk; Type: CONSTRAINT; Schema: public; Owner: testuser
+--
+
+ALTER TABLE ONLY public.bpd_payment_instrument_history
+    ADD CONSTRAINT bpd_payment_instrument_history_pk PRIMARY KEY (id_n);
+
+--
+-- TOC entry 4262 (class 2606 OID 52861)
+-- Name: bpd_payment_instrument_history bpd_payment_instrument_history_un; Type: CONSTRAINT; Schema: public; Owner: testuser
+--
+
+ALTER TABLE ONLY public.bpd_payment_instrument_history
+    ADD CONSTRAINT bpd_payment_instrument_history_un UNIQUE (hpan_s, activation_t, deactivation_t);
+
 
 --
 -- Name: TABLE v_bpd_citizen; Type: ACL; Schema: public; Owner: testuser
@@ -211,6 +314,22 @@ GRANT ALL ON TABLE public.v_bpd_citizen TO testuser;
 --
 
 GRANT ALL ON TABLE public.v_bpd_winning_transaction TO testuser;
+
+--
+-- TOC entry 4397 (class 0 OID 0)
+-- Dependencies: 261
+-- Name: TABLE bpd_payment_instrument_history; Type: ACL; Schema: public; Owner: testuser
+--
+
+GRANT ALL ON TABLE public.bpd_payment_instrument_history TO testuser;
+
+--
+-- TOC entry 4399 (class 0 OID 0)
+-- Dependencies: 262
+-- Name: SEQUENCE bpd_payment_instrument_history_id_n_seq; Type: ACL; Schema: public; Owner: testuser
+--
+
+GRANT ALL ON SEQUENCE public.bpd_payment_instrument_history_id_n_seq TO testuser;
 
 
 --
