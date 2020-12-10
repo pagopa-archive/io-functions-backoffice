@@ -86,9 +86,6 @@ function toApiPaymentInstrumentDetail(
           {
             ...pi,
             cancellation: pi.cancellation?.toISOString(),
-            channel_descr: fromNullable(pi.channel)
-              .map(getChannel)
-              .toUndefined(),
             enrollment: pi.enrollment.toISOString(),
             hist_insert_date: pi.hist_insert_date?.toISOString(),
             hist_update_date: pi.hist_update_date?.toISOString()
