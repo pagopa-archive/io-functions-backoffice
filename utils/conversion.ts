@@ -4,6 +4,8 @@ import {
   Operation_type_descrEnum as OperationType
 } from "../generated/definitions/BPDTransaction";
 
+import { Channel_descrEnum as Channel } from "../generated/definitions/PaymentMethodDetails";
+
 export function getOperationType(operationType: string): OperationType {
   switch (operationType) {
     case "00":
@@ -67,7 +69,7 @@ export function getAcquirer(acquirer: string): Acquirer {
     case "36019":
       return Acquirer.AmericanExpress;
     case "STPAY":
-      return Acquirer.Satispay;
+      return Acquirer.SatisPay;
     case "12940":
       return Acquirer.ICCREA;
     case "01005":
@@ -80,5 +82,34 @@ export function getAcquirer(acquirer: string): Acquirer {
       return Acquirer.SiaPay;
     default:
       return Acquirer.Other;
+  }
+}
+
+export function getChannel(channel: string): Channel {
+  switch (channel) {
+    case "03268":
+      return Channel.BancaSella;
+    case "03211":
+      return Channel.BancaSella_Other;
+    case "36081":
+      return Channel.Poste;
+    case "STPAY":
+      return Channel.SatisPay;
+    case "36085":
+      return Channel.EnelX;
+    case "BPAY1":
+      return Channel.BancomatPay;
+    case "36003":
+      return Channel.Flowe;
+    case "32875":
+      return Channel.Nexi_YAP;
+    case "05555":
+      return Channel.Nexi_Issuing_diretto;
+    case "04444":
+      return Channel.Nexi_Other;
+    case "36772":
+      return Channel.Hype;
+    default:
+      return Channel.Other;
   }
 }

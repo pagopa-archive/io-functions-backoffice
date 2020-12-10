@@ -3,6 +3,7 @@ import * as express from "express";
 import { Context } from "@azure/functions";
 import { Either } from "fp-ts/lib/Either";
 import { identity } from "fp-ts/lib/function";
+import { fromNullable } from "fp-ts/lib/Option";
 import {
   fromEither,
   fromPredicate,
@@ -36,6 +37,7 @@ import { PaymentIntrument } from "../models/payment_instrument";
 import { isAdminAuthLevel } from "../utils/ad_user";
 import { IServicePrincipalCreds } from "../utils/adb2c";
 import { InsertOrReplaceEntity, withAudit } from "../utils/audit_logs";
+import { getChannel } from "../utils/conversion";
 import {
   RequestCitizenToAdUserAndFiscalCode,
   RequestCitizenToFiscalCode
@@ -70,6 +72,9 @@ function toApiPaymentInstrumentDetail(
               hist_update_date: pi.hist_update_date?.toISOString()
             }
           ],
+          channel_descr: fromNullable(pi.channel)
+            .map(getChannel)
+            .toUndefined(),
           insert_date: pi.insert_date?.toISOString(),
           update_date: pi.update_date?.toISOString()
         } as PaymentMethodDetails;

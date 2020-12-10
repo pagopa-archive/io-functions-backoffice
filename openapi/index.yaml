@@ -144,6 +144,25 @@ definitions:
         $ref: "#/definitions/FiscalCode"
       hpan:
         type: string
+      channel:
+        type: string
+      channel_descr:
+        type: string
+        enum: [
+          BancaSella,
+          BancaSella_Other,
+          Poste,
+          SatisPay,
+          EnelX,
+          BancomatPay,
+          Flowe,
+          Nexi_YAP,
+          Nexi_Issuing_diretto,
+          Nexi_Other,
+          Hype,
+          AppIO,
+          Other
+        ]
       enabled:
         type: boolean
       update_date:
@@ -283,7 +302,7 @@ definitions:
           Nexi_UBI,
           Nexi_ICCREA,
           AmericanExpress,
-          Satispay,
+          SatisPay,
           ICCREA,
           Diners,
           Axepta_BNP,
