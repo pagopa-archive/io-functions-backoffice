@@ -8,6 +8,7 @@ import { PaymentMethodDetails } from "../../generated/definitions/PaymentMethodD
 import { PaymentIntrument } from "../../models/payment_instrument";
 import { RequestCitizenToAdUserAndFiscalCode } from "../../utils/middleware/citizen_id";
 import { AdUser } from "../../utils/strategy/bearer_strategy";
+import { getChannel } from "../../utils/conversion";
 import { GetBPDPaymentInstrumentHandler } from "../handler";
 
 const mockFind = jest.fn();
@@ -21,6 +22,7 @@ const mockPaymentInstrumentRepo = taskEither.of<
 const aFiscalCode = "AAABBB01C02D345D" as FiscalCode;
 const anHpan = "55ad015a3bf4f1b2b0b822cd15d6c15b0f00a089f86d081884c7d659a2feaa0c" as NonEmptyString;
 const aTimestamp = new Date();
+const aChannel = "32875";
 
 const anAuthenticatedUser: AdUser = {
   emails: ["email@example.com" as EmailString],
@@ -42,6 +44,8 @@ describe("GetBPDPaymentInstrumentHandler", () => {
     mockFind.mockImplementationOnce(async () => {
       return [
         {
+          channel: aChannel,
+          channel_descr: getChannel(aChannel),
           enabled: true,
           enrollment: aTimestamp,
           fiscal_code: aFiscalCode,
@@ -50,6 +54,7 @@ describe("GetBPDPaymentInstrumentHandler", () => {
         },
         {
           cancellation: aTimestamp,
+          channel: aChannel,
           enabled: true,
           enrollment: aTimestamp,
           fiscal_code: aFiscalCode,
@@ -68,6 +73,8 @@ describe("GetBPDPaymentInstrumentHandler", () => {
     >).value;
     expect(responseValue).toEqual({
       activation_periods: expect.any(Array),
+      channel: aChannel,
+      channel_descr: getChannel(aChannel),
       enabled: true,
       fiscal_code: aFiscalCode,
       hpan: anHpan

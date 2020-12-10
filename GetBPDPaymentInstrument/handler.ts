@@ -36,6 +36,7 @@ import { PaymentIntrument } from "../models/payment_instrument";
 import { isAdminAuthLevel } from "../utils/ad_user";
 import { IServicePrincipalCreds } from "../utils/adb2c";
 import { InsertOrReplaceEntity, withAudit } from "../utils/audit_logs";
+import { getChannel } from "../utils/conversion";
 import {
   RequestCitizenToAdUserAndFiscalCode,
   RequestCitizenToFiscalCode
@@ -70,6 +71,7 @@ function toApiPaymentInstrumentDetail(
               hist_update_date: pi.hist_update_date?.toISOString()
             }
           ],
+          channel_descr: getChannel(pi.channel),
           insert_date: pi.insert_date?.toISOString(),
           update_date: pi.update_date?.toISOString()
         } as PaymentMethodDetails;
@@ -81,6 +83,7 @@ function toApiPaymentInstrumentDetail(
           {
             ...pi,
             cancellation: pi.cancellation?.toISOString(),
+            channel_descr: getChannel(pi.channel),
             enrollment: pi.enrollment.toISOString(),
             hist_insert_date: pi.hist_insert_date?.toISOString(),
             hist_update_date: pi.hist_update_date?.toISOString()
