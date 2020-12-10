@@ -23,7 +23,7 @@ export class PaymentIntrument {
   @ViewColumn({
     name: "channel_s"
   })
-  channel: string;
+  channel?: string;
 
   @ViewColumn({
     name: "enabled_b"

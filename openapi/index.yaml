@@ -184,8 +184,6 @@ definitions:
       - hpan
       - activation_periods
       - enabled
-      - channel
-      - channel_descr
   ActivationPeriods:
     type: object
     properties:
