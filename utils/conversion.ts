@@ -109,6 +109,8 @@ export function getChannel(channel: string): Channel {
       return Channel.Nexi_Other;
     case "36772":
       return Channel.Hype;
+    case "app-io-channel":
+      return Channel.AppIO;
     default:
       return Channel.Other;
   }
