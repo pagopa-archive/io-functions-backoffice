@@ -169,6 +169,7 @@ CREATE VIEW public.v_bpd_winning_transaction AS
     bwt.bin_s,
     bwt.terminal_id_s,
     bwt.enabled_b,
+    bwt.elab_ranking_b,
     bwt.insert_date_t AS winn_trans_insert_date_t,
     bwt.insert_user_s AS winn_trans_insert_user_s,
     bwt.update_date_t AS winn_trans_update_date_t,

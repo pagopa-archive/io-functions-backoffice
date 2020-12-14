@@ -115,6 +115,11 @@ export class Transaction {
   })
   enabled?: boolean;
 
+  @ViewColumn({
+    name: "elab_ranking_b"
+  })
+  elab_ranking?: boolean;
+
   @AfterLoad()
   // Convert all null values to undefined
   protected removeNullValues(): void {
