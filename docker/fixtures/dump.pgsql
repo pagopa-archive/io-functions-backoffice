@@ -40,11 +40,11 @@ CREATE TABLE public.bpd_citizen (
     update_date_t timestamp(6) with time zone,
     update_user_s character varying(40),
     enabled_b boolean,
-	account_holder_cf_s varchar NULL,
-	account_holder_name_s varchar NULL,
-	account_holder_surname_s varchar NULL,
-	check_instr_status_s varchar NULL,
-	cancellation_t timestamp(6) with time zone
+    account_holder_cf_s varchar NULL,
+    account_holder_name_s varchar NULL,
+    account_holder_surname_s varchar NULL,
+    check_instr_status_s varchar NULL,
+    cancellation_t timestamp(6) with time zone
 );
 
 
