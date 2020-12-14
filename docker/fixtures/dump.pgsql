@@ -39,7 +39,12 @@ CREATE TABLE public.bpd_citizen (
     insert_user_s character varying(40),
     update_date_t timestamp(6) with time zone,
     update_user_s character varying(40),
-    enabled_b boolean
+    enabled_b boolean,
+	account_holder_cf_s varchar NULL,
+	account_holder_name_s varchar NULL,
+	account_holder_surname_s varchar NULL,
+	check_instr_status_s varchar NULL,
+	cancellation_t timestamp(6) with time zone
 );
 
 
@@ -129,9 +134,15 @@ CREATE VIEW public.v_bpd_citizen AS
     cit.enabled_b,
     cit.payoff_instr_s,
     cit.payoff_instr_type_c,
+    cit.account_holder_cf_s,
+    cit.account_holder_name_s,
+    cit.account_holder_surname_s,
+    cit.check_instr_status_s,
     cit.timestamp_tc_t,
     bpi.hpan_s,
     bpi.status_c,
+    cit.cancellation_t,
+    bpi.enabled_b AS pay_istr_update_enable_b,
     cit.insert_date_t AS ctz_insert_date_t,
     cit.insert_user_s AS ctz_insert_user_s,
     cit.update_date_t AS ctz_update_date_t,
@@ -242,12 +253,12 @@ ALTER TABLE ONLY public.bpd_payment_instrument_history ALTER COLUMN id_n SET DEF
 -- Data for Name: bpd_citizen; Type: TABLE DATA; Schema: public; Owner: testuser
 --
 
-INSERT INTO public.bpd_citizen (fiscal_code_s, payoff_instr_s, payoff_instr_type_c, timestamp_tc_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b) VALUES ('AAABBB01C02D345B', NULL, NULL, '2020-10-30 10:45:51.966658+01', '2020-10-30 10:45:51.966658+01', NULL, NULL, NULL, true);
-INSERT INTO public.bpd_citizen (fiscal_code_s, payoff_instr_s, payoff_instr_type_c, timestamp_tc_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b) VALUES ('AAABBB01C02D345C', NULL, NULL, '2020-10-30 10:45:56.241808+01', '2020-10-30 10:45:56.241808+01', NULL, NULL, NULL, true);
-INSERT INTO public.bpd_citizen (fiscal_code_s, payoff_instr_s, payoff_instr_type_c, timestamp_tc_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b) VALUES ('AAABBB01C02D345D', NULL, NULL, '2020-10-30 10:46:08.886749+01', '2020-10-30 10:46:08.886749+01', NULL, NULL, NULL, false);
-INSERT INTO public.bpd_citizen (fiscal_code_s, payoff_instr_s, payoff_instr_type_c, timestamp_tc_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b) VALUES ('AAABBB01C02D345E', 'IT49Q0300203280468153561998', 'IBAN', '2020-10-30 10:47:41.250312+01', '2020-10-30 10:47:41.250312+01', NULL, NULL, NULL, true);
-INSERT INTO public.bpd_citizen (fiscal_code_s, payoff_instr_s, payoff_instr_type_c, timestamp_tc_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b) VALUES ('AAABBB01C02D345F', 'IT04Q0300203280667958133212', 'IBAN', '2020-10-30 10:47:59.350655+01', '2020-10-30 10:47:59.350655+01', NULL, NULL, NULL, false);
-INSERT INTO public.bpd_citizen (fiscal_code_s, payoff_instr_s, payoff_instr_type_c, timestamp_tc_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b) VALUES ('AAABBB01C02D345A', NULL, NULL, '2020-10-30 10:45:44.21482+01', '2020-10-30 10:45:44.21482+01', 'Piattaforma A', '2020-10-30 10:45:44.21482+01', 'Piattaforma B', true);
+INSERT INTO public.bpd_citizen (fiscal_code_s, payoff_instr_s, payoff_instr_type_c, timestamp_tc_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b, account_holder_cf_s, account_holder_name_s, account_holder_surname_s, check_instr_status_s, cancellation_t) VALUES ('AAABBB01C02D345B', NULL, NULL, '2020-10-30 10:45:51.966658+01', '2020-10-30 10:45:51.966658+01', NULL, NULL, NULL, true, 'AAABBB01C02D345B', 'ANTONIO', 'ROSSI', 'OK', NULL);
+INSERT INTO public.bpd_citizen (fiscal_code_s, payoff_instr_s, payoff_instr_type_c, timestamp_tc_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b, account_holder_cf_s, account_holder_name_s, account_holder_surname_s, check_instr_status_s, cancellation_t) VALUES ('AAABBB01C02D345C', NULL, NULL, '2020-10-30 10:45:56.241808+01', '2020-10-30 10:45:56.241808+01', NULL, NULL, NULL, true, 'AAABBB01C02D345C', 'GIUSEPPE', 'VERDI', 'UNKNOWN_PSP', NULL);
+INSERT INTO public.bpd_citizen (fiscal_code_s, payoff_instr_s, payoff_instr_type_c, timestamp_tc_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b, account_holder_cf_s, account_holder_name_s, account_holder_surname_s, check_instr_status_s, cancellation_t) VALUES ('AAABBB01C02D345D', NULL, NULL, '2020-10-30 10:46:08.886749+01', '2020-10-30 10:46:08.886749+01', NULL, NULL, NULL, false, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO public.bpd_citizen (fiscal_code_s, payoff_instr_s, payoff_instr_type_c, timestamp_tc_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b, account_holder_cf_s, account_holder_name_s, account_holder_surname_s, check_instr_status_s, cancellation_t) VALUES ('AAABBB01C02D345E', 'IT49Q0300203280468153561998', 'IBAN', '2020-10-30 10:47:41.250312+01', '2020-10-30 10:47:41.250312+01', NULL, NULL, NULL, true, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO public.bpd_citizen (fiscal_code_s, payoff_instr_s, payoff_instr_type_c, timestamp_tc_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b, account_holder_cf_s, account_holder_name_s, account_holder_surname_s, check_instr_status_s, cancellation_t) VALUES ('AAABBB01C02D345F', 'IT04Q0300203280667958133212', 'IBAN', '2020-10-30 10:47:59.350655+01', '2020-10-30 10:47:59.350655+01', NULL, NULL, NULL, false, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO public.bpd_citizen (fiscal_code_s, payoff_instr_s, payoff_instr_type_c, timestamp_tc_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b, account_holder_cf_s, account_holder_name_s, account_holder_surname_s, check_instr_status_s, cancellation_t) VALUES ('AAABBB01C02D345A', NULL, NULL, '2020-10-30 10:45:44.21482+01', '2020-10-30 10:45:44.21482+01', 'Piattaforma A', '2020-10-30 10:45:44.21482+01', 'Piattaforma B', true, NULL, NULL, NULL, NULL, NULL);
 
 
 --
