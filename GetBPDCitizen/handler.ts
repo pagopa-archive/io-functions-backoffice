@@ -72,15 +72,10 @@ export const toApiBPDCitizen = (
           p =>
             ({
               ...citizen,
-              payment_instrument_enabled: citizen.payment_instrument_enabled,
               payment_instrument_hpan: p.hpan,
               payment_instrument_insert_date: citizen.payment_instrument_insert_date?.toISOString(),
-              payment_instrument_insert_user:
-                citizen.payment_instrument_insert_user,
               payment_instrument_status: p.status,
-              payment_instrument_update_date: citizen.payment_instrument_update_date?.toISOString(),
-              payment_instrument_update_user:
-                citizen.payment_instrument_update_user
+              payment_instrument_update_date: citizen.payment_instrument_update_date?.toISOString()
             } as PaymentMethod)
         );
       if (acc === undefined) {
