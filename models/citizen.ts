@@ -51,6 +51,31 @@ export class Citizen {
   enabled?: boolean;
 
   @ViewColumn({
+    name: "account_holder_cf_s"
+  })
+  checkiban_fiscal_code?: string;
+
+  @ViewColumn({
+    name: "account_holder_name_s"
+  })
+  checkiban_name?: string;
+
+  @ViewColumn({
+    name: "account_holder_surname_s"
+  })
+  checkiban_surname?: string;
+
+  @ViewColumn({
+    name: "check_instr_status_s"
+  })
+  checkiban_status?: string;
+
+  @ViewColumn({
+    name: "cancellation_t"
+  })
+  cancellation?: Date;
+
+  @ViewColumn({
     name: "hpan_s"
   })
   payment_instrument_hpan?: string;
@@ -79,6 +104,12 @@ export class Citizen {
     name: "pay_istr_update_user_s"
   })
   payment_instrument_update_user?: string;
+
+  @ViewColumn({
+    // TODO this name contains an error, it should be pay_istr_enable_b
+    name: "pay_istr_update_enable_b"
+  })
+  payment_instrument_enabled?: boolean;
 
   @AfterLoad()
   // Convert all null values to undefined
