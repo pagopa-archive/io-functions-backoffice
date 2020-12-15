@@ -43,7 +43,6 @@ import {
 export const toApiBPDAward = (
   domainObj: ReadonlyArray<Award>
 ): Either<t.Errors, AwardsList> => {
-  // TODO: missing implementation
   return AwardsList.decode(
     domainObj.reduce((acc: AwardsList | undefined, award) => {
       if (acc === undefined) {
