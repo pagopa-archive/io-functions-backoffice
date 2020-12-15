@@ -92,7 +92,26 @@ describe("GetBPDAwardsHandler", () => {
     expect(responseValue.awards).toHaveLength(2);
   });
 
-  it("should return a not found respose for user with no-one awards period", async () => {
+  it("should return a success reponse with empty awards for user with no one award period", async () => {
+    mockFind.mockImplementationOnce(async () => {
+      return [
+        {
+          fiscal_code: aFiscalCode
+        }
+      ];
+    });
+    const handler = GetBPDAwardsHandler(mockAwardRepository);
+    const response = await handler(context, aUserAndFiscalCode);
+
+    expect(response.kind).toBe("IResponseSuccessJson");
+    const responseValue = (response as IResponseSuccessJson<AwardsList>).value;
+    expect(responseValue).toEqual({
+      awards: [],
+      fiscal_code: aFiscalCode
+    } as AwardsList);
+  });
+
+  it("should return a not found respose if the user is missing in db", async () => {
     mockFind.mockImplementationOnce(async () => {
       return [];
     });
@@ -120,6 +139,7 @@ describe("GetBPDAwardsHandler", () => {
         {
           aw_per_aw_period_end: aTimestamp,
           aw_per_aw_period_start: aTimestamp,
+          award_period_id: 1,
           fiscal_code: aFiscalCode
         }
       ];

@@ -46,25 +46,30 @@ export const toApiBPDAward = (
   return AwardsList.decode(
     domainObj.reduce((acc: AwardsList | undefined, award) => {
       if (acc === undefined) {
-        return {
-          awards: [
-            {
-              ...award,
-              aw_per_aw_period_end: award.aw_per_aw_period_end.toISOString(),
-              aw_per_aw_period_start: award.aw_per_aw_period_start.toISOString(),
-              aw_per_insert_date: award.aw_per_insert_date?.toISOString(),
-              aw_per_update_date: award.aw_per_update_date?.toISOString(),
-              aw_winn_aw_period_end: award.aw_winn_aw_period_end?.toISOString(),
-              aw_winn_aw_period_start: award.aw_winn_aw_period_start?.toISOString(),
-              aw_winn_insert_date: award.aw_winn_insert_date?.toISOString(),
-              aw_winn_update_date: award.aw_winn_update_date?.toISOString(),
-              cit_rank_insert_date: award.cit_rank_insert_date?.toISOString(),
-              cit_rank_update_date: award.cit_rank_update_date?.toISOString(),
-              ranking_date: award.ranking_date?.toISOString()
-            }
-          ],
-          fiscal_code: award.fiscal_code
-        } as AwardsList;
+        return award.award_period_id === undefined
+          ? ({
+              awards: [],
+              fiscal_code: award.fiscal_code
+            } as AwardsList)
+          : ({
+              awards: [
+                {
+                  ...award,
+                  aw_per_aw_period_end: award.aw_per_aw_period_end.toISOString(),
+                  aw_per_aw_period_start: award.aw_per_aw_period_start.toISOString(),
+                  aw_per_insert_date: award.aw_per_insert_date?.toISOString(),
+                  aw_per_update_date: award.aw_per_update_date?.toISOString(),
+                  aw_winn_aw_period_end: award.aw_winn_aw_period_end?.toISOString(),
+                  aw_winn_aw_period_start: award.aw_winn_aw_period_start?.toISOString(),
+                  aw_winn_insert_date: award.aw_winn_insert_date?.toISOString(),
+                  aw_winn_update_date: award.aw_winn_update_date?.toISOString(),
+                  cit_rank_insert_date: award.cit_rank_insert_date?.toISOString(),
+                  cit_rank_update_date: award.cit_rank_update_date?.toISOString(),
+                  ranking_date: award.ranking_date?.toISOString()
+                }
+              ],
+              fiscal_code: award.fiscal_code
+            } as AwardsList);
       }
       return {
         ...acc,
