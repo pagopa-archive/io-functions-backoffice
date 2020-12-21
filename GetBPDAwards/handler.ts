@@ -141,10 +141,9 @@ export function GetBPDAwardsHandler(
           )
         )
       )
-      .map(ResponseSuccessJson)
       .fold<ResponseErrorTypes | IResponseSuccessJson<AwardsList>>(
         identity,
-        identity
+        ResponseSuccessJson
       )
       .run();
   };
