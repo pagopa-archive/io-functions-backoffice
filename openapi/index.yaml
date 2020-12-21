@@ -262,6 +262,17 @@ definitions:
         type: string
       enabled:
         type: boolean
+      checkiban_fiscal_code:
+        type: string
+      checkiban_name:
+        type: string
+      checkiban_surname:
+        type: string
+      checkiban_status:
+        type: string
+      cancellation:
+        type: string
+        format: dateTime
       payment_methods:
         type: array
         items:
@@ -287,6 +298,8 @@ definitions:
         format: dateTime
       payment_instrument_update_user:
         type: string
+      payment_instrument_enabled:
+        type: boolean
     required:
       - payment_instrument_hpan
       - payment_instrument_status

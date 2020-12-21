@@ -75,11 +75,16 @@ export const toApiBPDCitizen = (
               payment_instrument_hpan: p.hpan,
               payment_instrument_insert_date: citizen.payment_instrument_insert_date?.toISOString(),
               payment_instrument_status: p.status,
-              payment_instrument_update_date: citizen.payment_instrument_insert_date?.toISOString()
+              payment_instrument_update_date: citizen.payment_instrument_update_date?.toISOString()
             } as PaymentMethod)
         );
       if (acc === undefined) {
         return {
+          cancellation: citizen.cancellation?.toISOString(),
+          checkiban_fiscal_code: citizen.checkiban_fiscal_code,
+          checkiban_name: citizen.checkiban_name,
+          checkiban_status: citizen.checkiban_status,
+          checkiban_surname: citizen.checkiban_surname,
           enabled: citizen.enabled,
           fiscal_code: citizen.fiscal_code,
           insert_date: citizen.insert_date?.toISOString(),
