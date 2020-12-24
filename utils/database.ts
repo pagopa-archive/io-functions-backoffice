@@ -13,6 +13,7 @@ import {
   getConnectionManager,
   Repository
 } from "typeorm";
+import { Award } from "../models/award";
 import { Citizen } from "../models/citizen";
 import { PaymentIntrument } from "../models/payment_instrument";
 import { Transaction } from "../models/transaction";
@@ -47,7 +48,7 @@ export function getConnection(
           () =>
             createConnection({
               database: params.database,
-              entities: [Citizen, Transaction, PaymentIntrument],
+              entities: [Citizen, Transaction, PaymentIntrument, Award],
               host: params.host,
               password: params.password,
               port: params.port,
