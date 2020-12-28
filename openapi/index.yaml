@@ -434,117 +434,117 @@ definitions:
   AwardPeriod:
     type: object
     properties:
-      aw_winn_award_period_id:
+      award_winner_id:
         type: number
-      payoff_instr:
+      award_winner_payoff_instr:
         type: string
-      amount:
+      award_winner_amount:
         type: number
-      aw_winn_aw_period_start:
+      award_winner_period_start:
         type: string
         format: dateTime
-      aw_winn_aw_period_end:
+      award_winner_period_end:
         type: string
         format: dateTime
-      jackpot:
+      award_winner_jackpot:
         type: number
-      aw_winn_cashback:
+      award_winner_cashback:
         type: number
-      typology:
+      award_winner_typology:
         type: string
-      account_holder_cf:
+      award_winner_account_holder_cf:
         type: string
-      account_holder_name:
+      award_winner_account_holder_name:
         type: string
-      account_holder_surname:
+      award_winner_account_holder_surname:
         type: string
-      check_instr_status:
+      award_winner_check_instr_status:
         type: string
-      account_holder:
+      award_winner_account_holder:
         type: string
-      aw_winn_insert_date:
-        type: string
-        format: dateTime
-      aw_winn_insert_user:
-        type: string
-      aw_winn_update_date:
+      award_winner_insert_date:
         type: string
         format: dateTime
-      aw_winn_update_user:
+      award_winner_insert_user:
         type: string
-      aw_winn_enabled:
+      award_winner_update_date:
+        type: string
+        format: dateTime
+      award_winner_update_user:
+        type: string
+      award_winner_enabled:
         type: boolean
-      cit_rank_award_period_id:
+      citizen_ranking_period_id:
         type: number
-      cit_rank_cashback:
+      citizen_ranking_cashback:
         type: number
-      transaction:
+      citizen_ranking_transaction:
         type: number
-      ranking:
+      citizen_ranking_ranking:
         type: number
-      ranking_date:
+      citizen_ranking_ranking_date:
         type: string
         format: dateTime
-      cit_rank_insert_date:
+      citizen_ranking_insert_date:
         type: string
         format: dateTime
-      cit_rank_insert_user:
+      citizen_ranking_insert_user:
         type: string
-      cit_rank_update_date:
+      citizen_ranking_update_date:
         type: string
         format: dateTime
-      cit_rank_update_user:
+      citizen_ranking_update_user:
         type: string
-      cit_rank_enabled:
+      citizen_ranking_enabled:
         type: boolean
       award_period_id:
         type: number
-      aw_per_aw_period_start:
+      award_period_start:
         type: string
         format: dateTime
-      aw_per_aw_period_end:
+      award_period_end:
         type: string
         format: dateTime
-      aw_grace_period:
+      award_period_grace_period:
         type: number
-      amount_max:
+      award_period_amount_max:
         type: number
-      trx_volume_min:
+      award_period_trx_volume_min:
         type: number
-      trx_eval_max:
+      award_period_trx_eval_max:
         type: number
-      ranking_min:
+      award_period_ranking_min:
         type: number
-      trx_cashback_max:
+      award_period_trx_cashback_max:
         type: number
-      period_cashback_max:
+      award_period_cashback_max:
         type: number
-      cashback_perc:
+      award_period_cashback_perc:
         type: number
-      aw_per_insert_date:
+      award_period_insert_date:
         type: string
         format: dateTime
-      aw_per_insert_user:
+      award_period_insert_user:
         type: string
-      aw_per_update_date:
+      award_period_update_date:
         type: string
         format: dateTime
-      aw_per_update_user:
+      award_period_update_user:
         type: string
-      aw_per_enabled:
+      award_period_enabled:
         type: boolean
     required:
       - award_period_id
-      - aw_per_aw_period_start
-      - aw_per_aw_period_end
-      - aw_grace_period
-      - amount_max
-      - trx_volume_min
-      - trx_eval_max
-      - ranking_min
-      - trx_cashback_max
-      - period_cashback_max
-      - cashback_perc
+      - award_period_start
+      - award_period_end
+      - award_period_grace_period
+      - award_period_amount_max
+      - award_period_trx_volume_min
+      - award_period_ranking_min
+      - award_period_ranking_min
+      - award_period_trx_cashback_max
+      - award_period_trx_eval_max
+      - award_period_cashback_perc
   AwardsList:
     type: object
     properties:

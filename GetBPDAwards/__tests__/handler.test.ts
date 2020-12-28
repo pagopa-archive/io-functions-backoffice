@@ -45,37 +45,35 @@ describe("GetBPDAwardsHandler", () => {
       return [
         {
           fiscal_code: aFiscalCode,
-
-          amount: 120,
-          amount_max: 1,
-          aw_grace_period: 10,
-          aw_per_aw_period_end: aTimestamp,
-          aw_per_aw_period_start: aTimestamp,
-          aw_winn_award_period_id: 1,
+          award_winner_amount: 120,
+          award_period_amount_max: 1,
+          award_period_grace_period: 10,
+          award_period_end: aTimestamp,
+          award_period_start: aTimestamp,
+          award_winner_id: 1,
           award_period_id: 1,
-          cashback_perc: 10,
-          period_cashback_max: 150,
-          ranking_min: 0,
-          trx_cashback_max: 1500,
-          trx_eval_max: 1500,
-          trx_volume_min: 1
+          award_period_cashback_perc: 10,
+          award_period_cashback_max: 150,
+          award_period_ranking_min: 0,
+          award_period_trx_cashback_max: 1500,
+          award_period_trx_eval_max: 1500,
+          award_period_trx_volume_min: 1
         },
         {
           fiscal_code: aFiscalCode,
-
-          amount: 50,
-          amount_max: 1,
-          aw_grace_period: 10,
-          aw_per_aw_period_end: aTimestamp,
-          aw_per_aw_period_start: aTimestamp,
-          aw_winn_award_period_id: 1,
+          award_winner_amount: 50,
+          award_period_amount_max: 1,
+          award_period_grace_period: 10,
+          award_period_end: aTimestamp,
+          award_period_start: aTimestamp,
+          award_winner_id: 1,
           award_period_id: 1,
-          cashback_perc: 10,
-          period_cashback_max: 150,
-          ranking_min: 0,
-          trx_cashback_max: 1500,
-          trx_eval_max: 1500,
-          trx_volume_min: 1
+          award_period_cashback_perc: 10,
+          award_period_cashback_max: 150,
+          award_period_ranking_min: 0,
+          award_period_trx_cashback_max: 1500,
+          award_period_trx_eval_max: 1500,
+          award_period_trx_volume_min: 1
         }
         // tslint:disable-next-line: readonly-array
       ] as Award[];
@@ -137,8 +135,8 @@ describe("GetBPDAwardsHandler", () => {
     mockFind.mockImplementationOnce(async () => {
       return [
         {
-          aw_per_aw_period_end: aTimestamp,
-          aw_per_aw_period_start: aTimestamp,
+          award_period_end: aTimestamp,
+          award_period_start: aTimestamp,
           award_period_id: 1,
           fiscal_code: aFiscalCode
         }
