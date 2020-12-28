@@ -540,10 +540,10 @@ definitions:
       - award_period_grace_period
       - award_period_amount_max
       - award_period_trx_volume_min
-      - award_period_ranking_min
+      - award_period_trx_eval_max
       - award_period_ranking_min
       - award_period_trx_cashback_max
-      - award_period_trx_eval_max
+      - award_period_cashback_max
       - award_period_cashback_perc
   AwardsList:
     type: object
