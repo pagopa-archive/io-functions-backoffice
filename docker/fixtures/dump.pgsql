@@ -21,14 +21,6 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- Reset database drop table and views if exists
---
-DROP VIEW IF EXISTS public.v_bpd_citizen, public.v_bpd_winning_transaction,
-    public.v_bpd_payment_instrument, public.v_bpd_award_citizen;
-DROP TABLE IF EXISTS public.bpd_citizen, public.bpd_payment_instrument,
-    public.bpd_winning_transaction, public.bpd_payment_instrument_history, public.bpd_citizen_ranking, public.bpd_award_period;
-
---
 -- Name: bpd_citizen; Type: TABLE; Schema: public; Owner: testuser
 --
 
@@ -490,6 +482,24 @@ INSERT INTO public.bpd_winning_transaction VALUES ('36081', '978', 31, NULL, '01
 INSERT INTO public.bpd_winning_transaction VALUES ('02008', '978', 31, NULL, '00', '7726b99f6eff4f80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a29', '2345678901555', NULL, NULL, '00', 7, '2020-10-31 10:02:31.11989+00', '2020-10-31 10:02:31.11989+00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'AAABBB01C02D345A', true);
 
 --
+-- Data for Name: bpd_award_period; Type: TABLE DATA; Schema: public; Owner: testuser
+--
+INSERT INTO public.bpd_award_period (award_period_id_n, aw_period_start_d, aw_period_end_d, aw_grace_period_n, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b, trx_volume_min_n, trx_eval_max_n, amount_max_n, ranking_min_n, trx_cashback_max_n, period_cashback_max_n, cashback_perc_n, status_period_c) VALUES (0, '2020-11-23 10:02:31.11989+00', '2020-12-31 23:59:59.11989+00', 10, '2020-10-31 10:02:31.11989+00', 'test', '2020-10-31 10:02:31.11989+00', 'test', true, 2, 150, 150, 1500, 15, 150, 10, NULL);
+INSERT INTO public.bpd_award_period (award_period_id_n, aw_period_start_d, aw_period_end_d, aw_grace_period_n, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b, trx_volume_min_n, trx_eval_max_n, amount_max_n, ranking_min_n, trx_cashback_max_n, period_cashback_max_n, cashback_perc_n, status_period_c) VALUES (1, '2021-01-01 10:02:31.11989+00', '2021-06-30 23:59:59.11989+00', 10, '2020-10-31 10:02:31.11989+00', 'test', '2020-10-31 10:02:31.11989+00', 'test', true, 2, 150, 150, 1500, 15, 150, 10, NULL);
+
+--
+-- Data for Name: bpd_award_winner; Type: TABLE DATA; Schema: public; Owner: testuser
+--
+INSERT INTO public.bpd_award_winner (id_n, award_period_id_n, fiscal_code_s, payoff_instr_s, amount_n, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b, aw_period_start_d, aw_period_end_d, jackpot_n, cashback_n, typology_s, account_holder_cf_s, account_holder_name_s, account_holder_surname_s, check_instr_status_s, account_holder_s) VALUES (0, 0, 'AAABBB01C02D345A', 'IT49Q0300203280468153000112', 10, '2020-10-31 10:02:31.11989+00', 'test', '2020-10-31 10:02:31.11989+00', 'test', true, '2020-11-23 10:02:31.11989+00', '2020-12-31 23:59:59.11989+00', 1500, 20, NULL, 'AAABBB01C02D345A', 'Mario', 'Bianchi', 'OK', NULL);
+INSERT INTO public.bpd_award_winner (id_n, award_period_id_n, fiscal_code_s, payoff_instr_s, amount_n, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b, aw_period_start_d, aw_period_end_d, jackpot_n, cashback_n, typology_s, account_holder_cf_s, account_holder_name_s, account_holder_surname_s, check_instr_status_s, account_holder_s) VALUES (1, 1, 'AAABBB01C02D345A', 'IT49Q0300203280468153000112', 10, '2020-10-31 10:02:31.11989+00', 'test', '2020-10-31 10:02:31.11989+00', 'test', true, '2020-11-23 10:02:31.11989+00', '2020-12-31 23:59:59.11989+00', 1500, 20, NULL, 'AAABBB01C02D345A', 'Mario', 'Bianchi', 'OK', NULL);
+
+--
+-- Data for Name: bpd_citizen_ranking; Type: TABLE DATA; Schema: public; Owner: testuser
+--
+INSERT INTO public.bpd_citizen_ranking (fiscal_code_c, award_period_id_n, ranking_n, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b, ranking_min_n, cashback_n, transaction_n, ranking_date_t, max_cashback_n) VALUES ('AAABBB01C02D345A', 0, 1, '2020-10-31 10:02:31.11989+00', 'test', '2020-10-31 10:02:31.11989+00', 'test', true, 150, 10, 2, '2020-12-31 23:59:59.11989+00', 150);
+INSERT INTO public.bpd_citizen_ranking (fiscal_code_c, award_period_id_n, ranking_n, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b, ranking_min_n, cashback_n, transaction_n, ranking_date_t, max_cashback_n) VALUES ('AAABBB01C02D345A', 1, 1, '2020-10-31 10:02:31.11989+00', 'test', '2020-10-31 10:02:31.11989+00', 'test', true, 150, 10, 2, '2020-12-31 23:59:59.11989+00', 150);
+
+--
 -- Name: bpd_citizen bpd_citizen_pkey; Type: CONSTRAINT; Schema: public; Owner: testuser
 --
 
@@ -544,60 +554,6 @@ ALTER TABLE ONLY public.bpd_citizen_ranking
 
 ALTER TABLE ONLY public.bpd_award_period
     ADD CONSTRAINT bpd_award_period_pkey PRIMARY KEY (award_period_id_n);
-
-
---
--- Name: TABLE v_bpd_citizen; Type: ACL; Schema: public; Owner: testuser
---
-
-GRANT ALL ON TABLE public.v_bpd_citizen TO testuser;
-
---
--- Name: TABLE v_bpd_winning_transaction; Type: ACL; Schema: public; Owner: testuser
---
-
-GRANT ALL ON TABLE public.v_bpd_winning_transaction TO testuser;
-
---
--- TOC entry 4397 (class 0 OID 0)
--- Dependencies: 261
--- Name: TABLE bpd_payment_instrument_history; Type: ACL; Schema: public; Owner: testuser
---
-
-GRANT ALL ON TABLE public.bpd_payment_instrument_history TO testuser;
-
---
--- TOC entry 4438 (class 0 OID 0)
--- Dependencies: 288
--- Name: TABLE bpd_citizen_ranking; Type: ACL; Schema: public; Owner: testuser
---
-
-GRANT ALL ON TABLE public.bpd_citizen_ranking TO testuser;
-
---
--- TOC entry 4437 (class 0 OID 0)
--- Dependencies: 285
--- Name: TABLE bpd_award_period; Type: ACL; Schema: public; Owner: testuser
---
-
-GRANT ALL ON TABLE public.bpd_award_period TO testuser;
-
---
--- TOC entry 4399 (class 0 OID 0)
--- Dependencies: 262
--- Name: SEQUENCE bpd_payment_instrument_history_id_n_seq; Type: ACL; Schema: public; Owner: testuser
---
-
-GRANT ALL ON SEQUENCE public.bpd_payment_instrument_history_id_n_seq TO testuser;
-
---
--- TOC entry 4439 (class 0 OID 0)
--- Dependencies: 286
--- Name: SEQUENCE bpd_award_period_award_period_id_seq; Type: ACL; Schema: public; Owner: testuser
---
-
-GRANT ALL ON SEQUENCE public.bpd_award_period_award_period_id_seq TO testuser;
-
 
 --
 -- PostgreSQL database dump complete
