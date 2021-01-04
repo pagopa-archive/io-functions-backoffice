@@ -436,6 +436,8 @@ definitions:
     properties:
       award_winner_id:
         type: number
+      award_winner_period_id:
+        type: number
       award_winner_payoff_instr:
         type: string
       award_winner_amount:

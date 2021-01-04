@@ -15,6 +15,11 @@ export class Award {
   award_winner_id: number;
 
   @ViewColumn({
+    name: "award_period_id_n"
+  })
+  award_winner_period_id?: number;
+
+  @ViewColumn({
     name: "payoff_instr_s"
   })
   award_winner_payoff_instr?: string;
@@ -244,6 +249,12 @@ export class Award {
 
     // Type conversion for numeric columns. They come from database as string
     // and must be converted to float.
+    if (this.award_winner_period_id !== undefined) {
+      // tslint:disable-next-line: no-object-mutation
+      this.award_winner_period_id = parseFloat(
+        String(this.award_winner_period_id)
+      );
+    }
     if (this.award_winner_amount !== undefined) {
       // tslint:disable-next-line: no-object-mutation
       this.award_winner_amount = parseFloat(String(this.award_winner_amount));
