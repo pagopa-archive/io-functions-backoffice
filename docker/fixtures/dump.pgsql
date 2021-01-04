@@ -556,5 +556,12 @@ ALTER TABLE ONLY public.bpd_award_period
     ADD CONSTRAINT bpd_award_period_pkey PRIMARY KEY (award_period_id_n);
 
 --
+-- Name: bpd_award_winner bpd_award_winner_pkey; Type: CONSTRAINT; Schema: public; Owner: testuser
+--
+
+ALTER TABLE public.bpd_award_winner
+    ADD CONSTRAINT bpd_award_winner_pkey PRIMARY KEY (id_n);
+
+--
 -- PostgreSQL database dump complete
 --
