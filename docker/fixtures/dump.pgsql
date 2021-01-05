@@ -73,7 +73,7 @@ CREATE TABLE public.bpd_winning_transaction (
     acquirer_c character varying(20) NOT NULL,
     amount_currency_c character varying(3),
     amount_i numeric,
-    award_period_id_n int8range,
+    award_period_id_n bigint NOT NULL,
     circuit_type_c character varying(5),
     hpan_s character varying(64),
     id_trx_acquirer_s character varying NOT NULL,
@@ -477,9 +477,10 @@ INSERT INTO public.bpd_payment_instrument_history (hpan_s, fiscal_code_s, deacti
 -- Data for Name: bpd_winning_transaction; Type: TABLE DATA; Schema: public; Owner: testuser
 --
 
-INSERT INTO public.bpd_winning_transaction VALUES ('32875', '978', 10, NULL, '01', '807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966', '1234567890123', NULL, NULL, '00', 2, '2020-10-31 10:02:31.11989+00', '2020-10-31 10:02:31.11989+00', NULL, NULL, NULL, true, NULL, NULL, NULL, NULL, NULL, NULL, 'AAABBB01C02D345A', true);
-INSERT INTO public.bpd_winning_transaction VALUES ('36081', '978', 31, NULL, '01', '807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966', '2345678901555', NULL, NULL, '00', 7, '2020-10-31 10:02:31.11989+00', '2020-10-31 10:02:31.11989+00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'AAABBB01C02D345A', true);
-INSERT INTO public.bpd_winning_transaction VALUES ('02008', '978', 31, NULL, '00', '7726b99f6eff4f80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a29', '2345678901555', NULL, NULL, '00', 7, '2020-10-31 10:02:31.11989+00', '2020-10-31 10:02:31.11989+00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'AAABBB01C02D345A', true);
+INSERT INTO public.bpd_winning_transaction (acquirer_c,amount_currency_c,amount_i,award_period_id_n,circuit_type_c,hpan_s,id_trx_acquirer_s,mcc_c,mcc_descr_s,operation_type_c,score_n,trx_timestamp_t,insert_date_t,insert_user_s,update_date_t,update_user_s,enabled_b,merchant_id_s,correlation_id_s,acquirer_id_s,id_trx_issuer_s,bin_s,terminal_id_s,fiscal_code_s,elab_ranking_b) VALUES
+	 ('32875','978',10,1,'01','807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966','1234567890123',NULL,NULL,'00',2,'2020-10-31 11:02:31.119','2020-10-31 11:02:31.119',NULL,NULL,NULL,true,NULL,NULL,'123432',NULL,NULL,NULL,'AAABBB01C02D345A',true),
+	 ('36081','978',31,1,'01','807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966','2345678901555',NULL,NULL,'00',7,'2020-10-31 11:02:31.119','2020-10-31 11:02:31.119',NULL,NULL,NULL,NULL,NULL,NULL,'123435',NULL,NULL,NULL,'AAABBB01C02D345A',true),
+	 ('02008','978',31,1,'00','7726b99f6eff4f80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a29','2345678901558',NULL,NULL,'00',7,'2020-10-31 11:02:31.119','2020-10-31 11:02:31.119',NULL,NULL,NULL,NULL,NULL,NULL,'123437',NULL,NULL,NULL,'AAABBB01C02D345A',true);
 
 --
 -- Data for Name: bpd_award_period; Type: TABLE DATA; Schema: public; Owner: testuser
@@ -561,6 +562,9 @@ ALTER TABLE ONLY public.bpd_award_period
 
 ALTER TABLE public.bpd_award_winner
     ADD CONSTRAINT bpd_award_winner_pkey PRIMARY KEY (id_n);
+
+ALTER TABLE public.bpd_winning_transaction
+        ADD CONSTRAINT bpd_winning_transaction_pkey PRIMARY KEY (id_trx_acquirer_s, trx_timestamp_t, acquirer_c, acquirer_id_s, operation_type_c);
 
 --
 -- PostgreSQL database dump complete
