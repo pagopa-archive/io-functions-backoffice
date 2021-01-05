@@ -55,17 +55,17 @@ export const toApiBPDAward = (
               awards: [
                 {
                   ...award,
-                  aw_per_aw_period_end: award.aw_per_aw_period_end.toISOString(),
-                  aw_per_aw_period_start: award.aw_per_aw_period_start.toISOString(),
-                  aw_per_insert_date: award.aw_per_insert_date?.toISOString(),
-                  aw_per_update_date: award.aw_per_update_date?.toISOString(),
-                  aw_winn_aw_period_end: award.aw_winn_aw_period_end?.toISOString(),
-                  aw_winn_aw_period_start: award.aw_winn_aw_period_start?.toISOString(),
-                  aw_winn_insert_date: award.aw_winn_insert_date?.toISOString(),
-                  aw_winn_update_date: award.aw_winn_update_date?.toISOString(),
-                  cit_rank_insert_date: award.cit_rank_insert_date?.toISOString(),
-                  cit_rank_update_date: award.cit_rank_update_date?.toISOString(),
-                  ranking_date: award.ranking_date?.toISOString()
+                  award_period_end: award.award_period_end.toISOString(),
+                  award_period_insert_date: award.award_period_insert_date?.toISOString(),
+                  award_period_start: award.award_period_start.toISOString(),
+                  award_period_update_date: award.award_period_update_date?.toISOString(),
+                  award_winner_insert_date: award.award_winner_insert_date?.toISOString(),
+                  award_winner_period_end: award.award_winner_period_end?.toISOString(),
+                  award_winner_period_start: award.award_winner_period_start?.toISOString(),
+                  award_winner_update_date: award.award_winner_update_date?.toISOString(),
+                  citizen_ranking_insert_date: award.citizen_ranking_insert_date?.toISOString(),
+                  citizen_ranking_ranking_date: award.citizen_ranking_ranking_date?.toISOString(),
+                  citizen_ranking_update_date: award.citizen_ranking_update_date?.toISOString()
                 }
               ],
               fiscal_code: award.fiscal_code
@@ -77,17 +77,17 @@ export const toApiBPDAward = (
           ...acc.awards,
           {
             ...award,
-            aw_per_aw_period_end: award.aw_per_aw_period_end.toISOString(),
-            aw_per_aw_period_start: award.aw_per_aw_period_start.toISOString(),
-            aw_per_insert_date: award.aw_per_insert_date?.toISOString(),
-            aw_per_update_date: award.aw_per_update_date?.toISOString(),
-            aw_winn_aw_period_end: award.aw_winn_aw_period_end?.toISOString(),
-            aw_winn_aw_period_start: award.aw_winn_aw_period_start?.toISOString(),
-            aw_winn_insert_date: award.aw_winn_insert_date?.toISOString(),
-            aw_winn_update_date: award.aw_winn_update_date?.toISOString(),
-            cit_rank_insert_date: award.cit_rank_insert_date?.toISOString(),
-            cit_rank_update_date: award.cit_rank_update_date?.toISOString(),
-            ranking_date: award.ranking_date?.toISOString()
+            award_period_end: award.award_period_end.toISOString(),
+            award_period_insert_date: award.award_period_insert_date?.toISOString(),
+            award_period_start: award.award_period_start.toISOString(),
+            award_period_update_date: award.award_period_update_date?.toISOString(),
+            award_winner_insert_date: award.award_winner_insert_date?.toISOString(),
+            award_winner_period_end: award.award_winner_period_end?.toISOString(),
+            award_winner_period_start: award.award_winner_period_start?.toISOString(),
+            award_winner_update_date: award.award_winner_update_date?.toISOString(),
+            citizen_ranking_insert_date: award.citizen_ranking_insert_date?.toISOString(),
+            citizen_ranking_ranking_date: award.citizen_ranking_ranking_date?.toISOString(),
+            citizen_ranking_update_date: award.citizen_ranking_update_date?.toISOString()
           }
         ]
       } as AwardsList;
