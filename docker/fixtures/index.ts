@@ -35,12 +35,22 @@ createConnection({
 })
   .then(connection => {
     const query = fs
+      .readFileSync(path.join(__dirname, "drop.pgsql"))
+      .toString();
+    return connection.query(query).then(() => connection);
+  })
+  .then(connection => {
+    const query = fs
       .readFileSync(path.join(__dirname, "dump.pgsql"))
       .toString();
-    return connection
-      .query(query)
-      .then(() => connection.close())
-      .catch(() => connection.close());
+    return connection.query(query).then(() => connection);
   })
+  .then(connection => {
+    const query = fs
+      .readFileSync(path.join(__dirname, "grant.pgsql"))
+      .toString();
+    return connection.query(query).then(() => connection);
+  })
+  .then(connection => connection.close())
   // tslint:disable-next-line: no-console
   .catch(console.error);

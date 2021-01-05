@@ -64,6 +64,8 @@ services:
       dockerfile: docker/fixtures/Dockerfile
     volumes:
       - ./docker/fixtures/dump.pgsql:/opt/fixtures/dump.pgsql:delegated
+      - ./docker/fixtures/drop.pgsql:/opt/fixtures/drop.pgsql:delegated
+      - ./docker/fixtures/grant.pgsql:/opt/fixtures/grant.pgsql:delegated
     depends_on:
       - postgres
     networks:
