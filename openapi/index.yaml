@@ -462,8 +462,6 @@ definitions:
         type: string
       award_winner_check_instr_status:
         type: string
-      award_winner_account_holder:
-        type: string
       award_winner_insert_date:
         type: string
         format: dateTime
