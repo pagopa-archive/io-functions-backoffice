@@ -75,11 +75,6 @@ export class Award {
   award_winner_check_instr_status?: string;
 
   @ViewColumn({
-    name: "account_holder_s"
-  })
-  award_winner_account_holder?: string;
-
-  @ViewColumn({
     name: "aw_winn_insert_date_t"
   })
   award_winner_insert_date?: Date;

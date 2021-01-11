@@ -316,7 +316,6 @@ CREATE VIEW public.v_bpd_award_citizen AS
     baw.account_holder_name_s,
     baw.account_holder_surname_s,
     baw.check_instr_status_s,
-    baw.account_holder_s,
     baw.insert_date_t AS aw_winn_insert_date_t,
     baw.insert_user_s AS aw_winn_insert_user_s,
     baw.update_date_t AS aw_winn_update_date_t,
