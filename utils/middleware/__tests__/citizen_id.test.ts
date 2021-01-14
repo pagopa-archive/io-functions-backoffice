@@ -12,6 +12,7 @@ import { IServicePrincipalCreds } from "../../adb2c";
 import * as adb2cUtils from "../../adb2c";
 import { AdUser } from "../../strategy/bearer_strategy";
 import { RequestCitizenToFiscalCode } from "../citizen_id";
+import { RedisClient } from "redis";
 
 const aFiscalCode = "AAABBB01C02D345D" as FiscalCode;
 
@@ -62,6 +63,12 @@ jest.spyOn(adb2cUtils, "getGraphRbacManagementClient").mockImplementation(() =>
   taskEither.of(mockGraphClient as any)
 );
 
+const mockExists = jest.fn().mockImplementation((_, cb) => cb(undefined, 0));
+
+const mockRedisClient = ({
+  exists: mockExists
+} as unknown) as RedisClient;
+
 describe("RequestCitizenToFiscalCode", () => {
   it("should succeded if the header contain a plain fiscal code", async () => {
     mockHeader.mockImplementationOnce(() => aFiscalCode);
@@ -75,7 +82,8 @@ describe("RequestCitizenToFiscalCode", () => {
       aPublicRsaCert,
       mockAdb2cCreds,
       anAdminGroup,
-      aCacheTTL
+      aCacheTTL,
+      mockRedisClient
     )(mockRequest);
     expect(response).toEqual(
       right({
@@ -91,7 +99,8 @@ describe("RequestCitizenToFiscalCode", () => {
       aPublicRsaCert,
       mockAdb2cCreds,
       anAdminGroup,
-      aCacheTTL
+      aCacheTTL,
+      mockRedisClient
     )(mockRequest);
     expect(response).toEqual(
       right({
@@ -107,7 +116,8 @@ describe("RequestCitizenToFiscalCode", () => {
       aPublicRsaCert,
       mockAdb2cCreds,
       anAdminGroup,
-      aCacheTTL
+      aCacheTTL,
+      mockRedisClient
     )(mockRequest);
     expect(response).toEqual(
       left({
@@ -124,7 +134,8 @@ describe("RequestCitizenToFiscalCode", () => {
       aPublicRsaCert,
       mockAdb2cCreds,
       anAdminGroup,
-      aCacheTTL
+      aCacheTTL,
+      mockRedisClient
     )(mockRequest);
     expect(response).toEqual(
       left({

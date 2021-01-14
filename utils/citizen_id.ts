@@ -1,4 +1,4 @@
-import { TaskEither } from "fp-ts/lib/TaskEither";
+import { fromPredicate, TaskEither } from "fp-ts/lib/TaskEither";
 import { fromEither, fromLeft } from "fp-ts/lib/TaskEither";
 import { taskEither } from "fp-ts/lib/TaskEither";
 import { taskify } from "fp-ts/lib/TaskEither";
@@ -11,6 +11,7 @@ import {
 } from "italia-ts-commons/lib/responses";
 import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
 import * as jwt from "jsonwebtoken";
+import { RedisClient } from "redis";
 import { CitizenID } from "../generated/definitions/CitizenID";
 import { SupportToken } from "../generated/definitions/SupportToken";
 import { isAdminAuthLevel } from "./ad_user";
@@ -35,6 +36,8 @@ const FiscalCodeAndCitizenIdType = t.interface({
 export type FiscalCodeAndCitizenIdType = t.TypeOf<
   typeof FiscalCodeAndCitizenIdType
 >;
+
+export const BLACKLIST_SUPPORT_TOKEN_PREFIX = "BLACKLIST-SUPPORT-TOKEN-";
 
 const verifySupportToken = (
   pubCert: NonEmptyString,
@@ -65,7 +68,8 @@ export const withCitizenIdCheck = (
   adUser: AdUser,
   citizenId: CitizenID,
   publicRsaCertificate: NonEmptyString,
-  canQueryFiscalCodeGroup: NonEmptyString
+  canQueryFiscalCodeGroup: NonEmptyString,
+  redisClient: RedisClient
 ): TaskEither<
   IResponseErrorForbiddenNotAuthorized | IResponseErrorValidation,
   FiscalCodeAndCitizenIdType
@@ -86,9 +90,29 @@ export const withCitizenIdCheck = (
                 })
               )
         )
-    : verifySupportToken(publicRsaCertificate, citizenId).map(_ =>
-        FiscalCodeAndCitizenIdType.encode({
-          citizenIdType: "SupportToken",
-          fiscalCode: _
-        })
-      );
+    : verifySupportToken(publicRsaCertificate, citizenId)
+        // Check if the token is backlisted
+        .chain(_ =>
+          taskify<Error, number>(cb =>
+            redisClient.exists(
+              `${BLACKLIST_SUPPORT_TOKEN_PREFIX}${citizenId}`,
+              cb
+            )
+          )()
+            .chain(
+              fromPredicate(
+                existsResponse => existsResponse === 0,
+                () => new Error("Blacklisted support_token")
+              )
+            )
+            .map(_1 => _)
+            .mapLeft<
+              IResponseErrorForbiddenNotAuthorized | IResponseErrorValidation
+            >(_1 => ResponseErrorForbiddenNotAuthorized)
+        )
+        .map(_ =>
+          FiscalCodeAndCitizenIdType.encode({
+            citizenIdType: "SupportToken",
+            fiscalCode: _
+          })
+        );

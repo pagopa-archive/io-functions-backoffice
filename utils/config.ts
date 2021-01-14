@@ -4,9 +4,9 @@ import { readableReport } from "italia-ts-commons/lib/reporters";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
 import { IBearerStrategyOptionWithRequest } from "passport-azure-ad";
 
-// global app configuration
-export type IConfig = t.TypeOf<typeof IConfig>;
-export const IConfig = t.interface({
+export const IConfigRequired = t.interface({
+  isProduction: t.boolean,
+
   POSTGRES_DB_NAME: NonEmptyString,
 
   POSTGRES_HOSTNAME: NonEmptyString,
@@ -32,8 +32,31 @@ export const IConfig = t.interface({
   ADB2C_CONFIG: t.any, // TODO: Define the ADB2C_CONFIG type
   DASHBOARD_LOGS_TABLE_NAME: NonEmptyString,
   DASHBOARD_STORAGE_CONNECTION_STRING: NonEmptyString,
-  IN_MEMORY_CACHE_TTL: NumberFromString
+  IN_MEMORY_CACHE_TTL: NumberFromString,
+
+  REDIS_URL: NonEmptyString
 });
+export type IConfigRequired = t.TypeOf<typeof IConfigRequired>;
+
+// global app configuration
+export type IConfig = t.TypeOf<typeof IConfig>;
+export const IConfig = t.union([
+  t.intersection([
+    IConfigRequired,
+    t.interface({
+      isProduction: t.literal(false)
+    })
+  ]),
+  t.intersection([
+    IConfigRequired,
+    t.interface({
+      isProduction: t.literal(true),
+
+      REDIS_PASSWORD: NonEmptyString,
+      REDIS_PORT: NonEmptyString
+    })
+  ])
+]);
 
 export const creds: IBearerStrategyOptionWithRequest = {
   // Required. It must be tenant-specific endpoint, common endpoint
@@ -74,6 +97,7 @@ export const creds: IBearerStrategyOptionWithRequest = {
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   ...process.env,
   ADB2C_CONFIG: creds,
+  REDIS_URL: process.env.REDIS_URL || "redis://redis",
   isProduction: process.env.NODE_ENV === "production"
 });
 

@@ -30,6 +30,7 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { RedisClient } from "redis";
 import { Repository } from "typeorm";
 import { BPDCitizen } from "../generated/definitions/BPDCitizen";
 import { PaymentMethod } from "../generated/definitions/PaymentMethod";
@@ -158,7 +159,8 @@ export function GetBPDCitizen(
   publicRsaCertificate: NonEmptyString,
   adb2cCreds: IServicePrincipalCreds,
   adb2cAdminGroup: NonEmptyString,
-  cacheTtl: NumberFromString
+  cacheTtl: NumberFromString,
+  redisClient: RedisClient
 ): express.RequestHandler {
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
@@ -166,7 +168,8 @@ export function GetBPDCitizen(
       publicRsaCertificate,
       adb2cCreds,
       adb2cAdminGroup,
-      cacheTtl
+      cacheTtl,
+      redisClient
     )
   );
 

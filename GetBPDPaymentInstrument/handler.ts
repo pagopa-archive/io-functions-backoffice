@@ -31,6 +31,7 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { RedisClient } from "redis";
 import { Repository } from "typeorm";
 import { PaymentMethodDetails } from "../generated/definitions/PaymentMethodDetails";
 import { PaymentIntrument } from "../models/payment_instrument";
@@ -158,7 +159,8 @@ export function GetBPDPaymentInstrument(
   publicRsaCertificate: NonEmptyString,
   adb2cCreds: IServicePrincipalCreds,
   adb2cAdminGroup: NonEmptyString,
-  cacheTtl: NumberFromString
+  cacheTtl: NumberFromString,
+  redisClient: RedisClient
 ): express.RequestHandler {
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
@@ -167,7 +169,8 @@ export function GetBPDPaymentInstrument(
       publicRsaCertificate,
       adb2cCreds,
       adb2cAdminGroup,
-      cacheTtl
+      cacheTtl,
+      redisClient
     )
   );
 

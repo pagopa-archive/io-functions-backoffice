@@ -11,6 +11,7 @@ import {
   ResponseErrorValidation
 } from "italia-ts-commons/lib/responses";
 import { FiscalCode, NonEmptyString } from "italia-ts-commons/lib/strings";
+import { RedisClient } from "redis";
 import { CitizenID } from "../../generated/definitions/CitizenID";
 import { CitizenIDType } from "../../utils/citizen_id";
 import { IServicePrincipalCreds } from "../adb2c";
@@ -45,6 +46,7 @@ export const RequestCitizenToFiscalCode = (
   adb2cCreds: IServicePrincipalCreds,
   adb2cAdminGroup: NonEmptyString,
   cacheTtl: NumberFromString,
+  redisClient: RedisClient,
   headerName = "x-citizen-id"
 ): IRequestMiddleware<
   | "IResponseErrorValidation"
@@ -88,7 +90,8 @@ export const RequestCitizenToFiscalCode = (
           user,
           citizenId,
           publicRsaCertificate,
-          adb2cAdminGroup
+          adb2cAdminGroup,
+          redisClient
         ).map(fiscalCodeAndCitizenIdType => ({
           ...fiscalCodeAndCitizenIdType,
           user

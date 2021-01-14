@@ -155,11 +155,43 @@ paths:
           description: Internal server Error
           schema:
             $ref: "#/definitions/ProblemJson"
+  "/bpd/support-token":
+    delete:
+      operationId: BlacklistSupportToken
+      summary: Blacklist Support Token
+      description: Add a support token in backlist invalidating it
+      parameters:
+        - $ref: "#/parameters/CitizenID"
+      responses:
+        "200":
+          description: Found.
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "400":
+          description: Invalid request.
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+          schema:
+            $ref: "#/definitions/ProblemJson"
+        "500":
+          description: Internal server Error
+          schema:
+            $ref: "#/definitions/ProblemJson"
+
 consumes:
   - application/json
 produces:
   - application/json
 definitions:
+  SuccessResponse:
+    type: object
+    properties:
+      message:
+        type: string
   FiscalCode:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v10.7.0/openapi/definitions.yaml#/FiscalCode"
   ProblemJson:

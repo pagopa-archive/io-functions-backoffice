@@ -17,6 +17,7 @@ import { IServicePrincipalCreds } from "../utils/adb2c";
 import { GetInsertOrReplaceEntity } from "../utils/audit_logs";
 import { getConfigOrThrow } from "../utils/config";
 import { GetOAuthVerifier } from "../utils/middleware/oauth_adb2c";
+import { REDIS_CLIENT } from "../utils/redis";
 import { setupBearerStrategy } from "../utils/strategy/bearer_strategy";
 
 const config = getConfigOrThrow();
@@ -77,7 +78,8 @@ app.get(
     config.JWT_SUPPORT_TOKEN_PUBLIC_RSA_CERTIFICATE,
     adb2cCreds,
     config.ADB2C_ADMIN_GROUP_NAME,
-    config.IN_MEMORY_CACHE_TTL
+    config.IN_MEMORY_CACHE_TTL,
+    REDIS_CLIENT
   )
 );
 
