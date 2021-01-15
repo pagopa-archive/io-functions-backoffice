@@ -7,12 +7,12 @@ import {
   FiscalCode,
   NonEmptyString
 } from "italia-ts-commons/lib/strings";
+import { RedisClient } from "redis";
 import { SupportToken } from "../../../generated/definitions/SupportToken";
 import { IServicePrincipalCreds } from "../../adb2c";
 import * as adb2cUtils from "../../adb2c";
 import { AdUser } from "../../strategy/bearer_strategy";
 import { RequestCitizenToFiscalCode } from "../citizen_id";
-import { RedisClient } from "redis";
 
 const aFiscalCode = "AAABBB01C02D345D" as FiscalCode;
 
@@ -48,8 +48,12 @@ const mockRequest = ({
   user: mockUser
 } as unknown) as Request;
 
-const getMemberGroupsMock = jest.fn();
-const getGroupMock = jest.fn();
+const getMemberGroupsMock = jest
+  .fn()
+  .mockImplementation(() => Promise.resolve(["aaaaaa-bbbbbb"]));
+const getGroupMock = jest
+  .fn()
+  .mockImplementation(() => Promise.resolve({ displayName: anAdminGroup }));
 const mockGraphClient = {
   groups: {
     get: getGroupMock
@@ -70,14 +74,11 @@ const mockRedisClient = ({
 } as unknown) as RedisClient;
 
 describe("RequestCitizenToFiscalCode", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
   it("should succeded if the header contain a plain fiscal code", async () => {
     mockHeader.mockImplementationOnce(() => aFiscalCode);
-    getMemberGroupsMock.mockImplementationOnce(() =>
-      Promise.resolve(["aaaaaa-bbbbbb"])
-    );
-    getGroupMock.mockImplementationOnce(() =>
-      Promise.resolve({ displayName: anAdminGroup })
-    );
     const response = await RequestCitizenToFiscalCode(
       aPublicRsaCert,
       mockAdb2cCreds,
@@ -130,6 +131,44 @@ describe("RequestCitizenToFiscalCode", () => {
 
   it("should return a unauthorized if the JWT token is invalid ", async () => {
     mockHeader.mockImplementationOnce(() => anInvalidSupportToken);
+    const response = await RequestCitizenToFiscalCode(
+      aPublicRsaCert,
+      mockAdb2cCreds,
+      anAdminGroup,
+      aCacheTTL,
+      mockRedisClient
+    )(mockRequest);
+    expect(response).toEqual(
+      left({
+        apply: expect.any(Function),
+        detail: expect.any(String),
+        kind: "IResponseErrorForbiddenNotAuthorized"
+      })
+    );
+  });
+
+  it("should return a unauthorized if the JWT token is blacklisted", async () => {
+    mockHeader.mockImplementationOnce(() => aSupportToken);
+    mockExists.mockImplementationOnce((_, cb) => cb(undefined, 1));
+    const response = await RequestCitizenToFiscalCode(
+      aPublicRsaCert,
+      mockAdb2cCreds,
+      anAdminGroup,
+      aCacheTTL,
+      mockRedisClient
+    )(mockRequest);
+    expect(response).toEqual(
+      left({
+        apply: expect.any(Function),
+        detail: expect.any(String),
+        kind: "IResponseErrorForbiddenNotAuthorized"
+      })
+    );
+  });
+
+  it("should return an error if Redis exists fails", async () => {
+    mockHeader.mockImplementationOnce(() => aSupportToken);
+    mockExists.mockImplementationOnce((_, cb) => cb(new Error("Redis error")));
     const response = await RequestCitizenToFiscalCode(
       aPublicRsaCert,
       mockAdb2cCreds,
