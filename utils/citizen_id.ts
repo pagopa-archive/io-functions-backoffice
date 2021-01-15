@@ -105,10 +105,10 @@ export const withCitizenIdCheck = (
                 () => new Error("Blacklisted support_token")
               )
             )
-            .map(_1 => _)
-            .mapLeft<
-              IResponseErrorForbiddenNotAuthorized | IResponseErrorValidation
-            >(_1 => ResponseErrorForbiddenNotAuthorized)
+            .bimap(
+              _1 => ResponseErrorForbiddenNotAuthorized,
+              _1 => _
+            )
         )
         .map(_ =>
           FiscalCodeAndCitizenIdType.encode({
