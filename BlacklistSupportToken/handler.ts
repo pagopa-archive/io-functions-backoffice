@@ -61,7 +61,7 @@ export function BlacklistSupportTokenHandler(
         )
       )
         // Calculate remaining token validity
-        .map(_ => (_.exp - Math.round(new Date().valueOf() / 1000)) as Second)
+        .map(_ => (_.exp - Math.floor(new Date().valueOf() / 1000)) as Second)
         .chain(exp =>
           taskify<Error, "OK">(cb =>
             redisClient.set(
