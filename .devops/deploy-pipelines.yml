@@ -131,6 +131,7 @@ stages:
   - stage: Deploy_production
     dependsOn:
       - Release
+      - Prepare_artifact
     jobs:
       - job: 'deploy'
         steps:
