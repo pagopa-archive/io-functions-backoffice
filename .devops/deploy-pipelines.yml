@@ -103,7 +103,7 @@ stages:
           - task: CopyFiles@2
             inputs:
               SourceFolder: '$(System.DefaultWorkingDirectory)'
-              TargetFolder: '$(Build.ArtifactStagingDirectory)'
+              TargetFolder: '$(System.DefaultWorkingDirectory)/bundle'
               Contents: |
                 **/*
                 !.git/**/*
