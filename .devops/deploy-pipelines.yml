@@ -125,6 +125,9 @@ stages:
                 !__*/**/*
             displayName: 'Copy deploy files'
 
+          - publish: $(System.DefaultWorkingDirectory)/bundle
+            artifact: Bundle
+
   - stage: Deploy_production
     dependsOn:
       - Release
