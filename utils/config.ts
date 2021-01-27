@@ -1,3 +1,4 @@
+import { fromNullable } from "fp-ts/lib/Option";
 import * as t from "io-ts";
 import { NumberFromString } from "italia-ts-commons/lib/numbers";
 import { readableReport } from "italia-ts-commons/lib/reporters";
@@ -49,12 +50,17 @@ export const IConfig = t.union([
   ]),
   t.intersection([
     IConfigRequired,
-    t.interface({
-      isProduction: t.literal(true),
+    t.intersection([
+      t.interface({
+        isProduction: t.literal(true),
 
-      REDIS_PASSWORD: NonEmptyString,
-      REDIS_PORT: NonEmptyString
-    })
+        REDIS_PASSWORD: NonEmptyString,
+        REDIS_PORT: NonEmptyString
+      }),
+      t.partial({
+        REDIS_CLUSTER_ENABLED: t.boolean
+      })
+    ])
   ])
 ]);
 
@@ -97,7 +103,10 @@ export const creds: IBearerStrategyOptionWithRequest = {
 const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
   ...process.env,
   ADB2C_CONFIG: creds,
-  REDIS_URL: process.env.REDIS_URL || "redis://redis",
+  REDIS_CLUSTER_ENABLED: fromNullable(process.env.REDIS_CLUSTER_ENABLED)
+    .map(_ => _.toLocaleLowerCase() === "true")
+    .toUndefined(),
+  REDIS_URL: process.env.REDIS_URL || "redis",
   isProduction: process.env.NODE_ENV === "production"
 });
 

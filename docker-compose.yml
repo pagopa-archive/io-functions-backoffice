@@ -43,6 +43,8 @@ services:
       - "10002:10002"
     networks:
       - io-fn
+    depends_on:
+      - redis
 
   storage:
     image: azurite
