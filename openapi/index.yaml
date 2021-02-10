@@ -60,6 +60,9 @@ paths:
           description: Not found.
           schema:
             $ref: "#/definitions/ProblemJson"
+        # Rate Limit from APIM configuration https://github.com/pagopa/io-infrastructure-live-new/pull/416
+        "429":
+          description: Rate Limit exceeded
         "500":
           description: Internal server Error
           schema:
@@ -86,6 +89,9 @@ paths:
           description: Forbidden
           schema:
             $ref: "#/definitions/ProblemJson"
+        # Rate Limit from APIM configuration https://github.com/pagopa/io-infrastructure-live-new/pull/416
+        "429":
+          description: Rate Limit exceeded
         "500":
           description: Internal server Error
           schema:
@@ -151,6 +157,9 @@ paths:
           description: Not found.
           schema:
             $ref: "#/definitions/ProblemJson"
+        # Rate Limit from APIM configuration https://github.com/pagopa/io-infrastructure-live-new/pull/416
+        "429":
+          description: Rate Limit exceeded
         "500":
           description: Internal server Error
           schema:
