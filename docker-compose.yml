@@ -20,6 +20,7 @@ services:
     depends_on:
       - fnstorage
       - fixtures
+      - redis
     volumes:
       - .:/usr/src/app
     labels:
@@ -116,6 +117,17 @@ services:
       - "traefik.http.middlewares.fn-backoffice-replacepathregex.replacepathregex.regex=^/backoffice/(.*)"
       - "traefik.http.middlewares.fn-backoffice-replacepathregex.replacepathregex.replacement=/backoffice/api/v1/$$1"
 
+  redis:
+    container_name: redis-backoffice
+    image: wodby/redis:3.2-2.1.5
+    ports:
+      - "6379:6379"
+    environment:
+      REDIS_TIMEOUT: 300
+      REDIS_TCP_KEEPALIVE: 60
+      REDIS_MAXMEMORY: 182m
+    networks:
+      - io-fn
 networks:
   io-fn:
     driver: bridge

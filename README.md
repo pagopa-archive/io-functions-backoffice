@@ -40,6 +40,10 @@ Those are all Environment variables needed by the application:
 | POSTGRES_PASSWORD                        | Password for the postgres database                                                | string |
 | POSTGRES_DB_NAME                         | Postgres database name                                                            | string |
 | POSTGRES_SCHEMA                          | Postgres schema name                                                              | string |
+| REDIS_URL                                | The Redis hostname                                                                | string |
+| REDIS_PASSWORD                           | The Redis password                                                                | string |
+| REDIS_PORT                               | The Redis port                                                                    | string |
+| REDIS_CLUSTER_ENABLED                    | (Optional) On production environment use a Redis Cluster client                   | boolean|
 | JWT_SUPPORT_TOKEN_PUBLIC_RSA_CERTIFICATE | The support token's public certificate used to verify JWT's signature             | string |
 | ADB2C_TENANT_NAME                        | The Active Directory B2C tenant name                                              | string |
 | ADB2C_TENANT_ID                          | The Active Directory B2C tenant identifier                                        | string |

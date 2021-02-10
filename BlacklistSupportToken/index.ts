@@ -9,10 +9,8 @@ import { AzureContextTransport } from "io-functions-commons/dist/src/utils/loggi
 import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
-import { getRepository, IPostgresConnectionParams } from "../utils/database";
-import { GetBPDAwards } from "./handler";
+import { BlacklistSupportToken } from "./handler";
 
-import { Award } from "../models/award";
 import { IServicePrincipalCreds } from "../utils/adb2c";
 import { GetInsertOrReplaceEntity } from "../utils/audit_logs";
 import { getConfigOrThrow } from "../utils/config";
@@ -25,15 +23,6 @@ const config = getConfigOrThrow();
 const tableService = new TableService(
   config.DASHBOARD_STORAGE_CONNECTION_STRING
 );
-
-const postgresConfig: IPostgresConnectionParams = {
-  database: config.POSTGRES_DB_NAME,
-  host: config.POSTGRES_HOSTNAME,
-  password: config.POSTGRES_PASSWORD,
-  port: config.POSTGRES_PORT,
-  schema: config.POSTGRES_SCHEMA,
-  username: config.POSTGRES_USERNAME
-};
 
 // tslint:disable-next-line: no-let
 let logger: Context["log"] | undefined;
@@ -69,11 +58,10 @@ const adb2cCreds: IServicePrincipalCreds = {
 };
 
 // Add express route
-app.get(
-  "/api/v1/bpd/awards",
+app.delete(
+  "/api/v1/bpd/support-token",
   GetOAuthVerifier(passportAuthenticator, config.ADB2C_POLICY_NAME),
-  GetBPDAwards(
-    getRepository(postgresConfig, Award),
+  BlacklistSupportToken(
     GetInsertOrReplaceEntity(tableService, config.DASHBOARD_LOGS_TABLE_NAME),
     config.JWT_SUPPORT_TOKEN_PUBLIC_RSA_CERTIFICATE,
     adb2cCreds,

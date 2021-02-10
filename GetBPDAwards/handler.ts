@@ -29,6 +29,7 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { RedisClient } from "redis";
 import { Repository } from "typeorm";
 import { AwardsList } from "../generated/definitions/AwardsList";
 import { Award } from "../models/award";
@@ -155,7 +156,8 @@ export function GetBPDAwards(
   publicRsaCertificate: NonEmptyString,
   adb2cCreds: IServicePrincipalCreds,
   adb2cAdminGroup: NonEmptyString,
-  cacheTtl: NumberFromString
+  cacheTtl: NumberFromString,
+  redisClient: RedisClient
 ): express.RequestHandler {
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
@@ -163,7 +165,8 @@ export function GetBPDAwards(
       publicRsaCertificate,
       adb2cCreds,
       adb2cAdminGroup,
-      cacheTtl
+      cacheTtl,
+      redisClient
     )
   );
 
