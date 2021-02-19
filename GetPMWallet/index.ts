@@ -42,7 +42,7 @@ secureExpressApp(app);
 
 // Add express route
 app.get(
-  "/api/v1/bpd/transactions",
+  "/api/v1/pm/wallet",
   GetOAuthVerifier(passportAuthenticator, config.ADB2C_POLICY_NAME),
   GetPMWallet(
     PMApiClient.getWalletV2,
