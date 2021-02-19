@@ -14,6 +14,7 @@ import { getConfigOrThrow } from "../utils/config";
 import { GetOAuthVerifier } from "../utils/middleware/oauth_adb2c";
 import { PMApiClient } from "../utils/pm_api_client";
 import { GetPMWallet } from "./handler";
+import { setupBearerStrategy } from "../utils/strategy/bearer_strategy";
 
 const config = getConfigOrThrow();
 
@@ -39,6 +40,20 @@ winston.add(contextTransport);
 // Setup Express
 const app = express();
 secureExpressApp(app);
+
+/**
+ * Setup an authentication strategy (oauth) for express endpoints.
+ */
+setupBearerStrategy(
+  passportAuthenticator,
+  config.ADB2C_CONFIG,
+  async (userId, profile) => {
+    // executed when the user is logged in
+    // userId === profile.oid
+    // req.user === profile
+    logger?.info("setupBearerStrategy %s %s", userId, JSON.stringify(profile));
+  }
+);
 
 // Add express route
 app.get(

@@ -203,9 +203,14 @@ produces:
   - application/json
 definitions:
   Wallet:
-    type: array
-    items:
-      $ref: "#/definitions/PublicWalletItem"
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/PublicWalletItem"
+    required:
+      - data
   PublicCreditCard:
     type: object
     properties:

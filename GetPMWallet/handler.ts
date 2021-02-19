@@ -68,7 +68,7 @@ export function GetPMWalletHandler(
       type: TypeEnum.Bancomat
     };
     return taskEither
-      .of(ResponseSuccessJson([mockWallet1, mockWallet2]))
+      .of(ResponseSuccessJson({ data: [mockWallet1, mockWallet2] }))
       .fold<IResponseSuccessJson<Wallet> | ErrorTypes>(err => {
         context.log.error(
           `GetPMWalletHandler|ERROR|Error retrieving the user wallet [${err}]`
