@@ -1,6 +1,10 @@
 import { Context } from "@azure/functions";
 import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
-import { TypeofApiCall } from "@pagopa/ts-commons/lib/requests";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
+import {
+  TypeofApiCall,
+  TypeofApiResponse
+} from "@pagopa/ts-commons/lib/requests";
 import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
@@ -8,22 +12,52 @@ import {
   IResponseErrorValidation,
   IResponseSuccessJson,
   ResponseErrorInternal,
+  ResponseErrorNotFound,
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as express from "express";
+import {
+  Either,
+  fromNullable as eitherFromNullable,
+  toError
+} from "fp-ts/lib/Either";
 import { identity } from "fp-ts/lib/function";
-import { taskEither } from "fp-ts/lib/TaskEither";
+import { fromNullable } from "fp-ts/lib/Option";
+import {
+  fromEither,
+  fromLeft,
+  fromPredicate,
+  tryCatch
+} from "fp-ts/lib/TaskEither";
 import { ContextMiddleware } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import {
   withRequestMiddlewares,
   wrapRequestHandler
 } from "io-functions-commons/dist/src/utils/request_middleware";
-import { GetWalletV2T } from "../generated/api/requestTypes";
+import * as t from "io-ts";
+import {
+  GetWalletV2ResponsesT,
+  GetWalletV2T
+} from "../generated/api/requestTypes";
+import { WalletBpayInfoInput } from "../generated/api/WalletBpayInfoInput";
+import { WalletCardInfoInput } from "../generated/api/WalletCardInfoInput";
+import { WalletSatispayInfoInput } from "../generated/api/WalletSatispayInfoInput";
+import { WalletTypeEnum } from "../generated/api/WalletV2";
+import { WalletV2ListResponse } from "../generated/api/WalletV2ListResponse";
+import {
+  PublicBPay,
+  TypeEnum as BPayTypeEnum
+} from "../generated/definitions/PublicBPay";
 import {
   PublicCreditCard,
-  TypeEnum
+  TypeEnum as CardTypeEnum
 } from "../generated/definitions/PublicCreditCard";
+import {
+  PublicSatispay,
+  TypeEnum
+} from "../generated/definitions/PublicSatispay";
+import { PublicWalletItem } from "../generated/definitions/PublicWalletItem";
 import { Wallet } from "../generated/definitions/Wallet";
 import { isAdminAuthLevel } from "../utils/ad_user";
 import { IServicePrincipalCreds } from "../utils/adb2c";
@@ -44,37 +78,143 @@ type IHttpHandler = (
   userAndCitizenId: RequestCitizenToAdUserAndFiscalCode
 ) => Promise<IResponseSuccessJson<Wallet> | ErrorTypes>;
 
+const InternalServerErrorResponse = ResponseErrorInternal(
+  "Internal server error"
+);
+
+export const toApiPMWalletList = (
+  _: WalletV2ListResponse
+): Either<t.Errors, Wallet> => {
+  return Wallet.decode({
+    data: fromNullable(_.data)
+      .map(walletList =>
+        walletList.reduce((acc, wallet) => {
+          const info = wallet.info;
+          if (
+            wallet.walletType === WalletTypeEnum.Card &&
+            WalletCardInfoInput.is(info)
+          ) {
+            return [
+              ...acc,
+              {
+                brand: info.brand,
+                expireMonth: info.expireMonth,
+                expireYear: info.expireYear,
+                holder: info.holder,
+                hpan: info.hashPan,
+                masked_pan: info.blurredNumber,
+                type: CardTypeEnum.Card
+              } as PublicCreditCard
+            ];
+          }
+          if (
+            wallet.walletType === WalletTypeEnum.Bancomat &&
+            WalletCardInfoInput.is(info)
+          ) {
+            return [
+              ...acc,
+              {
+                brand: info.brand,
+                expireMonth: info.expireMonth,
+                expireYear: info.expireYear,
+                holder: info.holder,
+                hpan: info.hashPan,
+                masked_pan: info.blurredNumber,
+                type: CardTypeEnum.Bancomat
+              } as PublicCreditCard
+            ];
+          }
+          if (
+            wallet.walletType === WalletTypeEnum.BPay &&
+            WalletBpayInfoInput.is(info)
+          ) {
+            return [
+              ...acc,
+              {
+                back_name: info.bankName,
+                hpan: info.uidHash,
+                type: BPayTypeEnum.BPay
+              } as PublicBPay
+            ];
+          }
+          if (
+            wallet.walletType === WalletTypeEnum.Satispay &&
+            WalletSatispayInfoInput.is(info)
+          ) {
+            return [
+              ...acc,
+              {
+                hpan: info.uuid,
+                type: TypeEnum.Satispay
+              } as PublicSatispay
+            ];
+          }
+          return acc;
+        }, [] as ReadonlyArray<PublicWalletItem>)
+      )
+      .getOrElse([])
+  });
+};
+
 export function GetPMWalletHandler(
-  _: TypeofApiCall<GetWalletV2T>
+  getWalletV2: TypeofApiCall<GetWalletV2T>,
+  subscriptionKey: NonEmptyString
 ): IHttpHandler {
-  return async (context, __) => {
-    // TODO: Missing implementation, the method is mocked.
-    const mockWallet1: PublicCreditCard = {
-      brand: "VISA",
-      expireMonth: "1",
-      expireYear: "2023",
-      holder: "Mario Bianchi",
-      hpan: "807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966",
-      masked_pan: "4763",
-      type: TypeEnum.Card
-    };
-    const mockWallet2: PublicCreditCard = {
-      brand: "MASTERCARD",
-      expireMonth: "7",
-      expireYear: "2027",
-      holder: "Mario Bianchi",
-      hpan: "7726b99f6eff4f80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a29",
-      masked_pan: "7778",
-      type: TypeEnum.Bancomat
-    };
-    return taskEither
-      .of(ResponseSuccessJson({ data: [mockWallet1, mockWallet2] }))
-      .fold<IResponseSuccessJson<Wallet> | ErrorTypes>(err => {
+  return async (context, { fiscalCode }) => {
+    return tryCatch(
+      () =>
+        getWalletV2({
+          "Fiscal-Code": fiscalCode,
+          SubscriptionKey: subscriptionKey
+        }),
+      toError
+    )
+      .foldTaskEither(
+        _ => fromLeft<Error, TypeofApiResponse<GetWalletV2ResponsesT>>(_),
+        _ =>
+          fromEither(_).mapLeft(
+            err => new Error(errorsToReadableMessages(err).join("|"))
+          )
+      )
+      .mapLeft<ErrorTypes>(err => {
         context.log.error(
           `GetPMWalletHandler|ERROR|Error retrieving the user wallet [${err}]`
         );
-        return ResponseErrorInternal("Internal server error");
-      }, identity)
+        return InternalServerErrorResponse;
+      })
+      .chain(
+        fromPredicate(
+          _ => _.status === 200,
+          _ => {
+            if (_.status === 404) {
+              return ResponseErrorNotFound(
+                "Citizen not found",
+                "Missing wallet for the provided fiscal-code"
+              );
+            }
+            context.log.error(
+              `GetPMWalletHandler|ERROR|Error retrieving the user wallet [status:${_.status}|value:${_.value}]`
+            );
+            return InternalServerErrorResponse;
+          }
+        )
+      )
+      .chain(_ =>
+        fromEither(eitherFromNullable(InternalServerErrorResponse)(_.value))
+      )
+      .chain(_ =>
+        fromEither(toApiPMWalletList(_)).mapLeft(err => {
+          context.log.error(
+            `GetPMWalletHandler|ERROR|Error decoding wallet remapped response [${errorsToReadableMessages(
+              err
+            ).join("/")}]`
+          );
+          return InternalServerErrorResponse;
+        })
+      )
+      .fold<IResponseSuccessJson<Wallet> | ErrorTypes>(identity, _ =>
+        ResponseSuccessJson(_)
+      )
       .run();
   };
 }
@@ -85,7 +225,8 @@ export function GetPMWallet(
   publicRsaCertificate: NonEmptyString,
   adb2cCreds: IServicePrincipalCreds,
   adb2cAdminGroup: NonEmptyString,
-  cacheTtl: NumberFromString
+  cacheTtl: NumberFromString,
+  subscriptionKey: NonEmptyString
 ): express.RequestHandler {
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
@@ -98,7 +239,7 @@ export function GetPMWallet(
   );
 
   const handler = withAudit(insertOrReplaceEntity)(
-    GetPMWalletHandler(getWalletV2),
+    GetPMWalletHandler(getWalletV2, subscriptionKey),
     (context, { user, fiscalCode, citizenIdType }) => ({
       AuthLevel: isAdminAuthLevel(user, adb2cAdminGroup) ? "Admin" : "Support",
       Citizen: fiscalCode,

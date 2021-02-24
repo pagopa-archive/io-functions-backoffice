@@ -4,7 +4,7 @@ info:
   description: 'Apis for external clients to ADP'
   version: 1.0.0
 security:
-  - basicAuth: []
+  - SubscriptionKey: []
 paths:
   "/v1/external/walletv2":
     get:
@@ -30,8 +30,11 @@ paths:
           description: Generic Error
 
 securityDefinitions:
-  basicAuth:
-    type: basic
+  SubscriptionKey:
+    type: apiKey
+    name: Ocp-Apim-Subscription-Key
+    in: header
+    description: The API key obtained through the developer portal or the getService operation.
 
 definitions:
   WalletV2ListResponse:

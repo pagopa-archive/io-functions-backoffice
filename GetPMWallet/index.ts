@@ -65,7 +65,8 @@ app.get(
     config.JWT_SUPPORT_TOKEN_PUBLIC_RSA_CERTIFICATE,
     adb2cCreds,
     config.ADB2C_ADMIN_GROUP_NAME,
-    config.IN_MEMORY_CACHE_TTL
+    config.IN_MEMORY_CACHE_TTL,
+    config.CSTAR_SUBSCRIPTION_KEY
   )
 );
 
