@@ -32,7 +32,9 @@ export const IConfig = t.interface({
   ADB2C_CONFIG: t.any, // TODO: Define the ADB2C_CONFIG type
   DASHBOARD_LOGS_TABLE_NAME: NonEmptyString,
   DASHBOARD_STORAGE_CONNECTION_STRING: NonEmptyString,
-  IN_MEMORY_CACHE_TTL: NumberFromString
+  IN_MEMORY_CACHE_TTL: NumberFromString,
+
+  WALLET_API_URL: NonEmptyString
 });
 
 export const creds: IBearerStrategyOptionWithRequest = {
