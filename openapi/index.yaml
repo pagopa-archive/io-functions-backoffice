@@ -304,6 +304,7 @@ definitions:
           Nexi_Issuing_diretto,
           Nexi_Other,
           Hype,
+          Unicredit,
           AppIO,
           Other
         ]
