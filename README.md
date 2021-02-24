@@ -48,3 +48,4 @@ Those are all Environment variables needed by the application:
 | ADB2C_POLICY_NAME                        | The Active Directory B2C policy name                                              | string |
 | ADB2C_ADMIN_GROUP_NAME                   | The Active Directory B2C group that identifies admin users                        | string |
 | IN_MEMORY_CACHE_TTL                      | A time to live value for in memory cache that stores user's groups                | number |
+| WALLET_API_URL                           | The PM getWalletV2 API URL                                                        | string |

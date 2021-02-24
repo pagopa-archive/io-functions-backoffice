@@ -1,0 +1,149 @@
+swagger: "2.0"
+info:
+  title: Admin Panel
+  description: 'Apis for external clients to ADP'
+  version: 1.0.0
+security:
+  - basicAuth: []
+paths:
+  "/v1/external/walletv2":
+    get:
+      summary: Get Wallet list of user like IO APP
+      operationId: getWalletV2
+      parameters:
+        - in: header
+          name: Fiscal-Code
+          type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/WalletV2ListResponse"
+        400:
+          description: Bad Request
+        404:
+          description: Fiscal Code Not Found
+        401:
+          description: Invalid Credential
+        500:
+          description: Generic Error
+
+securityDefinitions:
+  basicAuth:
+    type: basic
+
+definitions:
+  WalletV2ListResponse:
+    type: object
+    properties:
+      data: 
+        type: "array"
+        items:
+          $ref: "#/definitions/WalletV2"
+  WalletV2:
+    type: object
+    properties:
+      idWallet:
+        type: number
+      walletType:
+        type: string
+        enum:
+          - Card
+          - Bancomat
+          - Satispay
+          - BPay
+      enableableFunctions:
+        type: array
+        items:
+          type: string
+          enum:
+            - pagoPA
+            - BPD
+            - FA
+      pagoPA:
+        type: boolean
+      onboardingChannel:
+        type: string
+      favourite:
+        type: boolean
+      createDate:
+        type: string
+        format: date-time
+        pattern: '^\d{4}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$'
+        example: "2020-01-01 00:00:00"
+      updateDate:
+        type: string
+        format: date-time
+        pattern: '^\d{4}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$'
+        example: "2020-01-01 00:00:00"
+      info:
+        type: object
+  Card:
+    $ref: '#/definitions/WalletCardInfoInput'
+  Bancomat:
+    $ref: '#/definitions/WalletCardInfoInput'
+  Satispay:
+    $ref: '#/definitions/WalletSatispayInfoInput'
+  BPay:
+    $ref: '#/definitions/WalletBpayInfoInput'
+  WalletCardInfoInput:
+    type: object
+    properties:
+      blurredNumber:
+        type: string
+      brand:
+        type: string
+      brandLogo:
+        type: string
+      expireMonth:
+        type: string
+      expireYear:
+        type: string
+      hashPan:
+        type: string
+      holder:
+        type: string
+      htokenList:
+        type: array
+        items:
+          type: string
+      issuerAbiCode:
+        type: string
+      type:
+        type: string
+        enum:
+          - PP
+          - DEB
+          - CRD
+  WalletSatispayInfoInput:
+    type: object
+    properties:
+      brandLogo:
+        type: string
+      uuid:
+        type: string
+  WalletBpayInfoInput:
+    type: object
+    properties:
+      bankName:
+        type: string
+      brandLogo:
+        type: string
+      instituteCode:
+        type: string
+      numberObfuscated:
+        type: string
+      paymentInstruments:
+        type: array
+        items:
+          $ref: '#/definitions/BPayPaymentInstrumentWallet'
+      uidHash:
+        type: string
+  BPayPaymentInstrumentWallet:
+    type: object
+    properties:
+      defaultReceive:
+        type: boolean
+      defaultSend:
+        type: boolean
