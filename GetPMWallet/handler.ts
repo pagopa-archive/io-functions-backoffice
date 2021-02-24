@@ -131,7 +131,7 @@ export const toApiPMWalletList = (
             return [
               ...acc,
               {
-                back_name: info.bankName,
+                bank_name: info.bankName,
                 hpan: info.uidHash,
                 type: BPayTypeEnum.BPay
               } as PublicBPay
