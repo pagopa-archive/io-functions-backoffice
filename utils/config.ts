@@ -34,9 +34,9 @@ export const IConfig = t.interface({
   DASHBOARD_STORAGE_CONNECTION_STRING: NonEmptyString,
   IN_MEMORY_CACHE_TTL: NumberFromString,
 
-  CSTAR_SUBSCRIPTION_KEY: NonEmptyString,
-  WALLET_API_BASE_PATH: NonEmptyString,
-  WALLET_API_URL: NonEmptyString
+  CSTAR_API_BASE_PATH: NonEmptyString,
+  CSTAR_API_URL: NonEmptyString,
+  CSTAR_SUBSCRIPTION_KEY: NonEmptyString
 });
 
 export const creds: IBearerStrategyOptionWithRequest = {

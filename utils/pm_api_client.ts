@@ -6,7 +6,7 @@ import { withTimeout } from "./fetch";
 
 const config = getConfigOrThrow();
 export const PMApiClient = createClient({
-  basePath: config.WALLET_API_BASE_PATH,
-  baseUrl: config.WALLET_API_URL,
+  basePath: config.CSTAR_API_BASE_PATH,
+  baseUrl: config.CSTAR_API_URL,
   fetchApi: withTimeout(5000 as Millisecond)(agent.getHttpsFetch(process.env))
 });
