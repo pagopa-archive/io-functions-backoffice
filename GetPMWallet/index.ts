@@ -13,8 +13,8 @@ import { GetInsertOrReplaceEntity } from "../utils/audit_logs";
 import { getConfigOrThrow } from "../utils/config";
 import { GetOAuthVerifier } from "../utils/middleware/oauth_adb2c";
 import { PMApiClient } from "../utils/pm_api_client";
-import { GetPMWallet } from "./handler";
 import { setupBearerStrategy } from "../utils/strategy/bearer_strategy";
+import { GetPMWallet } from "./handler";
 
 const config = getConfigOrThrow();
 
