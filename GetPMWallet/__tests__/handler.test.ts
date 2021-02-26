@@ -90,6 +90,10 @@ const mockGetWalletV2 = jest.fn().mockImplementation(async _ =>
   })
 );
 
+const getWalletApiClient = {
+  getWalletV2: mockGetWalletV2
+};
+
 const aSubscriptionKey = "SUBSCRIPTION_KEY" as NonEmptyString;
 
 const aFiscalCode = "AAABBB01C02D345D" as FiscalCode;
@@ -112,7 +116,7 @@ describe("GetPMWalletHandler", () => {
     jest.clearAllMocks();
   });
   it("should return a success response if PM API succeded", async () => {
-    const handler = GetPMWalletHandler(mockGetWalletV2, aSubscriptionKey);
+    const handler = GetPMWalletHandler(getWalletApiClient);
     const response = await handler(context, aUserAndFiscalCode);
 
     expect(response.kind).toBe("IResponseSuccessJson");
@@ -132,7 +136,7 @@ describe("GetPMWalletHandler", () => {
         }
       })
     );
-    const handler = GetPMWalletHandler(mockGetWalletV2, aSubscriptionKey);
+    const handler = GetPMWalletHandler(getWalletApiClient);
     const response = await handler(context, aUserAndFiscalCode);
 
     expect(response.kind).toBe("IResponseSuccessJson");
@@ -149,7 +153,7 @@ describe("GetPMWalletHandler", () => {
         status: 404
       })
     );
-    const handler = GetPMWalletHandler(mockGetWalletV2, aSubscriptionKey);
+    const handler = GetPMWalletHandler(getWalletApiClient);
     const response = await handler(context, aUserAndFiscalCode);
     expect(response.kind).toBe("IResponseErrorNotFound");
   });
@@ -160,7 +164,7 @@ describe("GetPMWalletHandler", () => {
         status: 500
       })
     );
-    const handler = GetPMWalletHandler(mockGetWalletV2, aSubscriptionKey);
+    const handler = GetPMWalletHandler(getWalletApiClient);
     const response = await handler(context, aUserAndFiscalCode);
     expect(context.log.error).toBeCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorInternal");
@@ -170,7 +174,7 @@ describe("GetPMWalletHandler", () => {
     mockGetWalletV2.mockImplementationOnce(async () => {
       throw new Error("Client error");
     });
-    const handler = GetPMWalletHandler(mockGetWalletV2, aSubscriptionKey);
+    const handler = GetPMWalletHandler(getWalletApiClient);
     const response = await handler(context, aUserAndFiscalCode);
     expect(context.log.error).toBeCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorInternal");
@@ -180,7 +184,7 @@ describe("GetPMWalletHandler", () => {
     mockGetWalletV2.mockImplementationOnce(
       async () => NonEmptyString.decode("") // Fake decoding error
     );
-    const handler = GetPMWalletHandler(mockGetWalletV2, aSubscriptionKey);
+    const handler = GetPMWalletHandler(getWalletApiClient);
     const response = await handler(context, aUserAndFiscalCode);
     expect(context.log.error).toBeCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorInternal");

@@ -2,10 +2,6 @@ import { Context } from "@azure/functions";
 import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
-  TypeofApiCall,
-  TypeofApiResponse
-} from "@pagopa/ts-commons/lib/requests";
-import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -36,10 +32,7 @@ import {
   wrapRequestHandler
 } from "io-functions-commons/dist/src/utils/request_middleware";
 import * as t from "io-ts";
-import {
-  GetWalletV2ResponsesT,
-  GetWalletV2T
-} from "../generated/api/requestTypes";
+
 import { WalletBpayInfoInput } from "../generated/api/WalletBpayInfoInput";
 import { WalletCardInfoInput } from "../generated/api/WalletCardInfoInput";
 import { WalletSatispayInfoInput } from "../generated/api/WalletSatispayInfoInput";
@@ -66,6 +59,7 @@ import {
   RequestCitizenToAdUserAndFiscalCode,
   RequestCitizenToFiscalCode
 } from "../utils/middleware/citizen_id";
+import { GetWalletApiClient } from "../utils/pm_api_client";
 
 type ErrorTypes =
   | IResponseErrorForbiddenNotAuthorized
@@ -157,24 +151,20 @@ export const toApiPMWalletList = (
 };
 
 export function GetPMWalletHandler(
-  getWalletV2: TypeofApiCall<GetWalletV2T>,
-  subscriptionKey: NonEmptyString
+  getWalletApiClient: ReturnType<GetWalletApiClient>
 ): IHttpHandler {
   return async (context, { fiscalCode }) => {
     return tryCatch(
       () =>
-        getWalletV2({
-          "Fiscal-Code": fiscalCode,
-          SubscriptionKey: subscriptionKey
+        getWalletApiClient.getWalletV2({
+          "Fiscal-Code": fiscalCode
         }),
       toError
     )
-      .foldTaskEither(
-        _ => fromLeft<Error, TypeofApiResponse<GetWalletV2ResponsesT>>(_),
-        _ =>
-          fromEither(_).mapLeft(
-            err => new Error(errorsToReadableMessages(err).join("|"))
-          )
+      .chain(_ =>
+        fromEither(_).mapLeft(
+          err => new Error(errorsToReadableMessages(err).join("|"))
+        )
       )
       .mapLeft<ErrorTypes>(err => {
         context.log.error(
@@ -220,13 +210,12 @@ export function GetPMWalletHandler(
 }
 
 export function GetPMWallet(
-  getWalletV2: TypeofApiCall<GetWalletV2T>,
+  getWalletApiClient: ReturnType<GetWalletApiClient>,
   insertOrReplaceEntity: InsertOrReplaceEntity,
   publicRsaCertificate: NonEmptyString,
   adb2cCreds: IServicePrincipalCreds,
   adb2cAdminGroup: NonEmptyString,
-  cacheTtl: NumberFromString,
-  subscriptionKey: NonEmptyString
+  cacheTtl: NumberFromString
 ): express.RequestHandler {
   const middlewaresWrap = withRequestMiddlewares(
     ContextMiddleware(),
@@ -239,7 +228,7 @@ export function GetPMWallet(
   );
 
   const handler = withAudit(insertOrReplaceEntity)(
-    GetPMWalletHandler(getWalletV2, subscriptionKey),
+    GetPMWalletHandler(getWalletApiClient),
     (context, { user, fiscalCode, citizenIdType }) => ({
       AuthLevel: isAdminAuthLevel(user, adb2cAdminGroup) ? "Admin" : "Support",
       Citizen: fiscalCode,

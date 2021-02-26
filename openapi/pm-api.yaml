@@ -34,7 +34,7 @@ securityDefinitions:
     type: apiKey
     name: Ocp-Apim-Subscription-Key
     in: header
-    description: The API key obtained through the developer portal or the getService operation.
+    description: The API key obtained through the developer portal.
 
 definitions:
   WalletV2ListResponse:
