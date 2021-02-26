@@ -20,12 +20,7 @@ import {
 } from "fp-ts/lib/Either";
 import { identity } from "fp-ts/lib/function";
 import { fromNullable } from "fp-ts/lib/Option";
-import {
-  fromEither,
-  fromLeft,
-  fromPredicate,
-  tryCatch
-} from "fp-ts/lib/TaskEither";
+import { fromEither, fromPredicate, tryCatch } from "fp-ts/lib/TaskEither";
 import { ContextMiddleware } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import {
   withRequestMiddlewares,
