@@ -9,10 +9,10 @@ app.get("/backoffice/v1/external/walletv2", (_, res) => {
   const aCreditCard = {
     blurredNumber: "1234",
     brand: "VISA",
-    brandLogo: "logo",
+    brandLogo: "https://example.com/visa.png",
     expireMonth: "1",
     expireYear: "2021",
-    hashPan: "hash_pan",
+    hashPan: "807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966",
     holder: "Mario Rossi",
     htokenList: ["token1", "token2"],
     issuerAbiCode: "30012",
@@ -22,10 +22,23 @@ app.get("/backoffice/v1/external/walletv2", (_, res) => {
   const aBancomat = {
     blurredNumber: "1234",
     brand: "BANCOMAT",
-    brandLogo: "logo",
+    brandLogo: "https://example.com/bacomat.png",
     expireMonth: "1",
     expireYear: "2021",
-    hashPan: "hash_pan",
+    hashPan: "7726b99f6eff4f80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a29",
+    holder: "Mario Rossi",
+    htokenList: ["token1", "token2"],
+    issuerAbiCode: "30012",
+    type: "DEB"
+  };
+
+  const aBancomat2 = {
+    blurredNumber: "1234",
+    brand: "BANCOMAT",
+    brandLogo: "https://example.com/bacomat.png",
+    expireMonth: "1",
+    expireYear: "2021",
+    hashPan: "99f6eff4f80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a297726b",
     holder: "Mario Rossi",
     htokenList: ["token1", "token2"],
     issuerAbiCode: "30012",
@@ -35,12 +48,29 @@ app.get("/backoffice/v1/external/walletv2", (_, res) => {
     data: [
       {
         idWallet: 1,
+        createDate: "2020-10-23 19:52:22",
+        updateDate: "2020-10-23 19:52:22",
+        enableableFunctions: ["pagoPA", "BPD", "FA"],
+        onboardingChannel: "IO",
         info: aCreditCard,
         walletType: "Card"
       },
       {
         idWallet: 2,
+        createDate: "2020-07-23 16:13:00",
+        updateDate: "2020-10-23 19:52:22",
+        enableableFunctions: ["BPD"],
+        onboardingChannel: "IO",
         info: aBancomat,
+        walletType: "Bancomat"
+      },
+      {
+        idWallet: 3,
+        createDate: "2020-07-23 16:13:00",
+        updateDate: "2020-10-23 19:52:22",
+        enableableFunctions: ["BPD"],
+        onboardingChannel: "IO",
+        info: aBancomat2,
         walletType: "Bancomat"
       }
     ]
