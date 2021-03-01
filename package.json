@@ -23,7 +23,7 @@
     "dist:zip": "zip -r dist.zip . --exclude @.funcignore --exclude .funcignore",
     "predeploy": "npm-run-all generate build dist:modules",
     "generate:definitions": "shx rm -rf ./generated/definitions && gen-api-models --api-spec ./openapi/index.yaml --out-dir ./generated/definitions",
-    "generate:api": "shx rm -rf ./generated/api && gen-api-models --api-spec ./openapi/pm-api.yaml --out-dir ./generated/api --client --request-types --response-decoders",
+    "generate:api": "shx rm -rf ./generated/api && gen-api-models --api-spec ./openapi/pm-api.yaml --out-dir ./generated/api --client --request-types --response-decoders --no-strict",
     "generate": "npm-run-all generate:*",
     "preversion": "auto-changelog  --config .auto-changelog.json --unreleased --commit-limit false --stdout --template preview.hbs",
     "version": "auto-changelog -p --config .auto-changelog.json --unreleased && git add CHANGELOG.md"

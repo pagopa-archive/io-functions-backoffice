@@ -12,7 +12,7 @@ import { IServicePrincipalCreds } from "../utils/adb2c";
 import { GetInsertOrReplaceEntity } from "../utils/audit_logs";
 import { getConfigOrThrow } from "../utils/config";
 import { GetOAuthVerifier } from "../utils/middleware/oauth_adb2c";
-import { PMApiClient } from "../utils/pm_api_client";
+import { GetWalletApiClient } from "../utils/pm_api_client";
 import { setupBearerStrategy } from "../utils/strategy/bearer_strategy";
 import { GetPMWallet } from "./handler";
 
@@ -60,7 +60,7 @@ app.get(
   "/api/v1/pm/wallet",
   GetOAuthVerifier(passportAuthenticator, config.ADB2C_POLICY_NAME),
   GetPMWallet(
-    PMApiClient.getWalletV2,
+    GetWalletApiClient(),
     GetInsertOrReplaceEntity(tableService, config.DASHBOARD_LOGS_TABLE_NAME),
     config.JWT_SUPPORT_TOKEN_PUBLIC_RSA_CERTIFICATE,
     adb2cCreds,
