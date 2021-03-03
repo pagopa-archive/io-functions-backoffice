@@ -16,7 +16,6 @@ import * as express from "express";
 import {
   Either,
   fromNullable as eitherFromNullable,
-  right,
   toError
 } from "fp-ts/lib/Either";
 import { identity } from "fp-ts/lib/function";
@@ -32,7 +31,7 @@ import * as t from "io-ts";
 import { WalletBpayInfoInput } from "../generated/api/WalletBpayInfoInput";
 import { WalletCardInfoInput } from "../generated/api/WalletCardInfoInput";
 import { WalletSatispayInfoInput } from "../generated/api/WalletSatispayInfoInput";
-import { WalletTypeEnum, WalletV2 } from "../generated/api/WalletV2";
+import { WalletTypeEnum } from "../generated/api/WalletV2";
 import { WalletV2ListResponse } from "../generated/api/WalletV2ListResponse";
 import {
   PublicBPay,
