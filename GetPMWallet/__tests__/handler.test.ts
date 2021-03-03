@@ -92,8 +92,6 @@ const getWalletApiClient = {
   getWalletV2: mockGetWalletV2
 };
 
-const aSubscriptionKey = "SUBSCRIPTION_KEY" as NonEmptyString;
-
 const aFiscalCode = "AAABBB01C02D345D" as FiscalCode;
 
 const anAuthenticatedUser: AdUser = {
