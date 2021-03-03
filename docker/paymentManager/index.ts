@@ -21,12 +21,10 @@ app.get("/backoffice/v1/external/walletv2", (_, res) => {
 
   const aBancomat = {
     blurredNumber: "1234",
-    brand: "BANCOMAT",
     brandLogo: "https://example.com/bacomat.png",
     expireMonth: "1",
     expireYear: "2021",
     hashPan: "7726b99f6eff4f80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a29",
-    holder: "Mario Rossi",
     htokenList: ["token1", "token2"],
     issuerAbiCode: "30012",
     type: "DEB"
@@ -34,12 +32,10 @@ app.get("/backoffice/v1/external/walletv2", (_, res) => {
 
   const aBancomat2 = {
     blurredNumber: "1234",
-    brand: "BANCOMAT",
     brandLogo: "https://example.com/bacomat.png",
     expireMonth: "1",
     expireYear: "2021",
     hashPan: "99f6eff4f80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a297726b",
-    holder: "Mario Rossi",
     htokenList: ["token1", "token2"],
     issuerAbiCode: "30012",
     type: "DEB"

@@ -35,12 +35,10 @@ const aCreditCard: WalletCardInfoInput = {
 
 const aBacomat: WalletCardInfoInput = {
   blurredNumber: "1234",
-  brand: "BANCOMAT",
   brandLogo: "logo",
   expireMonth: "1",
   expireYear: "2021",
   hashPan: "hash_pan",
-  holder: "Mario Rossi",
   htokenList: ["token1", "token2"],
   issuerAbiCode: "30012",
   type: TypeEnum.DEB
