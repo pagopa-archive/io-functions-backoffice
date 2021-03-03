@@ -235,10 +235,8 @@ definitions:
       - hpan
       - type
       - masked_pan
-      - holder
       - expireMonth
       - expireYear
-      - brand
   PublicBPay:
     type: object
     properties:

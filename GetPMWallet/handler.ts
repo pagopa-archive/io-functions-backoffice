@@ -103,10 +103,8 @@ export const toApiPMWalletList = (
             return [
               ...acc,
               {
-                brand: info.brand,
                 expireMonth: info.expireMonth,
                 expireYear: info.expireYear,
-                holder: info.holder,
                 hpan: info.hashPan,
                 masked_pan: info.blurredNumber,
                 type: CardTypeEnum.Bancomat
