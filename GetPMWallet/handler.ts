@@ -106,6 +106,7 @@ export const toApiPMWalletList = (
                 expireMonth: info.expireMonth,
                 expireYear: info.expireYear,
                 hpan: info.hashPan,
+                issuer_abi: info.issuerAbiCode,
                 masked_pan: info.blurredNumber,
                 type: CardTypeEnum.Bancomat
               } as PublicCreditCard

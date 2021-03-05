@@ -231,6 +231,8 @@ definitions:
         type: string
       brand:
         type: string
+      issuer_abi:
+        type: string
     required:
       - hpan
       - type
