@@ -48,3 +48,6 @@ Those are all Environment variables needed by the application:
 | ADB2C_POLICY_NAME                        | The Active Directory B2C policy name                                              | string |
 | ADB2C_ADMIN_GROUP_NAME                   | The Active Directory B2C group that identifies admin users                        | string |
 | IN_MEMORY_CACHE_TTL                      | A time to live value for in memory cache that stores user's groups                | number |
+| CSTAR_API_URL                            | The base url of the CStar Apim service                                            | string |
+| CSTAR_API_BASE_PATH                      | The base path for the CStar Apim URL                                              | string |
+| CSTAR_SUBSCRIPTION_KEY                   | The CStar APIM subscription key                                                   | string |
