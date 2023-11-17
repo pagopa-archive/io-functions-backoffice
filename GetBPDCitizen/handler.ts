@@ -30,10 +30,11 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 import { NonEmptyString } from "italia-ts-commons/lib/strings";
-import { Repository } from "typeorm";
+import { In, Not, Repository } from "typeorm";
 import { BPDCitizen } from "../generated/definitions/BPDCitizen";
 import { PaymentMethod } from "../generated/definitions/PaymentMethod";
 import { Citizen } from "../models/citizen";
+import { PaymentIntrument } from "../models/payment_instrument";
 import { isAdminAuthLevel } from "../utils/ad_user";
 import { IServicePrincipalCreds } from "../utils/adb2c";
 import { InsertOrReplaceEntity, withAudit } from "../utils/audit_logs";
@@ -72,6 +73,7 @@ export const toApiBPDCitizen = (
           p =>
             ({
               ...citizen,
+              active_on_other_citizen: false,
               payment_instrument_hpan: p.hpan,
               payment_instrument_insert_date: citizen.payment_instrument_insert_date?.toISOString(),
               payment_instrument_status: p.status,
@@ -109,51 +111,105 @@ export const toApiBPDCitizen = (
 };
 
 export function GetBPDCitizenHandler(
-  citizenRepository: TaskEither<Error, Repository<Citizen>>
+  citizenRepository: TaskEither<Error, Repository<Citizen>>,
+  paymentInstrumentRepository: TaskEither<Error, Repository<PaymentIntrument>>
 ): IHttpHandler {
   return async (context, userAndfiscalCode) => {
-    return citizenRepository
-      .chain(citizen =>
-        tryCatch(
-          () => citizen.find({ fiscal_code: userAndfiscalCode.fiscalCode }),
-          (err: unknown) => {
-            context.log.error(
-              `GetUserHandler|ERROR|Find citizen query error [${err}]`
-            );
-            return new Error("Citizen find query error");
-          }
-        )
-      )
-      .mapLeft<
-        | IResponseErrorInternal
-        | IResponseErrorNotFound
-        | IResponseErrorValidation
-      >(err => ResponseErrorInternal(err.message))
-      .chain(
-        fromPredicate(
-          citizenData => citizenData.length > 0,
-          () => ResponseErrorNotFound("Not found", "Citizen not found")
-        )
-      )
-      .chain(citizenData =>
-        fromEither(toApiBPDCitizen(citizenData)).mapLeft(err =>
-          ResponseErrorValidation(
-            "Invalid BPDCitizen object",
-            readableReport(err)
+    return (
+      citizenRepository
+        .chain(citizen =>
+          tryCatch(
+            () => citizen.find({ fiscal_code: userAndfiscalCode.fiscalCode }),
+            (err: unknown) => {
+              context.log.error(
+                `GetUserHandler|ERROR|Find citizen query error [${err}]`
+              );
+              return new Error("Citizen find query error");
+            }
           )
         )
-      )
-      .map(ResponseSuccessJson)
-      .fold<ResponseErrorTypes | IResponseSuccessJson<BPDCitizen>>(
-        identity,
-        identity
-      )
-      .run();
+        .mapLeft<
+          | IResponseErrorInternal
+          | IResponseErrorNotFound
+          | IResponseErrorValidation
+        >(err => ResponseErrorInternal(err.message))
+        .chain(
+          fromPredicate(
+            citizenData => citizenData.length > 0,
+            () => ResponseErrorNotFound("Not found", "Citizen not found")
+          )
+        )
+        .chain(_ =>
+          fromEither(toApiBPDCitizen(_)).mapLeft(err =>
+            ResponseErrorValidation(
+              "Invalid BPDCitizen object",
+              readableReport(err)
+            )
+          )
+        )
+        // Search other payment methods from the PaymentInstrument table
+        .chain(_ =>
+          paymentInstrumentRepository
+            .chain(paymentInstrument =>
+              tryCatch(
+                () =>
+                  paymentInstrument.find({
+                    fiscal_code: userAndfiscalCode.fiscalCode,
+                    hpan: Not(
+                      In(
+                        _.payment_methods.map(
+                          paymentMethod => paymentMethod.payment_instrument_hpan
+                        )
+                      )
+                    )
+                  }),
+                (err: unknown) => {
+                  context.log.error(
+                    `GetUserHandler|ERROR|Find payment instrument query error [${err}]`
+                  );
+                  return new Error("Payment Instrument find query error");
+                }
+              ).map(paymentInstrumentData => ({
+                ..._,
+                payment_methods: [
+                  ..._.payment_methods,
+                  ...paymentInstrumentData.map(
+                    otherPaymentMethod =>
+                      ({
+                        active_on_other_citizen: true,
+                        payment_instrument_enabled: otherPaymentMethod.enabled,
+                        payment_instrument_hpan: otherPaymentMethod.hpan,
+                        payment_instrument_insert_date: otherPaymentMethod.insert_date?.toISOString(),
+                        payment_instrument_insert_user:
+                          otherPaymentMethod.insert_user,
+                        payment_instrument_status: otherPaymentMethod.status,
+                        payment_instrument_update_date: otherPaymentMethod.update_date?.toISOString(),
+                        payment_instrument_update_user:
+                          otherPaymentMethod.update_user
+                      } as PaymentMethod)
+                  )
+                ]
+              }))
+            )
+            .mapLeft<
+              | IResponseErrorInternal
+              | IResponseErrorNotFound
+              | IResponseErrorValidation
+            >(err => ResponseErrorInternal(err.message))
+        )
+        .map(ResponseSuccessJson)
+        .fold<ResponseErrorTypes | IResponseSuccessJson<BPDCitizen>>(
+          identity,
+          identity
+        )
+        .run()
+    );
   };
 }
 
 export function GetBPDCitizen(
   citizenRepository: TaskEither<Error, Repository<Citizen>>,
+  paymentInstrumentRepository: TaskEither<Error, Repository<PaymentIntrument>>,
   insertOrReplaceEntity: InsertOrReplaceEntity,
   publicRsaCertificate: NonEmptyString,
   adb2cCreds: IServicePrincipalCreds,
@@ -171,7 +227,7 @@ export function GetBPDCitizen(
   );
 
   const handler = withAudit(insertOrReplaceEntity)(
-    GetBPDCitizenHandler(citizenRepository),
+    GetBPDCitizenHandler(citizenRepository, paymentInstrumentRepository),
     (context, { user, fiscalCode, citizenIdType }) => ({
       AuthLevel: isAdminAuthLevel(user, adb2cAdminGroup) ? "Admin" : "Support",
       Citizen: fiscalCode,

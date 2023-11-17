@@ -415,6 +415,8 @@ definitions:
         type: string
       payment_instrument_enabled:
         type: boolean
+      active_on_other_citizen:
+        type: boolean
     required:
       - payment_instrument_hpan
       - payment_instrument_status

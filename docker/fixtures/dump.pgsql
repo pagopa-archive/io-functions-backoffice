@@ -273,7 +273,7 @@ ALTER TABLE public.v_bpd_winning_transaction OWNER TO testuser;
 --
 
 CREATE VIEW public.v_bpd_payment_instrument AS
- SELECT bpi.fiscal_code_s,
+ SELECT bpih.fiscal_code_s,
     bpih.hpan_s,
         CASE
             WHEN (bpih.deactivation_t IS NOT NULL) THEN 'INACTIVE'::text
@@ -283,10 +283,10 @@ CREATE VIEW public.v_bpd_payment_instrument AS
     bpi.enabled_b,
     bpih.activation_t AS enrollment_t,
     bpih.deactivation_t AS cancellation_t,
-    NULL::text AS paym_istr_hist_insert_date_t,
-    NULL::text AS paym_istr_hist_insert_user_s,
-    NULL::text AS paym_istr_hist_update_date_t,
-    NULL::text AS paym_istr_hist_update_user_s,
+    bpih.insert_date_t AS paym_istr_hist_insert_date_t,
+    bpih.insert_user_s AS paym_istr_hist_insert_user_s,
+    bpih.update_date_t AS paym_istr_hist_update_date_t,
+    bpih.update_user_s AS paym_istr_hist_update_user_s,
     bpi.insert_date_t AS paym_istr_insert_date_t,
     bpi.insert_user_s AS paym_istr_insert_user_s,
     bpi.update_date_t AS paym_istr_update_date_t,
@@ -464,6 +464,8 @@ INSERT INTO public.bpd_citizen (fiscal_code_s, payoff_instr_s, payoff_instr_type
 
 INSERT INTO public.bpd_payment_instrument (hpan_s, fiscal_code_s, cancellation_t, status_c, enrollment_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b, channel_s) VALUES ('807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966', 'AAABBB01C02D345A', NULL, 'ACTIVE', '2020-10-30 11:02:08.749861+01', '2020-10-30 11:02:08.749861+01', NULL, NULL, NULL, true, 'app-io-channel');
 INSERT INTO public.bpd_payment_instrument (hpan_s, fiscal_code_s, cancellation_t, status_c, enrollment_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b, channel_s) VALUES ('7726b99f6eff4f80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a29', 'AAABBB01C02D345A', NULL, 'INACTIVE', '2020-10-30 11:02:31.11989+01', '2020-10-30 11:02:31.11989+01', NULL, NULL, NULL, false, '36081');
+INSERT INTO public.bpd_payment_instrument (hpan_s, fiscal_code_s, cancellation_t, status_c, enrollment_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b, channel_s) VALUES ('80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a297726b99f6eff4f', 'AAABBB01C02D345B', NULL, 'ACTIVE', '2020-10-30 11:02:31.11989+01', '2020-10-30 11:02:31.11989+01', NULL, NULL, NULL, true, '36081');
+INSERT INTO public.bpd_payment_instrument (hpan_s, fiscal_code_s, cancellation_t, status_c, enrollment_t, insert_date_t, insert_user_s, update_date_t, update_user_s, enabled_b, channel_s) VALUES ('6e9f7aa01c5837cbc9f1b9dc4c51689a297726b99f6eff4f0f27e91eee2fb4f8', 'AAABBB01C02D345B', NULL, 'ACTIVE', '2020-10-30 11:02:31.11989+01', '2020-10-30 11:02:31.11989+01', NULL, NULL, NULL, true, '36081');
 
 --
 -- Data for Name: bpd_payment_instrument_history; Type: TABLE DATA; Schema: public; Owner: testuser
@@ -471,6 +473,8 @@ INSERT INTO public.bpd_payment_instrument (hpan_s, fiscal_code_s, cancellation_t
 
 INSERT INTO public.bpd_payment_instrument_history (hpan_s, fiscal_code_s, deactivation_t, activation_t, insert_date_t, insert_user_s, update_date_t, update_user_s) VALUES ('807ae5f38db47bff8b09b37ad803cb10ef5147567a89a33a66bb3282df4ad966', 'AAABBB01C02D345A', '2020-10-30 11:02:08.749861+01', '2020-10-30 11:02:08.749861+01', NULL, NULL, NULL, NULL);
 INSERT INTO public.bpd_payment_instrument_history (hpan_s, fiscal_code_s, deactivation_t, activation_t, insert_date_t, insert_user_s, update_date_t, update_user_s) VALUES ('7726b99f6eff4f80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a29', 'AAABBB01C02D345A', '2020-10-30 11:02:31.11989+01', '2020-10-30 11:02:31.11989+01', NULL, NULL, NULL, NULL);
+INSERT INTO public.bpd_payment_instrument_history (hpan_s, fiscal_code_s, deactivation_t, activation_t, insert_date_t, insert_user_s, update_date_t, update_user_s) VALUES ('80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a297726b99f6eff4f', 'AAABBB01C02D345A', '2020-10-30 11:02:31.11989+01', '2020-10-31 11:02:31.11989+01', NULL, NULL, NULL, NULL);
+INSERT INTO public.bpd_payment_instrument_history (hpan_s, fiscal_code_s, deactivation_t, activation_t, insert_date_t, insert_user_s, update_date_t, update_user_s) VALUES ('80f27e91eee2fb4f6e9f7aa01c5837cbc9f1b9dc4c51689a297726b99f6eff4f', 'AAABBB01C02D345B', '2020-10-31 11:02:31.11989+01', '2020-10-31 11:02:31.11989+01', NULL, NULL, NULL, NULL);
 
 --
 -- Data for Name: bpd_winning_transaction; Type: TABLE DATA; Schema: public; Owner: testuser

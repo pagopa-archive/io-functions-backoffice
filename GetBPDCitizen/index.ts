@@ -13,6 +13,7 @@ import { Citizen } from "../models/citizen";
 import { getRepository, IPostgresConnectionParams } from "../utils/database";
 import { GetBPDCitizen } from "./handler";
 
+import { PaymentIntrument } from "../models/payment_instrument";
 import { IServicePrincipalCreds } from "../utils/adb2c";
 import { GetInsertOrReplaceEntity } from "../utils/audit_logs";
 import { getConfigOrThrow } from "../utils/config";
@@ -73,6 +74,7 @@ app.get(
   GetOAuthVerifier(passportAuthenticator, config.ADB2C_POLICY_NAME),
   GetBPDCitizen(
     getRepository(postgresConfig, Citizen),
+    getRepository(postgresConfig, PaymentIntrument),
     GetInsertOrReplaceEntity(tableService, config.DASHBOARD_LOGS_TABLE_NAME),
     config.JWT_SUPPORT_TOKEN_PUBLIC_RSA_CERTIFICATE,
     adb2cCreds,
